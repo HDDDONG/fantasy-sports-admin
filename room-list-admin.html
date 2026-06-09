@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 房间列表</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #fff;
+      --text: #26313d;
+      --muted: #7a8795;
+      --line: #e2e8f0;
+      --line-strong: #cdd7e3;
+      --blue: #2f8df5;
+      --green: #67bd51;
+      --orange: #f3a946;
+      --red: #d65a5a;
+      --shadow: 0 6px 18px rgba(32, 45, 59, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+    button, input, select { font: inherit; }
+
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { background: #172331; color: #dbe6ef; border-right: 1px solid #0f1823; padding: 16px 12px; }
+    .brand { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 12px; }
+    .brand-text strong { display: block; font-size: 14px; line-height: 18px; color: #fff; }
+    .brand-text span { display: block; color: #93a5b6; font-size: 12px; line-height: 16px; }
+    .menu-section { display: grid; gap: 4px; margin-bottom: 8px; }
+    .menu-title { height: 38px; border-radius: 8px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 0 10px; color: #f4f8fb; background: #203244; font-weight: 800; font-size: 14px; border: 0; width: 100%; cursor: pointer; text-align: left; }
+    .menu-title::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(47,141,245,.16); }
+    .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
+    .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
+    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 128px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
+    .menu-section.collapsed .submenu { max-height: 0; opacity: 0; padding-top: 0; transform: translateY(-6px); pointer-events: none; }
+    .submenu-item { height: 34px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; color: #b9c8d5; text-decoration: none; font-size: 13px; }
+    .submenu-item.active { color: #fff; background: var(--blue); box-shadow: 0 6px 14px rgba(47,141,245,.22); }
+
+    .shell { min-width: 0; min-height: 100vh; padding: 14px 18px 24px; background: linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px), var(--bg); }
+    .frame { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .topbar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fbfdff; }
+    .crumbs { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .menu-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #4f5c68; font-weight: 800; font-size: 18px; }
+    .module-btn { height: 26px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: #607080; cursor: pointer; font-size: 12px; }
+
+    .tabs { height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 16px; border-bottom: 1px solid var(--line); background: #fff; }
+    .tab { height: 24px; border-radius: 13px; border: 1px solid var(--line); background: #fff; padding: 0 8px 0 12px; color: #657386; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+    .tab-link { color: inherit; text-decoration: none; line-height: 22px; }
+    .tab-close { width: 16px; height: 16px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; display: inline-grid; place-items: center; padding: 0; font-size: 12px; line-height: 16px; }
+    .tab-close:hover { background: rgba(38, 49, 61, .1); }
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    .filter-band { padding: 10px 18px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+    .filters { display: flex; align-items: center; gap: 18px; white-space: nowrap; overflow-x: auto; padding-bottom: 2px; }
+    .label { color: #5b6775; font-weight: 700; font-size: 11px; text-align: right; white-space: nowrap; }
+    .filter-item { display: grid; grid-template-columns: auto 170px; align-items: center; gap: 8px; min-width: max-content; }
+    .filter-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+    .field { height: 30px; border: 1px solid var(--line-strong); background: #fff; border-radius: 7px; padding: 0 10px; min-width: 0; color: var(--text); outline: none; font-size: 12px; }
+    .field::placeholder { color: #b3beca; font-size: 12px; }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .btn { height: 30px; border: 1px solid var(--line-strong); background: #fff; color: var(--text); border-radius: 7px; padding: 0 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-size: 12px; }
+    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 5px 12px rgba(47, 141, 245, .2); }
+
+    .toolbar { padding: 14px 18px 12px; background: #fff; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+    .pill-btn { height: 30px; border: 1px solid transparent; border-radius: 8px; padding: 0 14px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .pill-btn.blue { background: #eaf4ff; color: var(--blue); border-color: #c7e0ff; }
+    .pill-btn.green { background: #edf9e9; color: var(--green); border-color: #cfeec7; }
+
+    .table-wrap { max-width: 100%; padding: 0 18px 18px; background: #fff; overflow: auto; max-height: calc(100vh - 248px); }
+    table { width: 100%; border-collapse: collapse; min-width: 1980px; font-size: 13px; }
+    th, td { border: 1px solid var(--line); padding: 10px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #566374; font-weight: 800; }
+    tbody tr:hover td { background: #fbfdff; }
+    .name-cell { text-align: left; max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
+    .muted { color: var(--muted); }
+    .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; height: 24px; padding: 0 8px; border-radius: 6px; font-size: 12px; border: 1px solid transparent; font-weight: 800; }
+    .tag.gray { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .tag.green { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.red { color: #9f3030; background: #ffd2d2; border-color: #ea8b8b; }
+    .tag.blue { color: #1557b0; background: #cfe6ff; border-color: #7eb9ff; }
+    .op { border: 0; background: transparent; padding: 0 7px; font-weight: 800; cursor: pointer; color: var(--blue); }
+    .summary { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: #fbfcfe; }
+    .pager-left, .pager-center, .pager-right { display: flex; align-items: center; gap: 8px; }
+    .page-size, .goto-input { height: 30px; border: 1px solid var(--line); background: #fff; border-radius: 8px; color: #657386; font-size: 12px; text-align: center; }
+    .page-size { width: 96px; padding: 0 10px; text-align: left; }
+    .goto-input { width: 52px; }
+    .page-btn { min-width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc; color: #657386; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 10px rgba(47,141,245,.22); }
+    .page-btn.ghost { color: #a8b3bf; background: #f3f6fa; }
+    .page-ellipsis { color: #657386; font-weight: 800; padding: 0 2px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #192533; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0; transform: translateY(70px); transition: all .18s ease; font-size: 13px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .modal-mask { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(29, 33, 41, .52); padding: 24px; }
+    .modal-mask.show { display: flex; }
+    .room-modal { width: min(640px, calc(100vw - 48px)); max-height: calc(100vh - 64px); overflow: auto; background: #fff; border-radius: 12px; box-shadow: 0 18px 48px rgba(29, 33, 41, .22); }
+    .modal-head { height: 62px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 0; font-size: 18px; font-weight: 700; color: var(--text); }
+    .modal-close { width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #9aa6b2; cursor: pointer; font-size: 24px; line-height: 1; }
+    .modal-close:hover { background: #f2f5f9; color: var(--text); }
+    .modal-body { padding: 20px 24px 8px; display: grid; gap: 18px; }
+    .radio-group { display: flex; align-items: center; gap: 28px; min-height: 30px; }
+    .radio-option { display: inline-flex; align-items: center; gap: 8px; color: #657386; font-size: 13px; }
+    .required { color: #f53f3f; margin-right: 3px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+    .modal-field { display: grid; gap: 8px; }
+    .modal-field label, .reward-title { color: #4e5969; font-size: 13px; font-weight: 700; }
+    .modal-input { height: 34px; width: 100%; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 12px; color: var(--text); outline: none; background: #fff; }
+    .modal-input::placeholder { color: #b8c2cc; }
+    .modal-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .reward-block { display: grid; gap: 12px; }
+    .reward-list { display: grid; gap: 10px; }
+    .reward-row { display: grid; grid-template-columns: 44px 18px 70px 18px 70px 32px 88px 32px 32px 96px; gap: 6px; align-items: center; color: #657386; }
+    .reward-row .modal-input { text-align: center; }
+    .icon-btn { width: 32px; height: 34px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-size: 18px; line-height: 1; }
+    .icon-btn.minus { background: #ffecec; color: #f53f3f; border-color: #ffd1d1; }
+    .icon-btn.plus { background: #eaf4ff; color: #2f8df5; border-color: #c7e0ff; }
+    .reward-percent { color: #657386; white-space: nowrap; }
+    .reward-summary { color: #657386; font-size: 13px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 12px; padding: 18px 24px 20px; border-top: 1px solid var(--line); }
+    @media (max-width: 900px) {
+      .modal-grid { grid-template-columns: 1fr; }
+      .reward-row { grid-template-columns: auto auto 1fr auto 1fr; }
+      .reward-row .reward-label,
+      .reward-row .icon-btn,
+      .reward-row .reward-percent { grid-column: span 1; }
+    }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=room-sport-type">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" id="matchMenuToggle" type="button">
+          <span>赛事管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" id="roomMenuToggle" type="button">
+          <span>房间管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item active" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button">
+          <span>运营管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button">
+          <span>赛事注单</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+        <header class="topbar">
+          <div class="crumbs">
+            <span class="menu-icon">≡</span>
+            <strong>首页</strong>
+            <span>/</span>
+            <span>房间管理</span>
+            <span>/</span>
+            <span>房间列表</span>
+          </div>
+          <button class="module-btn">板球</button>
+        </header>
+
+        <nav class="tabs">
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">赛事列表</a><button class="tab-close" type="button" aria-label="关闭赛事列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="match-recommend-admin.html">赛事推荐</a><button class="tab-close" type="button" aria-label="关闭赛事推荐">×</button></span>
+          <span class="tab active"><a class="tab-link" href="room-list-admin.html">房间列表</a><button class="tab-close" type="button" aria-label="关闭房间列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-template-admin.html">模板管理</a><button class="tab-close" type="button" aria-label="关闭模板管理">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-play-type-admin.html">玩法类型</a><button class="tab-close" type="button" aria-label="关闭玩法类型">×</button></span>
+          <span class="tab"><a class="tab-link" href="bet-order-list-admin.html">注单列表</a><button class="tab-close" type="button" aria-label="关闭注单列表">×</button></span>
+        </nav>
+
+        <section class="filter-band">
+          <div class="filters">
+            <label class="filter-item">
+              <span class="label">运动类型</span>
+              <select class="field" id="sportFilter">
+                <option value="">请选择运动类型</option>
+                <option value="cricket">板球</option>
+                <option value="football">足球</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">房间ID</span>
+              <input class="field" id="roomId" placeholder="请输入房间ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">比赛ID</span>
+              <input class="field" id="matchId" placeholder="请输入比赛ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">联赛ID</span>
+              <input class="field" id="competitionId" placeholder="请输入联赛ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">联赛名称</span>
+              <input class="field" id="competitionName" placeholder="请输入联赛名称">
+            </label>
+            <label class="filter-item">
+              <span class="label">玩法类型</span>
+              <select class="field" id="playType">
+                <option value="">玩法类型</option>
+                <option value="mega">Mega Contest</option>
+                <option value="winner">Winner Take All</option>
+                <option value="h2h">Head-to-Head</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">房间状态</span>
+              <select class="field" id="roomStatus">
+                <option value="">房间状态</option>
+                <option value="settled">已结算</option>
+                <option value="cancelled">已取消</option>
+              </select>
+            </label>
+            <div class="filter-actions">
+              <button class="btn primary" id="searchBtn">搜索</button>
+              <button class="btn" id="resetBtn">重置</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="toolbar">
+          <button class="pill-btn green" id="manualRoomBtn">手动新增房间</button>
+        </section>
+
+        <section class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>商户ID</th>
+                <th>商户名</th>
+                <th>运动类型</th>
+                <th>房间ID</th>
+                <th>房间名称</th>
+                <th>玩法类型</th>
+                <th>联赛ID</th>
+                <th>联赛名称</th>
+                <th>比赛ID</th>
+                <th>比赛名称</th>
+                <th>报名费</th>
+                <th>当前报名人数</th>
+                <th>最大参赛人数</th>
+                <th>最低开赛人数</th>
+                <th>每用户最大队伍数</th>
+                <th>抽水比例</th>
+                <th>奖池金额</th>
+                <th>开赛时间</th>
+                <th>房间状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+
+        <footer class="summary">
+          <div class="pager-left">
+            <span id="countText">共 0 条数据</span>
+            <select class="page-size" aria-label="每页条数">
+              <option>10条/页</option>
+              <option selected>20条/页</option>
+              <option>50条/页</option>
+            </select>
+          </div>
+          <div class="pager-center">
+            <button class="page-btn ghost" type="button">‹</button>
+            <button class="page-btn active" type="button">1</button>
+            <button class="page-btn" type="button">2</button>
+            <button class="page-btn" type="button">3</button>
+            <button class="page-btn" type="button">4</button>
+            <button class="page-btn" type="button">5</button>
+            <button class="page-btn" type="button">6</button>
+            <span class="page-ellipsis">•••</span>
+            <button class="page-btn" type="button">136</button>
+            <button class="page-btn ghost" type="button">›</button>
+          </div>
+          <div class="pager-right">
+            <span>前往</span>
+            <input class="goto-input" value="1" aria-label="前往页码">
+            <span>页</span>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="manualRoomModal" aria-hidden="true">
+    <section class="room-modal" role="dialog" aria-modal="true" aria-labelledby="manualRoomTitle">
+      <header class="modal-head">
+        <h3 id="manualRoomTitle">手动新增房间</h3>
+        <button class="modal-close" id="manualRoomClose" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <section class="modal-field">
+          <label>是否从模板创建</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="fromTemplate" checked> 否</label>
+            <label class="radio-option"><input type="radio" name="fromTemplate"> 是</label>
+          </div>
+        </section>
+        <section class="modal-grid">
+          <div class="modal-field">
+            <label><span class="required">*</span>比赛ID</label>
+            <input class="modal-input" placeholder="请输入比赛ID">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>玩法类型</label>
+            <select class="modal-input">
+              <option>玩法类型</option>
+              <option>Mega Contest</option>
+              <option>Winner Take All</option>
+              <option>Head-to-Head</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>报名费</label>
+            <input class="modal-input" type="number" value="0.00">
+          </div>
+          <div class="modal-field">
+            <label>每用户最大队伍数</label>
+            <input class="modal-input" type="number" value="3">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>最大参赛人数</label>
+            <input class="modal-input" type="number" value="100">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>最低开赛人数</label>
+            <input class="modal-input" type="number" value="10">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>抽水比例</label>
+            <input class="modal-input" type="number" value="10.00">
+          </div>
+        </section>
+        <section class="reward-block">
+          <div class="reward-title">奖励规则配置</div>
+          <div class="reward-list" id="rewardList">
+            <div class="reward-row">
+              <span class="reward-label">排名</span>
+              <span>从</span>
+              <input class="modal-input reward-from" type="number" value="1">
+              <span>到</span>
+              <input class="modal-input reward-to" type="number" value="1">
+              <span>每人</span>
+              <input class="modal-input reward-amount" type="number" value="100.00">
+              <button class="icon-btn minus" type="button" aria-label="删除奖励规则">−</button>
+              <button class="icon-btn plus" type="button" aria-label="新增奖励规则">＋</button>
+              <span class="reward-percent">百分比：100.00%</span>
+            </div>
+          </div>
+          <div class="reward-summary" id="rewardSummary">汇总金额：100</div>
+        </section>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn primary" id="manualRoomConfirm" type="button">确定</button>
+        <button class="btn" id="manualRoomCancel" type="button">取消</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">已操作</div>
+
+  <script>
+    const rooms = [
+      ["2062554995557548033", "sake 3duiwu - Triumph Knights MNE vs Bandra Blasters", "mega", "130039", "Mumbai T20 League", "97164", "Triumph Knights MNE vs Bandra Blasters", "10.00", 31, 100, 20, 5, "10.00%", "279.00", "2026-06-05 20:00:00", "settled"],
+      ["2062554995553353732", "test333 - Triumph Knights MNE vs Bandra Blasters", "winner", "130039", "Mumbai T20 League", "97164", "Triumph Knights MNE vs Bandra Blasters", "8.00", 0, 100, 2, 1, "10.00%", "0.00", "2026-06-05 20:00:00", "cancelled"],
+      ["2062554995553353731", "1234 - Triumph Knights MNE vs Bandra Blasters", "mega", "130039", "Mumbai T20 League", "97164", "Triumph Knights MNE vs Bandra Blasters", "9.00", 6, 100, 2, 1, "10.00%", "48.60", "2026-06-05 20:00:00", "settled"],
+      ["2062554995549195426", "two - Triumph Knights MNE vs Bandra Blasters", "h2h", "130039", "Mumbai T20 League", "97164", "Triumph Knights MNE vs Bandra Blasters", "50.00", 0, 2, 2, 1, "10.00%", "0.00", "2026-06-05 20:00:00", "cancelled"],
+      ["2062554995544919425", "2 Winners - Triumph Knights MNE vs Bandra Blasters", "two", "130039", "Mumbai T20 League", "97164", "Triumph Knights MNE vs Bandra Blasters", "15.00", 0, 120, 2, 2, "10.00%", "0.00", "2026-06-05 20:00:00", "cancelled"],
+      ["2062554995544965121", "10人 - Triumph Knights MNE vs Bandra Blasters", "four", "130039", "Mumbai T20 League", "97164", "Triumph Knights MNE vs Bandra Blasters", "20.00", 0, 20, 18, 2, "10.00%", "0.00", "2026-06-05 20:00:00", "cancelled"],
+      ["2062554995536576513", "热门-001 - Triumph Knights MNE vs Bandra Blasters", "mega", "130039", "Mumbai T20 League", "97164", "Triumph Knights MNE vs Bandra Blasters", "10.00", 55, 100, 50, 4, "10.00%", "495.00", "2026-06-05 20:00:00", "settled"],
+      ["2061993013508964354", "sake 3duiwu - Somerset vs Glamorgan", "mega", "129953", "Vitality Blast", "96106", "Somerset vs Glamorgan", "10.00", 0, 100, 20, 5, "10.00%", "0.00", "2026-06-05 21:00:00", "cancelled"],
+      ["2061993013504770051", "test333 - Somerset vs Glamorgan", "winner", "129953", "Vitality Blast", "96106", "Somerset vs Glamorgan", "8.00", 0, 100, 2, 1, "10.00%", "0.00", "2026-06-05 21:00:00", "cancelled"],
+      ["2061993013504770050", "Mega - Somerset vs Glamorgan", "mega", "129953", "Vitality Blast", "96106", "Somerset vs Glamorgan", "10.00", 18, 100, 20, 5, "10.00%", "162.00", "2026-06-05 21:00:00", "settled"],
+      ["2061993013504770052", "Winner - Somerset vs Glamorgan", "winner", "129953", "Vitality Blast", "96106", "Somerset vs Glamorgan", "12.00", 12, 80, 10, 2, "10.00%", "129.60", "2026-06-05 21:00:00", "settled"],
+      ["2061993013504770053", "Head-to-Head - Somerset vs Glamorgan", "h2h", "129953", "Vitality Blast", "96106", "Somerset vs Glamorgan", "25.00", 2, 2, 2, 1, "10.00%", "45.00", "2026-06-05 21:00:00", "settled"],
+      ["2061993013504770054", "2 Winners - Somerset vs Glamorgan", "two", "129953", "Vitality Blast", "96106", "Somerset vs Glamorgan", "15.00", 44, 120, 20, 3, "10.00%", "594.00", "2026-06-05 21:00:00", "settled"],
+      ["2061993013504770055", "4X or Nothing - Somerset vs Glamorgan", "four", "129953", "Vitality Blast", "96106", "Somerset vs Glamorgan", "20.00", 16, 20, 18, 2, "10.00%", "288.00", "2026-06-05 21:00:00", "cancelled"],
+      ["2061882013504770056", "Mega - Kent vs Hampshire", "mega", "129953", "Vitality Blast", "96152", "Kent vs Hampshire", "10.00", 72, 100, 20, 5, "10.00%", "648.00", "2026-06-06 20:30:00", "settled"],
+      ["2061882013504770057", "Winner - Kent vs Hampshire", "winner", "129953", "Vitality Blast", "96152", "Kent vs Hampshire", "8.00", 33, 100, 2, 1, "10.00%", "237.60", "2026-06-06 20:30:00", "cancelled"],
+      ["2061882013504770058", "Head-to-Head - Kent vs Hampshire", "h2h", "129953", "Vitality Blast", "96152", "Kent vs Hampshire", "30.00", 2, 2, 2, 1, "10.00%", "54.00", "2026-06-06 20:30:00", "settled"],
+      ["2061771013504770059", "2 Winners - Essex vs Surrey", "two", "129953", "Vitality Blast", "96155", "Essex vs Surrey", "18.00", 0, 120, 2, 2, "10.00%", "0.00", "2026-06-06 22:00:00", "cancelled"],
+      ["2061771013504770060", "4X or Nothing - Essex vs Surrey", "four", "129953", "Vitality Blast", "96155", "Essex vs Surrey", "22.00", 20, 20, 18, 2, "10.00%", "396.00", "2026-06-06 22:00:00", "settled"],
+      ["2061771013504770061", "热门-002 - Essex vs Surrey", "mega", "129953", "Vitality Blast", "96155", "Essex vs Surrey", "10.00", 0, 100, 20, 5, "10.00%", "0.00", "2026-06-06 22:00:00", "cancelled"]
+    ].map((row, index) => ({
+      index: index + 1,
+      merchantId: "000000",
+      merchantName: "XXX有限公司",
+      sportType: index % 6 === 5 ? "football" : "cricket",
+      roomId: row[0],
+      roomName: row[1],
+      playType: row[2],
+      competitionId: row[3],
+      competitionName: row[4],
+      matchId: row[5],
+      matchName: row[6],
+      fee: row[7],
+      joined: row[8],
+      max: row[9],
+      min: row[10],
+      maxTeams: row[11],
+      rake: row[12],
+      prize: row[13],
+      start: row[14],
+      status: row[15]
+    }));
+
+    const filters = { sportType: "", roomId: "", matchId: "", competitionId: "", competitionName: "", playType: "", roomStatus: "" };
+    const el = (id) => document.getElementById(id);
+    const playText = { mega: "Mega Contest", winner: "Winner Take All", h2h: "Head-to-Head", two: "2 Winners", four: "4X or Nothing" };
+    const statusText = { settled: "已结算", cancelled: "已取消" };
+    const sportText = { cricket: "板球", football: "足球" };
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function openManualRoomModal() {
+      el("manualRoomModal").classList.add("show");
+      el("manualRoomModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeManualRoomModal() {
+      el("manualRoomModal").classList.remove("show");
+      el("manualRoomModal").setAttribute("aria-hidden", "true");
+    }
+
+    function updateRewardSummary() {
+      const rows = Array.from(document.querySelectorAll(".reward-row"));
+      const amounts = rows.map((row) => {
+        const from = Number(row.querySelector(".reward-from").value || 0);
+        const to = Number(row.querySelector(".reward-to").value || 0);
+        const perPerson = Number(row.querySelector(".reward-amount").value || 0);
+        return Math.max(to - from, 0) * perPerson;
+      });
+      const total = amounts.reduce((sum, amount) => sum + amount, 0);
+      rows.forEach((row, index) => {
+        const percent = total > 0 ? (amounts[index] / total) * 100 : 0;
+        row.querySelector(".reward-percent").textContent = `百分比：${percent.toFixed(2)}%`;
+      });
+      el("rewardSummary").textContent = `汇总金额：${Number.isInteger(total) ? total : total.toFixed(2)}`;
+    }
+
+    function createRewardRow() {
+      const row = document.createElement("div");
+      row.className = "reward-row";
+      row.innerHTML = `
+        <span class="reward-label">排名</span>
+        <span>从</span>
+        <input class="modal-input reward-from" type="number" value="1">
+        <span>到</span>
+        <input class="modal-input reward-to" type="number" value="1">
+        <span>每人</span>
+        <input class="modal-input reward-amount" type="number" value="100.00">
+        <button class="icon-btn minus" type="button" aria-label="删除奖励规则">−</button>
+        <button class="icon-btn plus" type="button" aria-label="新增奖励规则">＋</button>
+        <span class="reward-percent">百分比：0.00%</span>
+      `;
+      return row;
+    }
+
+    function bindRewardRow(row) {
+      row.querySelectorAll(".reward-from, .reward-to, .reward-amount").forEach((input) => {
+        input.addEventListener("input", updateRewardSummary);
+      });
+      row.querySelector(".icon-btn.plus").addEventListener("click", () => {
+        const nextRow = createRewardRow();
+        el("rewardList").appendChild(nextRow);
+        bindRewardRow(nextRow);
+        updateRewardSummary();
+      });
+      row.querySelector(".icon-btn.minus").addEventListener("click", () => {
+        const rows = document.querySelectorAll(".reward-row");
+        if (rows.length <= 1) {
+          showToast("至少保留一条奖励规则");
+          return;
+        }
+        row.remove();
+        updateRewardSummary();
+      });
+    }
+
+    function filteredRows() {
+      return rooms.filter((room) => {
+        const sportType = !filters.sportType || room.sportType === filters.sportType;
+        const roomId = !filters.roomId || room.roomId.includes(filters.roomId);
+        const matchId = !filters.matchId || room.matchId.includes(filters.matchId);
+        const competitionId = !filters.competitionId || room.competitionId.includes(filters.competitionId);
+        const competitionName = !filters.competitionName || room.competitionName.toLowerCase().includes(filters.competitionName.toLowerCase());
+        const playType = !filters.playType || room.playType === filters.playType;
+        const status = !filters.roomStatus || room.status === filters.roomStatus;
+        return sportType && roomId && matchId && competitionId && competitionName && playType && status;
+      });
+    }
+
+    function renderRows() {
+      const rows = filteredRows();
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("rows").innerHTML = rows.map((room) => `
+        <tr>
+          <td>${room.index}</td>
+          <td class="muted">${room.merchantId}</td>
+          <td>${room.merchantName}</td>
+          <td><span class="tag ${room.sportType === "football" ? "blue" : "green"}">${sportText[room.sportType]}</span></td>
+          <td>${room.roomId}</td>
+          <td class="name-cell" title="${room.roomName}">${room.roomName}</td>
+          <td><span class="tag gray">${playText[room.playType]}</span></td>
+          <td>${room.competitionId}</td>
+          <td>${room.competitionName}</td>
+          <td>${room.matchId}</td>
+          <td class="name-cell" title="${room.matchName}">${room.matchName}</td>
+          <td>${room.fee}</td>
+          <td>${room.joined}</td>
+          <td>${room.max}</td>
+          <td>${room.min}</td>
+          <td>${room.maxTeams}</td>
+          <td>${room.rake}</td>
+          <td>${room.prize}</td>
+          <td>${room.start}</td>
+          <td><span class="tag ${room.status === "settled" ? "green" : "red"}">${statusText[room.status]}</span></td>
+          <td><button class="op">详情</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="21">暂无房间数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => button.addEventListener("click", () => showToast("详情已提交")));
+    }
+
+    function bind() {
+      const inputMap = [
+        ["roomId", "roomId"],
+        ["matchId", "matchId"],
+        ["competitionId", "competitionId"],
+        ["competitionName", "competitionName"]
+      ];
+      inputMap.forEach(([id, key]) => el(id).addEventListener("input", (event) => filters[key] = event.target.value));
+      el("sportFilter").addEventListener("input", (event) => filters.sportType = event.target.value);
+      el("playType").addEventListener("input", (event) => filters.playType = event.target.value);
+      el("roomStatus").addEventListener("input", (event) => filters.roomStatus = event.target.value);
+      el("searchBtn").addEventListener("click", renderRows);
+      el("resetBtn").addEventListener("click", () => {
+        Object.keys(filters).forEach((key) => filters[key] = "");
+        [...inputMap.map(([id]) => id), "sportFilter", "playType", "roomStatus"].forEach((id) => el(id).value = "");
+        renderRows();
+      });
+      bindSidebarAccordion();
+      el("manualRoomBtn").addEventListener("click", openManualRoomModal);
+      el("manualRoomClose").addEventListener("click", closeManualRoomModal);
+      el("manualRoomCancel").addEventListener("click", closeManualRoomModal);
+      el("manualRoomConfirm").addEventListener("click", () => {
+        closeManualRoomModal();
+        showToast("手动新增房间已提交");
+      });
+      el("manualRoomModal").addEventListener("click", (event) => {
+        if (event.target === el("manualRoomModal")) closeManualRoomModal();
+      });
+      document.querySelectorAll(".reward-row").forEach(bindRewardRow);
+      updateRewardSummary();
+      document.querySelectorAll(".tab-close").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.closest(".tab").remove();
+        });
+      });
+    }
+
+    function bindSidebarAccordion() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      const closeOthers = (activeSection) => {
+        sections.forEach((section) => {
+          if (section !== activeSection) section.classList.add("collapsed");
+        });
+      };
+      sections.forEach((section) => {
+        const toggle = section.querySelector(".menu-title");
+        toggle.addEventListener("click", () => {
+          const willOpen = section.classList.contains("collapsed");
+          section.classList.toggle("collapsed");
+          if (willOpen) closeOthers(section);
+        });
+      });
+      document.querySelectorAll(".submenu-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const activeSection = item.closest(".menu-section");
+          activeSection.classList.remove("collapsed");
+          closeOthers(activeSection);
+        });
+      });
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      if (activeSection) {
+        activeSection.classList.remove("collapsed");
+        closeOthers(activeSection);
+      }
+    }
+
+    renderRows();
+    bind();
+  </script>
+</body>
+</html>

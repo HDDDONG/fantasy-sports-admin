@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 赛事详情</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #fff;
+      --text: #26313d;
+      --muted: #7a8795;
+      --line: #e2e8f0;
+      --line-strong: #cdd7e3;
+      --blue: #2f8df5;
+      --green: #67bd51;
+      --orange: #f3a946;
+      --red: #d65a5a;
+      --shadow: 0 6px 18px rgba(32, 45, 59, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+    button, input, select { font: inherit; }
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { background: #172331; color: #dbe6ef; border-right: 1px solid #0f1823; padding: 16px 12px; }
+    .brand { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 12px; }
+    .brand-text strong { display: block; font-size: 14px; line-height: 18px; color: #fff; }
+    .brand-text span { display: block; color: #93a5b6; font-size: 12px; line-height: 16px; }
+    .menu-section { display: grid; gap: 4px; margin-bottom: 8px; }
+    .menu-title { height: 38px; border-radius: 8px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 0 10px; color: #f4f8fb; background: #203244; font-weight: 800; font-size: 14px; border: 0; width: 100%; cursor: pointer; text-align: left; }
+    .menu-title::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(47,141,245,.16); }
+    .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
+    .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
+    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 128px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
+    .menu-section.collapsed .submenu { max-height: 0; opacity: 0; padding-top: 0; transform: translateY(-6px); pointer-events: none; }
+    .submenu-item { height: 34px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; color: #b9c8d5; text-decoration: none; font-size: 13px; }
+    .submenu-item.active { color: #fff; background: var(--blue); box-shadow: 0 6px 14px rgba(47,141,245,.22); }
+
+    .shell { min-width: 0; min-height: 100vh; padding: 14px 18px 24px; background: linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px), var(--bg); }
+    .frame { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .topbar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fbfdff; }
+    .crumbs { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .menu-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #4f5c68; font-weight: 800; font-size: 18px; }
+    .module-btn { height: 26px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: #607080; cursor: pointer; font-size: 12px; }
+    .tabs { height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 16px; border-bottom: 1px solid var(--line); background: #fff; }
+    .tab { height: 24px; border-radius: 13px; border: 1px solid var(--line); background: #fff; padding: 0 8px 0 12px; color: #657386; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+    .tab-link { color: inherit; text-decoration: none; line-height: 22px; }
+    .tab-close { width: 16px; height: 16px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; display: inline-grid; place-items: center; padding: 0; font-size: 12px; line-height: 16px; }
+    .tab-close:hover { background: rgba(38, 49, 61, .1); }
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    .section-tabs { display: flex; align-items: center; gap: 18px; height: 48px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fff; }
+    .section-tab { height: 48px; border: 0; background: transparent; color: #4f5c68; font-size: 13px; font-weight: 800; cursor: pointer; border-bottom: 2px solid transparent; }
+    .section-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .detail-body { padding: 16px 18px 18px; background: #fff; }
+    .table-wrap { width: 100%; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .detail-body .table-wrap { padding: 0 !important; }
+    .core-panel { display: grid; gap: 14px; }
+    .core-hero { display: grid; grid-template-columns: 1.4fr repeat(3, minmax(160px, 1fr)); gap: 12px; }
+    .metric-card { min-height: 106px; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; }
+    .metric-card.primary { background: linear-gradient(135deg, #f2f7ff, #fff); border-color: #cfe2ff; }
+    .metric-label { color: #6b7785; font-size: 12px; font-weight: 700; }
+    .metric-value { color: #1d2939; font-size: 28px; line-height: 34px; font-weight: 850; letter-spacing: 0; }
+    .metric-unit { margin-left: 4px; color: #8a96a3; font-size: 12px; font-weight: 700; }
+    .metric-sub { display: flex; align-items: center; gap: 8px; color: #7a8795; font-size: 12px; }
+    .metric-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
+    .core-grid { display: grid; grid-template-columns: repeat(5, minmax(132px, 1fr)); gap: 12px; }
+    .mini-card { border: 1px solid var(--line); border-radius: 10px; background: #fbfcfe; padding: 12px 14px; min-height: 82px; }
+    .mini-label { color: #6b7785; font-size: 12px; line-height: 18px; font-weight: 700; }
+    .mini-value { margin-top: 8px; color: #273442; font-size: 20px; line-height: 24px; font-weight: 850; letter-spacing: 0; }
+    .mini-card.green { background: #f3fbf5; border-color: #cbeed4; }
+    .mini-card.blue { background: #f2f7ff; border-color: #cfe2ff; }
+    .mini-card.orange { background: #fff8ed; border-color: #ffddb0; }
+    .mini-card.gray { background: #f7f8fa; border-color: #e5e6eb; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+    th, td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 11px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+    th:last-child, td:last-child { border-right: 0; }
+    tbody tr:last-child td { border-bottom: 0; }
+    th { background: #f8fafc; color: #566374; font-weight: 800; }
+    tbody tr:hover td { background: #fbfdff; }
+    .core-table { min-width: 1460px; }
+    .player-table { min-width: 1380px; }
+    .stat-table { min-width: 1120px; }
+    .team-stat-table { min-width: 2060px; }
+    .play-stat-table { min-width: 100% !important; table-layout: fixed; }
+    .play-stat-table th,
+    .play-stat-table td { padding: 9px 8px !important; }
+    .name-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+    .muted { color: var(--muted); }
+    .detail-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .detail-filter { display: flex; align-items: center; gap: 24px; padding-bottom: 16px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .filter-item { display: grid; grid-template-columns: auto 210px; align-items: center; gap: 8px; }
+    .label { color: #5b6775; font-weight: 700; font-size: 12px; white-space: nowrap; }
+    .field { height: 32px; border: 1px solid var(--line-strong); background: #fff; border-radius: 8px; padding: 0 10px; color: var(--text); outline: none; font-size: 12px; }
+    .field::placeholder { color: #c9cdd4; }
+    .btn { height: 32px; border: 1px solid var(--line-strong); background: #fff; color: var(--text); border-radius: 8px; padding: 0 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-size: 12px; }
+    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .detail-summary { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding-top: 14px; color: var(--muted); font-size: 12px; }
+    .pager-left, .pager-center, .pager-right { display: flex; align-items: center; gap: 8px; }
+    .page-size, .goto-input { height: 30px; border: 1px solid var(--line); background: #fff; border-radius: 8px; color: #657386; font-size: 12px; text-align: center; }
+    .page-size { width: 96px; padding: 0 10px; text-align: left; }
+    .goto-input { width: 52px; }
+    .page-btn { min-width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc; color: #657386; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 10px rgba(47,141,245,.22); }
+    .page-btn.ghost { color: #a8b3bf; background: #f3f6fa; }
+    .page-ellipsis { color: #657386; font-weight: 800; padding: 0 2px; }
+    .action-link { border: 0; background: transparent; padding: 0 7px; font-weight: 800; cursor: pointer; color: var(--blue); text-decoration: none; font-size: 12px; }
+    .action-link.warn { color: var(--orange); }
+    .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; height: 24px; padding: 0 8px; border-radius: 6px; font-size: 12px; border: 1px solid transparent; font-weight: 800; }
+    .tag.green { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.blue { color: #165dff; background: #e8f3ff; border-color: #9fd0ff; }
+    .tag.orange { color: #b56a00; background: #fff1d6; border-color: #ffc46b; }
+    .tag.gray { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .tag.red { color: #d92d20; background: #fff1f0; border-color: #ffccc7; }
+    .tag.pos-ar { color: #7a4d00; background: #fff7d6; border-color: #ffd666; }
+    .tag.pos-wk { color: #0052cc; background: #e8f3ff; border-color: #9fd0ff; }
+    .tag.pos-bat { color: #0c6b3f; background: #e9f8ef; border-color: #9ee2b8; }
+    .tag.pos-bowl { color: #8f2b8c; background: #fff0f6; border-color: #ffadd2; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #192533; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0; transform: translateY(70px); transition: all .18s ease; font-size: 13px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 1280px) {
+      .core-hero { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .core-grid { grid-template-columns: repeat(3, minmax(132px, 1fr)); }
+    }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=sport-sticker-overlay">
+  <style>
+    .tag.pos-ar { color: #fff !important; background: #9F7AEA !important; border-color: #9F7AEA !important; }
+    .tag.pos-wk { color: #fff !important; background: #4080FF !important; border-color: #4080FF !important; }
+    .tag.pos-bat { color: #fff !important; background: #23C343 !important; border-color: #23C343 !important; }
+    .tag.pos-bowl { color: #fff !important; background: #D65AD6 !important; border-color: #D65AD6 !important; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" type="button"><span>赛事管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item active" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" type="button"><span>房间管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button"><span>运营管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button"><span>赛事注单</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+        <header class="topbar">
+          <div class="crumbs">
+            <span class="menu-icon">≡</span>
+            <strong>首页</strong>
+            <span>/</span>
+            <span>赛事管理</span>
+            <span>/</span>
+            <span>赛事详情</span>
+          </div>
+          <button class="module-btn">板球</button>
+        </header>
+
+        <nav class="tabs">
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">赛事列表</a><button class="tab-close" type="button" aria-label="关闭赛事列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-list-admin.html">房间列表</a><button class="tab-close" type="button" aria-label="关闭房间列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="robot-management-admin.html">机器人管理</a><button class="tab-close" type="button" aria-label="关闭机器人管理">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-template-admin.html">房间模板</a><button class="tab-close" type="button" aria-label="关闭房间模板">×</button></span>
+          <span class="tab"><a class="tab-link" href="bet-order-list-admin.html">注单列表</a><button class="tab-close" type="button" aria-label="关闭注单列表">×</button></span>
+          <span class="tab active"><a class="tab-link" href="match-detail-admin.html">赛事详情</a><button class="tab-close" type="button" aria-label="关闭赛事详情">×</button></span>
+        </nav>
+
+        <nav class="section-tabs">
+          <button class="section-tab active" data-view="core" type="button">核心指标</button>
+          <button class="section-tab" data-view="players" type="button">球员页</button>
+          <button class="section-tab" data-view="plays" type="button">玩法维度统计</button>
+          <button class="section-tab" data-view="rooms" type="button">房间维度统计</button>
+          <button class="section-tab" data-view="teams" type="button">队伍维度统计</button>
+        </nav>
+
+        <section class="detail-body">
+          <div id="detailContent"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast">已切换</div>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+    const coreRows = [{
+      index: 1,
+      users: 11,
+      firstUsers: 0,
+      robots: 100,
+      teams: 167,
+      entryAmount: "487.00",
+      robotEntryAmount: "1252.00",
+      arppu: "44.27",
+      poolAmount: "1194.00",
+      robotPrize: "644.00",
+      refundAmount: "126.00",
+      winUsers: 2,
+      winRate: "0.1818%",
+      profit: "173.90"
+    }];
+
+    const players = [
+      ["Ayush Jethwa", "Arcs Andheri", "ar", "yes", "0.00", 0, 0, 0],
+      ["Prasad Pawar", "Arcs Andheri", "wk", "yes", "0.00", 0, 0, 0],
+      ["Siddid Tiwari", "Arcs Andheri", "bat", "no", "0.00", 2, 0, 0],
+      ["Ajay Mishra", "Arcs Andheri", "ar", "yes", "0.00", 1, 0, 0],
+      ["Musheer Khan", "Arcs Andheri", "ar", "yes", "0.00", 5, 0, 0],
+      ["Shaun Rodrigues", "Eagle Thane Strikers", "bat", "no", "0.00", 9, 3, 0],
+      ["Shashwat Jagtap", "Eagle Thane Strikers", "bat", "yes", "0.00", 12, 1, 2],
+      ["Rishi Shah", "Arcs Andheri", "ar", "no", "0.00", 3, 0, 1],
+      ["Kartik Mishra", "Eagle Thane Strikers", "bowl", "yes", "0.00", 8, 0, 1],
+      ["Himanshu Singh", "Arcs Andheri", "bowl", "no", "0.00", 3, 1, 1],
+      ["Prasoon Singh", "Arcs Andheri", "ar", "yes", "0.00", 2, 0, 0],
+      ["Amartya Raje", "Eagle Thane Strikers", "ar", "yes", "0.00", 7, 0, 0],
+      ["Shivansh Lallan Singh", "Eagle Thane Strikers", "bowl", "no", "0.00", 5, 0, 0],
+      ["Onkar Tukaram Tarmale", "Eagle Thane Strikers", "bowl", "yes", "0.00", 6, 1, 1],
+      ["Hrishikesh Bhushan Gore", "Arcs Andheri", "ar", "yes", "0.00", 2, 0, 0],
+      ["Amol Tanpure", "Arcs Andheri", "bowl", "no", "0.00", 0, 0, 0],
+      ["Rohan Rajendra Ghag", "Eagle Thane Strikers", "bowl", "no", "0.00", 1, 0, 0],
+      ["Manan Bhatt", "Eagle Thane Strikers", "bat", "no", "0.00", 0, 0, 0],
+      ["Ayaan Jain", "Eagle Thane Strikers", "bat", "no", "0.00", 0, 0, 0],
+      ["Sumeir Zaveri", "Eagle Thane Strikers", "ar", "yes", "0.00", 0, 0, 0],
+      ["Dhanay Parekh", "Eagle Thane Strikers", "ar", "no", "0.00", 0, 0, 0],
+      ["Vinay Kunwar", "Eagle Thane Strikers", "ar", "yes", "0.00", 0, 0, 0],
+      ["Aditya Giri", "Eagle Thane Strikers", "ar", "no", "0.00", 0, 0, 0],
+      ["Anuj Giri", "Eagle Thane Strikers", "ar", "no", "0.00", 0, 0, 0],
+      ["Kiaan Dipen Parekh", "Arcs Andheri", "wk", "no", "0.00", 0, 0, 0]
+    ];
+
+    const playStats = [
+      ["FOUR_X_OR_NOTHING", 1, 0, 0, 0, "0.00", "0.00", "0.00", "0.00", 0, 0],
+      ["HEAD_TO_HEAD", 1, 0, 0, 0, "0.00", "0.00", "0.00", "0.00", 0, 0],
+      ["HIGH_REWARDS", 1, 1, 0, 1, "111.00", "0.00", "0.00", "111.00", 0, 0],
+      ["MEGA_CONTEST", 3, 11, 100, 165, "361.00", "1194.00", "644.00", "0.00", 2, 7],
+      ["TWO_WINNERS", 1, 1, 0, 1, "15.00", "0.00", "0.00", "15.00", 0, 0],
+      ["WINNER_TAKE_ALL", 1, 0, 0, 0, "0.00", "0.00", "0.00", "0.00", 0, 0]
+    ];
+
+    const roomStats = [
+      ["2061993013370552322", "sake 3duiwu", 4, 38, 64, "143.00", "476.00", "216.00", "0.00", 1, 3],
+      ["2061993013353775105", "热门-001", 3, 24, 36, "96.00", "286.00", "128.00", "15.00", 1, 2],
+      ["2061993013366358020", "1234", 2, 18, 30, "82.00", "216.00", "120.00", "111.00", 0, 1],
+      ["2062554995557548033", "sake 3duiwu - Mega", 1, 11, 20, "50.00", "108.00", "64.00", "0.00", 0, 1],
+      ["2062554995553353732", "test333", 1, 7, 10, "36.00", "82.00", "52.00", "0.00", 0, 0],
+      ["2062554995544919426", "two", 1, 2, 4, "9.00", "26.00", "0.00", "0.00", 0, 0]
+    ];
+
+    const teamStats = [
+      ["2062784616137351169", "62pqk7v", "2061993013370557105", 1, "749.50", "Shivam Dube", "Shashwat Jagtap", "Prasad Pawar", "Ajay Mishra", "Musheer Khan", "Shaun Rodrigues", "Shardul Thakur", "Sairaj Patil", "Divyaansh Saxena", "Siddhant Singh", "Deepak Shetty"],
+      ["2062784616137351169", "62pqk7v", "2061993013370552322", 1, "749.50", "Shivam Dube", "Shashwat Jagtap", "Prasad Pawar", "Ajay Mishra", "Musheer Khan", "Shaun Rodrigues", "Shardul Thakur", "Sairaj Patil", "Divyaansh Saxena", "Siddhant Singh", "Deepak Shetty"],
+      ["2062807284307251202", "4gg00lwi", "2061993013366358020", 1, "684.00", "Shivam Dube", "Sairaj Patil", "Prasoon Singh", "Deepak Shetty", "Shashikant Kadam", "Aditya Giri", "Moin Ahmed", "Divyaansh Saxena", "Prasad Pawar", "Ajay Mishra", "Shaun Rodrigues"],
+      ["2062804009249775618", "7gky466", "2061993013362163715", 1, "279.50", "Shivam Dube", "Sumeir Zaveri", "Himanshu Singh", "Amartya Raje", "Onkar Tukaram Tarmale", "Amol Tanpure", "Manan Bhatt", "Ayaan Jain", "Shashikant Kadam", "Shardul Thakur", "Pragnesh Durgesh Kanp..."],
+      ["2062804088706670594", "7gky466", "2061993013366358019", 1, "202.00", "Prasad Pawar", "Shaun Rodrigues", "Siddid Tiwari", "Shashwat Jagtap", "Kartik Mishra", "Amartya Raje", "Moin Ahmed", "Ashutosh Ghagre", "Shivam Dube", "Shashikant Kadam", "Shardul Thakur"],
+      ["2062771409012252674", "4kskw9s", "2061993013370552322", 2, "708.50", "Shashwat Jagtap", "Shardul Thakur", "Siddid Tiwari", "Ajay Mishra", "Prasoon Singh", "Eknath Kerkar", "Shivam Dube", "Divyaansh Saxena", "Atharva Ankolekar", "Siddhant Singh", "Deepak Shetty"],
+      ["2062771409012252674", "4kskw9s", "2061993013353775105", 2, "708.50", "Shashwat Jagtap", "Shardul Thakur", "Siddid Tiwari", "Ajay Mishra", "Prasoon Singh", "Eknath Kerkar", "Shivam Dube", "Divyaansh Saxena", "Atharva Ankolekar", "Siddhant Singh", "Deepak Shetty"],
+      ["2062808792956456961", "j87q4xnq", "206199301336358020", 2, "571.50", "Prasoon Singh", "Sumeir Zaveri", "Himanshu Singh", "Arjun Tendulkar", "Pragnesh Durgesh Kanp...", "Eknath Kerkar", "Sairaj Patil", "Siddhant Singh", "Shivam Dube", "Kartik Mishra", "Siddid Tiwari"],
+      ["2062807284307251202", "4mau305p", "2061993013353775105", 3, "684.00", "Shivam Dube", "Sairaj Patil", "Prasoon Singh", "Deepak Shetty", "Shashikant Kadam", "Aditya Giri", "Moin Ahmed", "Divyaansh Saxena", "Prasad Pawar", "Ajay Mishra", "Shaun Rodrigues"],
+      ["2062807284307251202", "xuwy2orm", "2061993013370552322", 3, "684.00", "Shivam Dube", "Sairaj Patil", "Prasoon Singh", "Deepak Shetty", "Shashikant Kadam", "Aditya Giri", "Moin Ahmed", "Divyaansh Saxena", "Prasad Pawar", "Ajay Mishra", "Shaun Rodrigues"]
+    ];
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1200);
+    }
+
+    function renderTable(headers, rows, tableClass) {
+      el("detailContent").innerHTML = `
+        <div class="table-wrap">
+          <table class="${tableClass}">
+            <thead><tr>${headers.map((head) => `<th>${head}</th>`).join("")}</tr></thead>
+            <tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderCore() {
+      const r = coreRows[0];
+      el("detailContent").innerHTML = `
+        <section class="core-panel">
+          <div class="core-hero">
+            <article class="metric-card primary">
+              <div class="metric-label">赛事收益</div>
+              <div><span class="metric-value">${r.profit}</span><span class="metric-unit">元</span></div>
+              <div class="metric-sub"><span class="metric-dot"></span><span>总报名 ${r.entryAmount} / 总奖池 ${r.poolAmount}</span></div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-label">参与用户数(去重)</div>
+              <div><span class="metric-value">${r.users}</span><span class="metric-unit">人</span></div>
+              <div class="metric-sub"><span class="metric-dot"></span><span>首次参与 ${r.firstUsers} 人</span></div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-label">总队伍数</div>
+              <div><span class="metric-value">${r.teams}</span><span class="metric-unit">队</span></div>
+              <div class="metric-sub"><span class="metric-dot"></span><span>参与机器人 ${r.robots} 个</span></div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-label">中奖率</div>
+              <div><span class="metric-value">${r.winRate}</span></div>
+              <div class="metric-sub"><span class="metric-dot"></span><span>获奖用户 ${r.winUsers} 人</span></div>
+            </article>
+          </div>
+          <div class="core-grid">
+            <article class="mini-card blue"><div class="mini-label">总报名金额</div><div class="mini-value">${r.entryAmount}</div></article>
+            <article class="mini-card orange"><div class="mini-label">机器人总报名金额</div><div class="mini-value">${r.robotEntryAmount}</div></article>
+            <article class="mini-card green"><div class="mini-label">总奖池金额</div><div class="mini-value">${r.poolAmount}</div></article>
+            <article class="mini-card green"><div class="mini-label">机器人获奖金额</div><div class="mini-value">${r.robotPrize}</div></article>
+            <article class="mini-card gray"><div class="mini-label">总退款金额</div><div class="mini-value">${r.refundAmount}</div></article>
+            <article class="mini-card blue"><div class="mini-label">ARPPU</div><div class="mini-value">${r.arppu}</div></article>
+            <article class="mini-card"><div class="mini-label">首次参与用户数</div><div class="mini-value">${r.firstUsers}</div></article>
+            <article class="mini-card"><div class="mini-label">参与机器人数</div><div class="mini-value">${r.robots}</div></article>
+            <article class="mini-card"><div class="mini-label">获奖用户数</div><div class="mini-value">${r.winUsers}</div></article>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderPlayers() {
+      const positionText = { ar: "ar", wk: "wk", bat: "bat", bowl: "bowl" };
+      el("detailContent").innerHTML = `
+        <div class="detail-toolbar">
+          <button class="btn primary" type="button" id="syncPlayersBtn">同步球员</button>
+        </div>
+        <div class="table-wrap">
+          <table class="player-table">
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>球员</th>
+                <th>队名</th>
+                <th>位置</th>
+                <th>是否首发</th>
+                <th>赛季累计得分</th>
+                <th>被选择次数</th>
+                <th>被任命队长次数</th>
+                <th>被任命副队长次数</th>
+                <th>得分详情</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${players.map((p, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${p[0]}</td>
+                  <td>${p[1]}</td>
+                  <td><span class="tag pos-${p[2]}">${positionText[p[2]]}</span></td>
+                  <td><span class="tag ${p[3] === "yes" ? "green" : "gray"}">${p[3] === "yes" ? "是" : "否"}</span></td>
+                  <td>${p[4]}</td>
+                  <td>${p[5]}</td>
+                  <td>${p[6]}</td>
+                  <td>${p[7]}</td>
+                  <td><button class="action-link" type="button">查看</button></td>
+                  <td><button class="action-link warn" type="button">禁止选择</button></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+      el("syncPlayersBtn").addEventListener("click", () => showToast("同步球员已提交"));
+      document.querySelectorAll(".action-link").forEach((button) => {
+        button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交"));
+      });
+    }
+
+    function renderPlayStats() {
+      renderTable(
+        ["序号", "玩法类型", "房间数", "参与用户数(去重)", "参与机器人数", "总队伍数", "总报名金额", "总派奖金额", "机器人获奖金额", "总退款金额", "获奖用户数", "获奖队伍数"],
+        playStats.map((p, index) => [index + 1, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10]]),
+        "play-stat-table"
+      );
+    }
+
+    function renderRoomStats() {
+      renderTable(
+        ["序号", "房间ID", "房间名称", "参与用户数(去重)", "参与机器人数", "总队伍数", "总报名金额", "总派奖金额", "机器人获奖金额", "总退款金额", "获奖用户数", "获奖队伍数"],
+        roomStats.map((r, index) => [index + 1, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10]]),
+        "play-stat-table"
+      );
+    }
+
+    function renderTeamStats() {
+      const headers = ["序号", "队伍ID", "用户ID", "房间ID", "排名", "总积分", "队长", "副队长", "队员1", "队员2", "队员3", "队员4", "队员5", "队员6", "队员7", "队员8", "队员9"];
+      el("detailContent").innerHTML = `
+        <div class="detail-filter">
+          <label class="filter-item"><span class="label">用户ID</span><input class="field" id="teamUserId" placeholder="请输入用户ID"></label>
+          <label class="filter-item"><span class="label">房间ID</span><input class="field" id="teamRoomId" placeholder="请输入房间ID"></label>
+          <button class="btn primary" type="button" id="teamSearchBtn">搜索</button>
+          <button class="btn" type="button" id="teamResetBtn">重置</button>
+        </div>
+        <div class="table-wrap">
+          <table class="team-stat-table">
+            <thead><tr>${headers.map((head) => `<th>${head}</th>`).join("")}</tr></thead>
+            <tbody>
+              ${teamStats.map((t, index) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  ${t.map((cell) => `<td>${cell}</td>`).join("")}
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+        <footer class="detail-summary">
+          <div class="pager-left"><span>共 167 条</span><select class="page-size"><option selected>10条/页</option><option>20条/页</option><option>50条/页</option></select></div>
+          <div class="pager-center">
+            <button class="page-btn ghost" type="button">‹</button>
+            <button class="page-btn active" type="button">1</button>
+            <button class="page-btn" type="button">2</button>
+            <button class="page-btn" type="button">3</button>
+            <button class="page-btn" type="button">4</button>
+            <button class="page-btn" type="button">5</button>
+            <button class="page-btn" type="button">6</button>
+            <span class="page-ellipsis">•••</span>
+            <button class="page-btn" type="button">17</button>
+            <button class="page-btn ghost" type="button">›</button>
+          </div>
+          <div class="pager-right"><span>前往</span><input class="goto-input" value="1"><span>页</span></div>
+        </footer>
+      `;
+      el("teamSearchBtn").addEventListener("click", () => showToast("搜索已提交"));
+      el("teamResetBtn").addEventListener("click", () => {
+        el("teamUserId").value = "";
+        el("teamRoomId").value = "";
+        showToast("筛选已重置");
+      });
+    }
+
+    const renderers = {
+      core: renderCore,
+      players: renderPlayers,
+      plays: renderPlayStats,
+      rooms: renderRoomStats,
+      teams: renderTeamStats
+    };
+
+    function bindSidebarAccordion() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      const closeOthers = (activeSection) => {
+        sections.forEach((section) => {
+          if (section !== activeSection) section.classList.add("collapsed");
+        });
+      };
+      sections.forEach((section) => {
+        const toggle = section.querySelector(".menu-title");
+        toggle.addEventListener("click", () => {
+          const willOpen = section.classList.contains("collapsed");
+          section.classList.toggle("collapsed");
+          if (willOpen) closeOthers(section);
+        });
+      });
+      document.querySelectorAll(".submenu-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const activeSection = item.closest(".menu-section");
+          activeSection.classList.remove("collapsed");
+          closeOthers(activeSection);
+        });
+      });
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      if (activeSection) {
+        activeSection.classList.remove("collapsed");
+        closeOthers(activeSection);
+      }
+    }
+
+    function bind() {
+      document.querySelectorAll(".section-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".section-tab").forEach((item) => item.classList.remove("active"));
+          tab.classList.add("active");
+          renderers[tab.dataset.view]();
+        });
+      });
+      document.querySelectorAll(".tab-close").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.closest(".tab").remove();
+        });
+      });
+      bindSidebarAccordion();
+    }
+
+    renderCore();
+    bind();
+  </script>
+</body>
+</html>

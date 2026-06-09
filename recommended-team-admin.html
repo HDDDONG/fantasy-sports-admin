@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 推荐队伍</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #fff;
+      --text: #26313d;
+      --muted: #7a8795;
+      --line: #e2e8f0;
+      --line-strong: #cdd7e3;
+      --blue: #2f8df5;
+      --green: #67bd51;
+      --orange: #f3a946;
+      --red: #d65a5a;
+      --shadow: 0 6px 18px rgba(32, 45, 59, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+    button, input, select { font: inherit; }
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { background: #172331; color: #dbe6ef; border-right: 1px solid #0f1823; padding: 16px 12px; }
+    .brand { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 12px; }
+    .brand-text strong { display: block; font-size: 14px; line-height: 18px; color: #fff; }
+    .brand-text span { display: block; color: #93a5b6; font-size: 12px; line-height: 16px; }
+    .menu-section { display: grid; gap: 4px; margin-bottom: 8px; }
+    .menu-title { height: 38px; border-radius: 8px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 0 10px; color: #f4f8fb; background: #203244; font-weight: 800; font-size: 14px; border: 0; width: 100%; cursor: pointer; text-align: left; }
+    .menu-title::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(47,141,245,.16); }
+    .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
+    .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
+    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 128px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
+    .menu-section.collapsed .submenu { max-height: 0; opacity: 0; padding-top: 0; transform: translateY(-6px); pointer-events: none; }
+    .submenu-item { height: 34px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; color: #b9c8d5; text-decoration: none; font-size: 13px; }
+    .submenu-item.active { color: #fff; background: var(--blue); box-shadow: 0 6px 14px rgba(47,141,245,.22); }
+
+    .shell { min-width: 0; min-height: 100vh; padding: 14px 18px 24px; background: linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px), var(--bg); }
+    .frame { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .topbar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fbfdff; }
+    .crumbs { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .menu-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #4f5c68; font-weight: 800; font-size: 18px; }
+    .module-btn { height: 26px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: #607080; cursor: pointer; font-size: 12px; }
+    .tabs { height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 16px; border-bottom: 1px solid var(--line); background: #fff; overflow-x: auto; }
+    .tab { height: 24px; border-radius: 13px; border: 1px solid var(--line); background: #fff; padding: 0 8px 0 12px; color: #657386; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; flex: 0 0 auto; }
+    .tab-link { color: inherit; text-decoration: none; line-height: 22px; }
+    .tab-close { width: 16px; height: 16px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; display: inline-grid; place-items: center; padding: 0; font-size: 12px; line-height: 16px; }
+    .tab-close:hover { background: rgba(38, 49, 61, .1); }
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .filter-band { padding: 10px 18px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+    .filters { display: flex; align-items: center; gap: 18px; white-space: nowrap; overflow-x: auto; padding-bottom: 2px; }
+    .label { color: #5b6775; font-weight: 700; font-size: 11px; text-align: right; white-space: nowrap; }
+    .filter-item { display: grid; grid-template-columns: auto 170px; align-items: center; gap: 8px; min-width: max-content; }
+    .filter-item.date { grid-template-columns: auto 240px; }
+    .filter-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+    .field { height: 30px; border: 1px solid var(--line-strong); background: #fff; border-radius: 7px; padding: 0 10px; min-width: 0; color: var(--text); outline: none; font-size: 12px; }
+    .field::placeholder { color: #b3beca; font-size: 12px; }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .btn { height: 30px; border: 1px solid var(--line-strong); background: #fff; color: var(--text); border-radius: 7px; padding: 0 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-size: 12px; }
+    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 5px 12px rgba(47, 141, 245, .2); }
+    .toolbar { padding: 14px 18px 12px; background: #fff; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+    .pill-btn { height: 30px; border: 1px solid transparent; border-radius: 8px; padding: 0 14px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .pill-btn.blue { background: #eaf4ff; color: var(--blue); border-color: #c7e0ff; }
+    .pill-btn.gray { background: #eef2f6; color: #64748b; border-color: #d8e0ea; }
+    .pill-btn.orange { background: #fff3df; color: #b8680b; border-color: #f3c47d; }
+    .table-wrap { max-width: 100%; padding: 0 18px 18px; background: #fff; overflow: auto; max-height: calc(100vh - 248px); }
+    table { width: 100%; border-collapse: collapse; min-width: 3300px; font-size: 12px; }
+    th, td { border: 1px solid var(--line); padding: 9px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #566374; font-weight: 800; }
+    tbody tr:hover td { background: #fbfdff; }
+    .check { width: 14px; height: 14px; accent-color: var(--blue); }
+    .muted { color: var(--muted); }
+    .match-cell { text-align: left; max-width: 170px; overflow: hidden; text-overflow: ellipsis; }
+    .player-cell { min-width: 112px; white-space: normal; line-height: 17px; color: #536170; }
+    .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; height: 23px; padding: 0 8px; border-radius: 6px; font-size: 12px; border: 1px solid transparent; font-weight: 800; }
+    .tag.green { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.orange { color: #9c5c0d; background: #ffe6bd; border-color: #f5c070; }
+    .tag.gray { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .tag.blue { color: #1557b0; background: #cfe6ff; border-color: #7eb9ff; }
+    .op { border: 0; background: transparent; padding: 0 7px; font-weight: 800; cursor: pointer; }
+    .op.edit { color: var(--blue); }
+    .op.delete { color: var(--red); }
+    .op.toggle { color: var(--orange); }
+    .summary { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: #fbfcfe; }
+    .pager-left, .pager-center, .pager-right { display: flex; align-items: center; gap: 8px; }
+    .page-size, .goto-input { height: 30px; border: 1px solid var(--line); background: #fff; border-radius: 8px; color: #657386; font-size: 12px; text-align: center; }
+    .page-size { width: 96px; padding: 0 10px; text-align: left; }
+    .goto-input { width: 52px; }
+    .page-btn { min-width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc; color: #657386; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 10px rgba(47,141,245,.22); }
+    .page-btn.ghost { color: #a8b3bf; background: #f3f6fa; }
+    .page-ellipsis { color: #657386; font-weight: 800; padding: 0 2px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #192533; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0; transform: translateY(70px); transition: all .18s ease; font-size: 13px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .modal-mask { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(29, 33, 41, .52); padding: 24px; }
+    .modal-mask.show { display: flex; }
+    .team-modal { width: min(720px, calc(100vw - 48px)); max-height: calc(100vh - 64px); background: #fff; border-radius: 12px; box-shadow: 0 18px 48px rgba(29, 33, 41, .22); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+    .modal-head { height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 0; font-size: 18px; font-weight: 700; color: var(--text); }
+    .modal-close { width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #9aa6b2; cursor: pointer; font-size: 24px; line-height: 1; }
+    .modal-close:hover { background: #f2f5f9; color: var(--text); }
+    .modal-body { min-height: 0; overflow: auto; padding: 18px 22px 16px; display: grid; gap: 14px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; align-items: end; }
+    .modal-field { display: grid; gap: 8px; }
+    .modal-field label { color: #4e5969; font-size: 13px; font-weight: 700; }
+    .field-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+    .modal-input { height: 34px; width: 100%; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 12px; color: var(--text); outline: none; background: #fff; }
+    .modal-input::placeholder { color: #b8c2cc; }
+    .modal-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .modal-input[disabled] { background: #f7f9fc; color: #86909c; cursor: not-allowed; }
+    .position-summary { border: 1px solid var(--line); border-radius: 10px; background: #fbfcff; padding: 10px 12px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .position-summary-title { color: #4e5969; font-size: 13px; font-weight: 800; margin-right: 2px; }
+    .position-pill { height: 22px; display: inline-flex; align-items: center; gap: 5px; color: #4e5969; font-size: 12px; font-weight: 700; }
+    .position-pill strong { color: var(--blue); font-size: 13px; font-weight: 800; }
+    .player-panel { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+    .player-head { min-height: 44px; padding: 8px 16px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: auto minmax(220px, 1fr) auto; align-items: center; gap: 14px; font-weight: 800; color: #4e5969; }
+    .player-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; max-width: 460px; justify-self: center; width: 100%; }
+    .player-search .modal-input { height: 30px; font-size: 12px; }
+    .player-search .btn { height: 30px; min-width: 64px; padding: 0 14px; }
+    .player-count { color: var(--blue); font-weight: 800; }
+    .player-empty { color: #a8b3bf; font-size: 12px; padding: 8px 0; }
+    .player-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 0; max-height: 330px; overflow: auto; }
+    .player-column { padding: 12px 16px; display: grid; gap: 9px; align-content: start; }
+    .player-column + .player-column { border-left: 1px solid var(--line); }
+    .player-team-title { color: #4e5969; font-weight: 800; padding-bottom: 4px; }
+    .player-option { min-height: 28px; display: grid; grid-template-columns: 16px minmax(0, 1fr) 42px; align-items: center; gap: 8px; color: #4e5969; font-weight: 600; cursor: pointer; }
+    .player-option input { width: 14px; height: 14px; accent-color: var(--blue); }
+    .player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .player-role { height: 20px; min-width: 36px; padding: 0 6px; border-radius: 6px; background: #f2f3f5; color: #86909c; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+    .player-option.selected { color: var(--blue); }
+    .player-option.selected .player-role { background: #e8f3ff; color: var(--blue); }
+    .captain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 22px 18px; border-top: 1px solid var(--line); background: #fff; }
+    @media (max-width: 760px) {
+      .modal-grid, .captain-grid, .player-columns, .player-head { grid-template-columns: 1fr; }
+      .player-search { justify-self: stretch; max-width: none; }
+      .player-column + .player-column { border-left: 0; border-top: 1px solid var(--line); }
+    }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=recommended-team-modal">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" type="button">
+          <span>赛事管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" type="button">
+          <span>房间管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button">
+          <span>运营管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item active" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button">
+          <span>赛事注单</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+        <header class="topbar">
+          <div class="crumbs">
+            <span class="menu-icon">≡</span>
+            <strong>首页</strong>
+            <span>/</span>
+            <span>运营管理</span>
+            <span>/</span>
+            <span>推荐队伍</span>
+          </div>
+          <button class="module-btn">板球</button>
+        </header>
+
+        <nav class="tabs">
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">赛事列表</a><button class="tab-close" type="button" aria-label="关闭赛事列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="match-recommend-admin.html">赛事推荐</a><button class="tab-close" type="button" aria-label="关闭赛事推荐">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-list-admin.html">房间列表</a><button class="tab-close" type="button" aria-label="关闭房间列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-template-admin.html">模板管理</a><button class="tab-close" type="button" aria-label="关闭模板管理">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-play-type-admin.html">玩法类型</a><button class="tab-close" type="button" aria-label="关闭玩法类型">×</button></span>
+          <span class="tab"><a class="tab-link" href="banner-config-admin.html">BANNER配置</a><button class="tab-close" type="button" aria-label="关闭BANNER配置">×</button></span>
+          <span class="tab active"><a class="tab-link" href="recommended-team-admin.html">推荐队伍</a><button class="tab-close" type="button" aria-label="关闭推荐队伍">×</button></span>
+          <span class="tab"><a class="tab-link" href="robot-management-admin.html">机器人管理</a><button class="tab-close" type="button" aria-label="关闭机器人管理">×</button></span>
+          <span class="tab"><a class="tab-link" href="bet-order-list-admin.html">注单列表</a><button class="tab-close" type="button" aria-label="关闭注单列表">×</button></span>
+        </nav>
+
+        <section class="filter-band">
+          <div class="filters">
+            <label class="filter-item">
+              <span class="label">商户</span>
+              <input class="field" id="merchant" placeholder="请输入商户">
+            </label>
+            <label class="filter-item">
+              <span class="label">比赛ID</span>
+              <input class="field" id="matchId" placeholder="请输入比赛ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">比赛名称</span>
+              <input class="field" id="matchName" placeholder="请输入比赛名称">
+            </label>
+            <label class="filter-item">
+              <span class="label">推荐队伍ID</span>
+              <input class="field" id="teamId" placeholder="请输入推荐队伍ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">队伍类型</span>
+              <select class="field" id="teamType">
+                <option value="">请选择队伍类型</option>
+                <option value="batting_heavy">batting_heavy</option>
+                <option value="bowling_heavy">bowling_heavy</option>
+                <option value="balanced">balanced</option>
+                <option value="all_rounder">all_rounder</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">状态</span>
+              <select class="field" id="status">
+                <option value="">请选择状态</option>
+                <option value="enabled">启用</option>
+                <option value="disabled">停用</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">是否自动生成</span>
+              <select class="field" id="source">
+                <option value="">请选择是否自动生成</option>
+                <option value="auto">自动</option>
+                <option value="manual">手动</option>
+              </select>
+            </label>
+            <label class="filter-item date">
+              <span class="label">创建时间</span>
+              <input class="field" id="dateRange" placeholder="开始时间  至  结束时间">
+            </label>
+            <div class="filter-actions">
+              <button class="btn primary" id="searchBtn">搜索</button>
+              <button class="btn" id="resetBtn">重置</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="toolbar">
+          <button class="pill-btn blue" id="manualTeamBtn">手动添加推荐队伍</button>
+          <button class="pill-btn gray team-bulk-action disabled" id="enableTeamBtn" disabled>启用</button>
+          <button class="pill-btn orange team-bulk-action disabled" id="disableTeamBtn" disabled>停用</button>
+        </section>
+
+        <section class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th><input class="check" type="checkbox" id="selectAll"></th>
+                <th>序号</th>
+                <th>商户</th>
+                <th>推荐队伍ID</th>
+                <th>比赛ID</th>
+                <th>比赛名称</th>
+                <th>队伍类型</th>
+                <th>队伍来源</th>
+                <th>A队球员数</th>
+                <th>B队球员数</th>
+                <th>队员1</th>
+                <th>队员2</th>
+                <th>队员3</th>
+                <th>队员4</th>
+                <th>队员5</th>
+                <th>队员6</th>
+                <th>队员7</th>
+                <th>队员8</th>
+                <th>队员9</th>
+                <th>队长</th>
+                <th>副队长</th>
+                <th>队伍总credits</th>
+                <th>队伍赛季总points</th>
+                <th>状态</th>
+                <th>创建时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+
+        <footer class="summary">
+          <div class="pager-left">
+            <span id="countText">共 0 条数据</span>
+            <select class="page-size" aria-label="每页条数">
+              <option>10条/页</option>
+              <option selected>20条/页</option>
+              <option>50条/页</option>
+            </select>
+          </div>
+          <div class="pager-center">
+            <button class="page-btn ghost" type="button">‹</button>
+            <button class="page-btn active" type="button">1</button>
+            <button class="page-btn" type="button">2</button>
+            <button class="page-btn" type="button">3</button>
+            <button class="page-btn" type="button">4</button>
+            <button class="page-btn" type="button">5</button>
+            <button class="page-btn" type="button">6</button>
+            <span class="page-ellipsis">•••</span>
+            <button class="page-btn" type="button">136</button>
+            <button class="page-btn ghost" type="button">›</button>
+          </div>
+          <div class="pager-right">
+            <span>前往</span>
+            <input class="goto-input" value="1" aria-label="前往页码">
+            <span>页</span>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="manualTeamModal" aria-hidden="true">
+    <section class="team-modal" role="dialog" aria-modal="true" aria-labelledby="manualTeamTitle">
+      <header class="modal-head">
+        <h3 id="manualTeamTitle">手动添加推荐队伍</h3>
+        <button class="modal-close" id="manualTeamClose" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <section class="modal-grid">
+          <div class="modal-field">
+            <label>比赛ID</label>
+            <input class="modal-input" id="modalTeamMatchId" placeholder="输入比赛ID自动联想比赛">
+          </div>
+          <div class="modal-field">
+            <label>比赛名称</label>
+            <input class="modal-input" id="modalTeamMatchName" placeholder="输入比赛ID后自动展示" disabled readonly>
+          </div>
+          <div class="modal-field">
+            <label>队伍类型</label>
+            <select class="modal-input" id="modalTeamType">
+              <option value="batting_heavy">Batting Heavy</option>
+              <option value="bowling_heavy">Bowling Heavy</option>
+              <option value="balanced">Balanced</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="position-summary" aria-label="已选球员位置统计">
+          <span class="position-summary-title">位置统计</span>
+          <span class="position-pill bat">BAT <strong id="roleCountBat">0</strong></span>
+          <span class="position-pill bowl">BOWL <strong id="roleCountBowl">0</strong></span>
+          <span class="position-pill ar">AR <strong id="roleCountAr">0</strong></span>
+          <span class="position-pill wk">WK <strong id="roleCountWk">0</strong></span>
+        </section>
+
+        <section class="player-panel">
+          <div class="player-head">
+            <span>选择球员</span>
+            <div class="player-search">
+              <input class="modal-input" id="modalPlayerNameSearch" placeholder="请输入球员名字">
+              <button class="btn primary" id="modalPlayerSearchBtn" type="button">搜索</button>
+            </div>
+            <span class="player-count" id="selectedPlayerCount">0/11</span>
+          </div>
+          <div class="player-columns">
+            <div class="player-column">
+              <div class="player-team-title">球队A</div>
+              <div id="teamAPlayers"></div>
+            </div>
+            <div class="player-column">
+              <div class="player-team-title">球队B</div>
+              <div id="teamBPlayers"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="captain-grid">
+          <div class="modal-field">
+            <label>队长</label>
+            <select class="modal-input" id="captainSelect">
+              <option value="">请先选择球员</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label>副队长</label>
+            <select class="modal-input" id="viceCaptainSelect">
+              <option value="">请先选择球员</option>
+            </select>
+          </div>
+        </section>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn" id="manualTeamCancel" type="button">取消</button>
+        <button class="btn primary" id="manualTeamConfirm" type="button">确定</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">已操作</div>
+
+  <script>
+    const playerSets = [
+      ["Gull Feroza(bat)", "Saira Jabeen(ar)", "Tasmia Rubab(bowl)", "Zaida James(ar)", "Rameen Shamim(bowl)", "Chinelle Henry(ar)", "Qiana Joseph(bat)", "Iram Javed(bat)", "Aaliyah Alleyne(bowl)", "Eboni Brathwaite(bat)", "Ashmini Munisar(bowl)"],
+      ["Gull Feroza(bat)", "Eyman Fatima(bat)", "Aliya Riaz(ar)", "Mandy Mangru(wk)", "Jahzara Claxton(bowl)", "Ayesha Zafar(ar)", "Chinelle Henry(ar)", "Sana Fatima(ar)", "Shemaine Campbelle(wk)", "Nashra Sandhu(bowl)", "Rameen Shamim(bowl)"],
+      ["Vignesh Puthur(bowl)", "Emanjot Singh Chahal(ar)", "Shimron Hetmyer(bat)", "Ravindra Jadeja(ar)", "Lhuan dre Pretorius(wk)", "Rashid Khan(bowl)", "Nishant Sindhu(ar)", "Gurnoor Singh Brar(bowl)", "Washington Sundar(ar)", "Jos Buttler(wk)", "Connor Esterhuizen(wk)"],
+      ["Arshad Khan(bowl)", "Emanjot Singh Chahal(ar)", "Aman Rao Perala(bat)", "Shimron Hetmyer(bat)", "Ravindra Jadeja(ar)", "Lhuan dre Pretorius(wk)", "Brijesh Sharma(bowl)", "Connor Esterhuizen(wk)", "Nishant Sindhu(ar)", "Vaibhav Sooryavanshi(bat)", "Kagiso Rabada(bowl)"],
+      ["Lorcan Tucker(wk)", "Harry Tector(bat)", "Jake Egan(bat)", "Dean Foxcroft(ar)", "Daryl Mitchell(ar)", "Will Young(bat)", "Tom Blundell(wk)", "Tom Latham(wk)", "Cade Carmichael(bat)", "Henry Nicholls(bat)", "Reuben Wilson(bowl)"]
+    ];
+
+    const matchPool = [
+      ["96237", "Pakistan Women vs West Indies Women"],
+      ["96876", "Gujarat Titans vs Rajasthan Royals"],
+      ["96226", "Ireland vs New Zealand"],
+      ["96027", "Kolkata Knight Riders vs Mumbai Indians"],
+      ["96076", "Kent vs Sussex"],
+      ["96164", "Gloucestershire vs Surrey"]
+    ];
+
+    const modalPlayersA = [
+      "Arjun Dani(ar)", "Sachin Yadav(wk)", "Jitendra Paliwal(bowl)", "Sahil Jadhav(wk)", "Shreyas Gurav(bowl)",
+      "Irfan Umair(bowl)", "Maxwell Swaminathan(bowl)", "Shreyanssh Rai(bat)", "Yash Ajay Gadia(ar)", "Ayaz Ahmed Afzal(bat)",
+      "Swaraj Parulkar(bat)", "Pratik Shukla(bat)", "OM Bangar(bat)", "Aryan Patni(ar)", "Atharva Bhosale(ar)",
+      "Tushar Deshpande(bowl)", "Siddhesh Lad(bat)", "Rohan Raje(ar)", "Aditya Dhumal(bowl)", "Chinmay Sutar(bat)"
+    ];
+    const modalPlayersB = [
+      "Sagar Mishra(ar)", "Suryansh Shedge(ar)", "Nutan Goel(bat)", "Sylvester D'Souza(bowl)", "Jayesh Pokhare(ar)",
+      "Prasann Shukla(ar)", "Ayush Mhatre(ar)", "Jigar Surendra Rana(bat)", "Makarand Giresh Patil(ar)", "Vedant Vijay Gurav(bowl)",
+      "Utkarsh Hemant Raut(ar)", "Vedant Mohan Murkar(wk)", "Yaseen Soudagar(ar)", "Akhil Herwadkar(ar)", "Harshal Jadhav(ar)",
+      "Surya Kumar Yadav(bat)", "Hitesh Kadam(bowl)", "Minad Manjrekar(bowl)", "Parikshit Valsangkar(ar)", "Shikhar Thakur(wk)",
+      "Bharat Patil(ar)", "Aishwary Surve(ar)", "Asif Shaikh(bowl)"
+    ];
+
+    const teams = Array.from({ length: 20 }, (_, index) => {
+      const match = matchPool[index % matchPool.length];
+      const players = playerSets[index % playerSets.length];
+      const type = ["batting_heavy", "bowling_heavy", "balanced", "all_rounder"][index % 4];
+      const source = index % 5 === 1 ? "auto" : "manual";
+      const status = index % 6 === 5 ? "disabled" : "enabled";
+      const aCount = [5, 7, 6, 4, 2][index % 5];
+      const bCount = 11 - aCount;
+      return {
+        index: index + 1,
+        merchant: "000000",
+        teamId: String(1028 - index),
+        matchId: match[0],
+        matchName: match[1],
+        type,
+        source,
+        aCount,
+        bCount,
+        players,
+        credits: (77 + (index % 8) * 1.5).toFixed(2),
+        points: index % 3 === 0 ? "0.00" : (2800 + index * 83).toFixed(2),
+        status,
+        createdAt: `2026-06-${String(3 + (index % 20)).padStart(2, "0")} ${String(17 - (index % 8)).padStart(2, "0")}:${String(54 - (index % 5) * 6).padStart(2, "0")}:59`
+      };
+    });
+
+    const filters = { merchant: "", matchId: "", matchName: "", teamId: "", teamType: "", status: "", source: "", dateRange: "" };
+    const el = (id) => document.getElementById(id);
+    const sourceText = { manual: "手动", auto: "自动" };
+    const statusText = { enabled: "启用", disabled: "停用" };
+    const selectedModalPlayers = new Set();
+    let modalPlayerKeyword = "";
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function openManualTeamModal() {
+      selectedModalPlayers.clear();
+      el("modalTeamMatchId").value = "";
+      el("modalTeamMatchName").value = "";
+      el("modalTeamMatchName").placeholder = "输入比赛ID后自动展示";
+      el("modalTeamType").value = "batting_heavy";
+      el("modalPlayerNameSearch").value = "";
+      modalPlayerKeyword = "";
+      renderModalPlayers();
+      updateSelectedPlayerState();
+      el("manualTeamModal").classList.add("show");
+      el("manualTeamModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeManualTeamModal() {
+      el("manualTeamModal").classList.remove("show");
+      el("manualTeamModal").setAttribute("aria-hidden", "true");
+    }
+
+    function inferModalMatch() {
+      const keyword = el("modalTeamMatchId").value.trim();
+      const nameInput = el("modalTeamMatchName");
+      if (!keyword) {
+        nameInput.value = "";
+        nameInput.placeholder = "输入比赛ID后自动展示";
+        return;
+      }
+
+      const lowerKeyword = keyword.toLowerCase();
+      const matched = matchPool.find(([id]) => id === keyword)
+        || (keyword.length >= 3 ? matchPool.find(([id, name]) => id.includes(keyword) || name.toLowerCase().includes(lowerKeyword)) : null);
+
+      if (!matched) {
+        nameInput.value = "";
+        nameInput.placeholder = "未匹配比赛";
+        return;
+      }
+
+      nameInput.value = matched[1];
+    }
+
+    function parsePlayer(player) {
+      const match = player.match(/^(.*)\(([^)]+)\)$/);
+      return match ? { name: match[1].trim(), role: match[2].trim() } : { name: player, role: "-" };
+    }
+
+    function renderModalPlayers() {
+      const keyword = modalPlayerKeyword.trim().toLowerCase();
+      const filterGroup = (players) => keyword
+        ? players.filter((player) => parsePlayer(player).name.toLowerCase().includes(keyword))
+        : players;
+      const renderGroup = (players) => players.length ? players.map((player) => {
+        const parsed = parsePlayer(player);
+        return `
+          <label class="player-option ${selectedModalPlayers.has(player) ? "selected" : ""}" title="${player}">
+            <input type="checkbox" class="modal-player-check" value="${player}" ${selectedModalPlayers.has(player) ? "checked" : ""}>
+            <span class="player-name">${parsed.name}</span>
+            <span class="player-role">${parsed.role}</span>
+          </label>
+        `;
+      }).join("") : `<div class="player-empty">暂无匹配球员</div>`;
+      el("teamAPlayers").innerHTML = renderGroup(filterGroup(modalPlayersA));
+      el("teamBPlayers").innerHTML = renderGroup(filterGroup(modalPlayersB));
+      document.querySelectorAll(".modal-player-check").forEach((input) => {
+        input.addEventListener("change", (event) => {
+          const player = event.target.value;
+          if (event.target.checked && selectedModalPlayers.size >= 11) {
+            event.target.checked = false;
+            showToast("最多选择 11 名球员");
+            return;
+          }
+          if (event.target.checked) selectedModalPlayers.add(player);
+          else selectedModalPlayers.delete(player);
+          event.target.closest(".player-option").classList.toggle("selected", event.target.checked);
+          updateSelectedPlayerState();
+        });
+      });
+    }
+
+    function searchModalPlayers() {
+      modalPlayerKeyword = el("modalPlayerNameSearch").value.trim();
+      renderModalPlayers();
+    }
+
+    function updateSelectedPlayerState() {
+      const selected = Array.from(selectedModalPlayers);
+      el("selectedPlayerCount").textContent = `${selected.length}/11`;
+      updatePositionStats(selected);
+      const options = selected.length
+        ? `<option value="">请选择</option>${selected.map((player) => `<option value="${player}">${player}</option>`).join("")}`
+        : `<option value="">请先选择球员</option>`;
+      const captainValue = selected.includes(el("captainSelect").value) ? el("captainSelect").value : "";
+      const viceValue = selected.includes(el("viceCaptainSelect").value) ? el("viceCaptainSelect").value : "";
+      el("captainSelect").innerHTML = options;
+      el("viceCaptainSelect").innerHTML = options;
+      el("captainSelect").value = captainValue;
+      el("viceCaptainSelect").value = viceValue;
+    }
+
+    function updatePositionStats(selected = Array.from(selectedModalPlayers)) {
+      const counts = { bat: 0, bowl: 0, ar: 0, wk: 0 };
+      selected.forEach((player) => {
+        const role = parsePlayer(player).role;
+        if (Object.prototype.hasOwnProperty.call(counts, role)) counts[role] += 1;
+      });
+      el("roleCountBat").textContent = counts.bat;
+      el("roleCountBowl").textContent = counts.bowl;
+      el("roleCountAr").textContent = counts.ar;
+      el("roleCountWk").textContent = counts.wk;
+    }
+
+    function filteredRows() {
+      return teams.filter((team) => {
+        const merchant = !filters.merchant || team.merchant.includes(filters.merchant);
+        const matchId = !filters.matchId || team.matchId.includes(filters.matchId);
+        const matchName = !filters.matchName || team.matchName.toLowerCase().includes(filters.matchName.toLowerCase());
+        const teamId = !filters.teamId || team.teamId.includes(filters.teamId);
+        const type = !filters.teamType || team.type === filters.teamType;
+        const status = !filters.status || team.status === filters.status;
+        const source = !filters.source || team.source === filters.source;
+        return merchant && matchId && matchName && teamId && type && status && source;
+      });
+    }
+
+    function renderRows() {
+      const rows = filteredRows();
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("selectAll").checked = false;
+      el("rows").innerHTML = rows.map((team) => `
+        <tr>
+          <td><input class="check row-check" type="checkbox" data-team-id="${team.teamId}"></td>
+          <td>${team.index}</td>
+          <td class="muted">${team.merchant}</td>
+          <td>${team.teamId}</td>
+          <td>${team.matchId}</td>
+          <td class="match-cell" title="${team.matchName}">${team.matchName}</td>
+          <td>${team.type}</td>
+          <td><span class="tag ${team.source === "manual" ? "orange" : "blue"}">${sourceText[team.source]}</span></td>
+          <td>${team.aCount}</td>
+          <td>${team.bCount}</td>
+          ${team.players.slice(0, 9).map((player) => `<td class="player-cell">${player}</td>`).join("")}
+          <td class="player-cell">${team.players[9]}</td>
+          <td class="player-cell">${team.players[10]}</td>
+          <td>${team.credits}</td>
+          <td>${team.points}</td>
+          <td><span class="tag ${team.status === "enabled" ? "green" : "gray"}">${statusText[team.status]}</span></td>
+          <td class="muted">${team.createdAt}</td>
+          <td><button class="op edit">编辑</button><button class="op delete">删除</button><button class="op toggle">${team.status === "enabled" ? "停用" : "启用"}</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="26">暂无推荐队伍数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => {
+        button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交"));
+      });
+      document.querySelectorAll(".row-check").forEach((input) => {
+        input.addEventListener("change", () => {
+          const checks = Array.from(document.querySelectorAll(".row-check"));
+          el("selectAll").checked = checks.length > 0 && checks.every((item) => item.checked);
+          updateTeamToolbarState();
+        });
+      });
+      updateTeamToolbarState();
+    }
+
+    function selectedTeams() {
+      const selectedIds = Array.from(document.querySelectorAll(".row-check:checked")).map((input) => input.dataset.teamId);
+      return teams.filter((team) => selectedIds.includes(team.teamId));
+    }
+
+    function setButtonState(button, active) {
+      button.disabled = !active;
+      button.classList.toggle("disabled", !active);
+      button.setAttribute("aria-disabled", String(!active));
+    }
+
+    function updateTeamToolbarState() {
+      const active = selectedTeams().length > 0;
+      document.querySelectorAll(".team-bulk-action").forEach((button) => setButtonState(button, active));
+    }
+
+    function setSelectedTeamStatus(status) {
+      const selected = selectedTeams();
+      if (!selected.length) {
+        showToast("请先选择推荐队伍");
+        return;
+      }
+      selected.forEach((team) => {
+        team.status = status;
+      });
+      renderRows();
+      showToast(status === "enabled" ? "已启用" : "已停用");
+    }
+
+    function bindSidebarAccordion() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      const closeOthers = (activeSection) => {
+        sections.forEach((section) => {
+          if (section !== activeSection) section.classList.add("collapsed");
+        });
+      };
+      sections.forEach((section) => {
+        const toggle = section.querySelector(".menu-title");
+        toggle.addEventListener("click", () => {
+          const willOpen = section.classList.contains("collapsed");
+          section.classList.toggle("collapsed");
+          if (willOpen) closeOthers(section);
+        });
+      });
+      document.querySelectorAll(".submenu-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const activeSection = item.closest(".menu-section");
+          activeSection.classList.remove("collapsed");
+          closeOthers(activeSection);
+        });
+      });
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      if (activeSection) {
+        activeSection.classList.remove("collapsed");
+        closeOthers(activeSection);
+      }
+    }
+
+    function bind() {
+      const inputMap = [
+        ["merchant", "merchant"],
+        ["matchId", "matchId"],
+        ["matchName", "matchName"],
+        ["teamId", "teamId"],
+        ["dateRange", "dateRange"]
+      ];
+      inputMap.forEach(([id, key]) => el(id).addEventListener("input", (event) => filters[key] = event.target.value));
+      el("teamType").addEventListener("input", (event) => filters.teamType = event.target.value);
+      el("status").addEventListener("input", (event) => filters.status = event.target.value);
+      el("source").addEventListener("input", (event) => filters.source = event.target.value);
+      el("searchBtn").addEventListener("click", renderRows);
+      el("resetBtn").addEventListener("click", () => {
+        Object.keys(filters).forEach((key) => filters[key] = "");
+        [...inputMap.map(([id]) => id), "teamType", "status", "source"].forEach((id) => el(id).value = "");
+        renderRows();
+      });
+      el("selectAll").addEventListener("change", (event) => {
+        document.querySelectorAll(".row-check").forEach((input) => input.checked = event.target.checked);
+        updateTeamToolbarState();
+      });
+      el("manualTeamBtn").addEventListener("click", openManualTeamModal);
+      el("manualTeamClose").addEventListener("click", closeManualTeamModal);
+      el("manualTeamCancel").addEventListener("click", closeManualTeamModal);
+      el("manualTeamConfirm").addEventListener("click", () => {
+        closeManualTeamModal();
+        showToast("手动添加推荐队伍已提交");
+      });
+      el("manualTeamModal").addEventListener("click", (event) => {
+        if (event.target === el("manualTeamModal")) closeManualTeamModal();
+      });
+      el("modalTeamMatchId").addEventListener("input", inferModalMatch);
+      el("modalPlayerSearchBtn").addEventListener("click", searchModalPlayers);
+      el("modalPlayerNameSearch").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") searchModalPlayers();
+      });
+      el("enableTeamBtn").addEventListener("click", () => setSelectedTeamStatus("enabled"));
+      el("disableTeamBtn").addEventListener("click", () => setSelectedTeamStatus("disabled"));
+      document.querySelectorAll(".tab-close").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.closest(".tab").remove();
+        });
+      });
+      bindSidebarAccordion();
+    }
+
+    renderRows();
+    bind();
+  </script>
+</body>
+</html>

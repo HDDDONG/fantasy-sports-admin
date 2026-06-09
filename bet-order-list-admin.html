@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 注单列表</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #fff;
+      --text: #26313d;
+      --muted: #7a8795;
+      --line: #e2e8f0;
+      --line-strong: #cdd7e3;
+      --blue: #2f8df5;
+      --green: #67bd51;
+      --orange: #f3a946;
+      --red: #d65a5a;
+      --shadow: 0 6px 18px rgba(32, 45, 59, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+    button, input, select { font: inherit; }
+
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { background: #172331; color: #dbe6ef; border-right: 1px solid #0f1823; padding: 16px 12px; }
+    .brand { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 12px; }
+    .brand-text strong { display: block; font-size: 14px; line-height: 18px; color: #fff; }
+    .brand-text span { display: block; color: #93a5b6; font-size: 12px; line-height: 16px; }
+    .menu-section { display: grid; gap: 4px; margin-bottom: 8px; }
+    .menu-title { height: 38px; border-radius: 8px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 0 10px; color: #f4f8fb; background: #203244; font-weight: 800; font-size: 14px; border: 0; width: 100%; cursor: pointer; text-align: left; }
+    .menu-title::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(47,141,245,.16); }
+    .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
+    .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
+    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 128px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
+    .menu-section.collapsed .submenu { max-height: 0; opacity: 0; padding-top: 0; transform: translateY(-6px); pointer-events: none; }
+    .submenu-item { height: 34px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; color: #b9c8d5; text-decoration: none; font-size: 13px; }
+    .submenu-item.active { color: #fff; background: var(--blue); box-shadow: 0 6px 14px rgba(47,141,245,.22); }
+
+    .shell { min-width: 0; min-height: 100vh; padding: 14px 18px 24px; background: linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px), var(--bg); }
+    .frame { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .topbar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fbfdff; }
+    .crumbs { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .menu-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #4f5c68; font-weight: 800; font-size: 18px; }
+    .module-btn { height: 26px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: #607080; cursor: pointer; font-size: 12px; }
+
+    .tabs { height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 16px; border-bottom: 1px solid var(--line); background: #fff; }
+    .tab { height: 24px; border-radius: 13px; border: 1px solid var(--line); background: #fff; padding: 0 8px 0 12px; color: #657386; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+    .tab-link { color: inherit; text-decoration: none; line-height: 22px; }
+    .tab-close { width: 16px; height: 16px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; display: inline-grid; place-items: center; padding: 0; font-size: 12px; line-height: 16px; }
+    .tab-close:hover { background: rgba(38, 49, 61, .1); }
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    .filter-band { padding: 10px 18px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+    .filters { display: flex; align-items: center; gap: 18px; white-space: nowrap; overflow-x: auto; padding-bottom: 2px; }
+    .label { color: #5b6775; font-weight: 700; font-size: 11px; text-align: right; white-space: nowrap; }
+    .filter-item { display: grid; grid-template-columns: auto 170px; align-items: center; gap: 8px; min-width: max-content; }
+    .filter-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+    .field { height: 30px; border: 1px solid var(--line-strong); background: #fff; border-radius: 7px; padding: 0 10px; min-width: 0; color: var(--text); outline: none; font-size: 12px; }
+    .field::placeholder { color: #b3beca; font-size: 12px; }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .btn { height: 30px; border: 1px solid var(--line-strong); background: #fff; color: var(--text); border-radius: 7px; padding: 0 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-size: 12px; }
+    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 5px 12px rgba(47, 141, 245, .2); }
+
+    .toolbar { padding: 14px 18px 12px; background: #fff; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+    .pill-btn { height: 30px; border: 1px solid transparent; border-radius: 8px; padding: 0 14px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .pill-btn.blue { background: #eaf4ff; color: var(--blue); border-color: #c7e0ff; }
+    .pill-btn.green { background: #edf9e9; color: var(--green); border-color: #cfeec7; }
+
+    .table-wrap { max-width: 100%; padding: 0 18px 18px; background: #fff; overflow: auto; max-height: calc(100vh - 248px); }
+    table { width: 100%; border-collapse: collapse; min-width: 2040px; font-size: 13px; }
+    th, td { border: 1px solid var(--line); padding: 10px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #566374; font-weight: 800; }
+    tbody tr:hover td { background: #fbfdff; }
+    .name-cell { text-align: left; max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
+    .muted { color: var(--muted); }
+    .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; height: 24px; padding: 0 8px; border-radius: 6px; font-size: 12px; border: 1px solid transparent; font-weight: 800; }
+    .tag.gray { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .tag.green { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.red { color: #9f3030; background: #ffd2d2; border-color: #ea8b8b; }
+    .tag.blue { color: #1557b0; background: #cfe6ff; border-color: #7eb9ff; }
+    .op { border: 0; background: transparent; padding: 0 7px; font-weight: 800; cursor: pointer; color: var(--blue); }
+    .summary { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: #fbfcfe; }
+    .pager-left, .pager-center, .pager-right { display: flex; align-items: center; gap: 8px; }
+    .page-size, .goto-input { height: 30px; border: 1px solid var(--line); background: #fff; border-radius: 8px; color: #657386; font-size: 12px; text-align: center; }
+    .page-size { width: 96px; padding: 0 10px; text-align: left; }
+    .goto-input { width: 52px; }
+    .page-btn { min-width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc; color: #657386; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 10px rgba(47,141,245,.22); }
+    .page-btn.ghost { color: #a8b3bf; background: #f3f6fa; }
+    .page-ellipsis { color: #657386; font-weight: 800; padding: 0 2px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #192533; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0; transform: translateY(70px); transition: all .18s ease; font-size: 13px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=sport-sticker-overlay">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" id="matchMenuToggle" type="button">
+          <span>赛事管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" id="roomMenuToggle" type="button">
+          <span>房间管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button">
+          <span>运营管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button">
+          <span>赛事注单</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item active" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+        <header class="topbar">
+          <div class="crumbs">
+            <span class="menu-icon">≡</span>
+            <strong>首页</strong>
+            <span>/</span>
+            <span>赛事注单</span>
+            <span>/</span>
+            <span>注单列表</span>
+          </div>
+          <button class="module-btn">板球</button>
+        </header>
+
+        <nav class="tabs">
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+          <span class="tab"><a class="tab-link" href="robot-management-admin.html">机器人管理</a><button class="tab-close" type="button" aria-label="关闭机器人管理">×</button></span>
+          <span class="tab active"><a class="tab-link" href="bet-order-list-admin.html">注单列表</a><button class="tab-close" type="button" aria-label="关闭注单列表">×</button></span>
+        </nav>
+
+        <section class="filter-band">
+          <div class="filters">
+            <label class="filter-item"><span class="label">投注单号</span><input class="field" id="orderNo" placeholder="请输入投注单号"></label>
+            <label class="filter-item"><span class="label">用户ID</span><input class="field" id="userId" placeholder="请输入用户ID"></label>
+            <label class="filter-item"><span class="label">下注状态</span><select class="field" id="orderStatus"><option value="">请选择下注状态</option><option value="success">下注成功</option><option value="settled">已结算</option><option value="cancelled">已取消</option></select></label>
+            <label class="filter-item"><span class="label">日期范围</span><input class="field" id="dateRange" placeholder="开始日期  -  结束日期"></label>
+            <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+          </div>
+        </section>
+
+        <section class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>商户ID</th>
+                <th>商户名</th>
+                <th>投注单号</th>
+                <th>用户ID</th>
+                <th>联赛名称</th>
+                <th>比赛ID</th>
+                <th>比赛名称</th>
+                <th>房间ID</th>
+                <th>房间名称</th>
+                <th>玩法类型</th>
+                <th>队伍ID</th>
+                <th>下注金额</th>
+                <th>返奖金额</th>
+                <th>下注时间</th>
+                <th>结算时间</th>
+                <th>注单状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+
+        <footer class="summary">
+          <div class="pager-left">
+            <span id="countText">共 0 条数据</span>
+            <select class="page-size" aria-label="每页条数">
+              <option>10条/页</option>
+              <option selected>20条/页</option>
+              <option>50条/页</option>
+            </select>
+          </div>
+          <div class="pager-center">
+            <button class="page-btn ghost" type="button">‹</button>
+            <button class="page-btn active" type="button">1</button>
+            <button class="page-btn" type="button">2</button>
+            <button class="page-btn" type="button">3</button>
+            <button class="page-btn" type="button">4</button>
+            <button class="page-btn" type="button">5</button>
+            <button class="page-btn" type="button">6</button>
+            <span class="page-ellipsis">•••</span>
+            <button class="page-btn" type="button">136</button>
+            <button class="page-btn ghost" type="button">›</button>
+          </div>
+          <div class="pager-right">
+            <span>前往</span>
+            <input class="goto-input" value="1" aria-label="前往页码">
+            <span>页</span>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">已操作</div>
+
+  <script>
+    const orders = Array.from({ length: 44 }, (_, index) => {
+      const status = index < 5 ? "success" : index % 4 === 0 ? "cancelled" : "settled";
+      const fee = index % 3 === 0 ? "9.00" : "10.00";
+      return {
+        index: index + 1,
+        merchantId: "000000",
+        merchantName: "XXX有限公司",
+        orderNo: String(2063865101561831424n + BigInt(index * 761239)),
+        userId: ["da8ms5g", "7gky466", "4kskw9s", "4kshbwc"][index % 4],
+        competitionName: "Mumbai T20 League",
+        matchId: index < 5 ? "97171" : "97165",
+        matchName: index < 5 ? "MSC Maratha Royals vs Triumph Knights MNE" : "Eagle Thane Strikers vs Arcs Andheri",
+        roomId: index < 5 ? "2063809102105825281" : ["2061993013370552322", "2061993013353775105", "2061993013366358020"][index % 3],
+        roomName: index < 5 ? "热门-001 - MSC Maratha Royals" : ["sake 3duiwu - Eagle Thane", "热门-001 - Eagle Thane", "1234 - Eagle Thane Strikers"][index % 3],
+        playType: "MEGA_CONTEST",
+        teamId: String(2063819371264856065n + BigInt(index * 49137)),
+        stakeAmount: fee,
+        returnAmount: status === "settled" ? (index % 5 === 0 ? "18.00" : "0.00") : "0.00",
+        betAt: index < 5 ? "2026-06-08 14:05:59" : `2026-06-05 16:${String(10 + index % 50).padStart(2, "0")}:59`,
+        settledAt: status === "settled" ? "2026-06-05 19:42:49" : "--",
+        status
+      };
+    });
+
+    const filters = { orderNo: "", userId: "", orderStatus: "", dateRange: "" };
+    const el = (id) => document.getElementById(id);
+    const PAGE_SIZE = 20;
+    const statusText = { success: "下注成功", settled: "已结算", cancelled: "已取消" };
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function filteredRows() {
+      return orders.filter((order) => {
+        const orderNo = !filters.orderNo || order.orderNo.includes(filters.orderNo);
+        const userId = !filters.userId || order.userId.includes(filters.userId);
+        const status = !filters.orderStatus || order.status === filters.orderStatus;
+        return orderNo && userId && status;
+      });
+    }
+
+    function renderRows() {
+      const rows = filteredRows();
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("rows").innerHTML = rows.slice(0, PAGE_SIZE).map((order) => `
+        <tr>
+          <td>${order.index}</td>
+          <td class="muted">${order.merchantId}</td>
+          <td>${order.merchantName}</td>
+          <td>${order.orderNo}</td>
+          <td>${order.userId}</td>
+          <td>${order.competitionName}</td>
+          <td>${order.matchId}</td>
+          <td class="name-cell">${order.matchName}</td>
+          <td>${order.roomId}</td>
+          <td class="name-cell">${order.roomName}</td>
+          <td>${order.playType}</td>
+          <td>${order.teamId}</td>
+          <td>${order.stakeAmount}</td>
+          <td>${order.returnAmount}</td>
+          <td>${order.betAt}</td>
+          <td>${order.settledAt}</td>
+          <td><span class="tag ${order.status === "success" ? "green" : order.status === "settled" ? "green" : "red"}">${statusText[order.status]}</span></td>
+          <td><button class="op">详情</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="18">暂无注单数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => button.addEventListener("click", () => showToast("详情已提交")));
+    }
+
+    function bind() {
+      Object.keys(filters).forEach((key) => {
+        const node = el(key);
+        if (node) node.addEventListener("input", (event) => filters[key] = event.target.value);
+      });
+      el("searchBtn").addEventListener("click", renderRows);
+      el("resetBtn").addEventListener("click", () => {
+        Object.keys(filters).forEach((key) => { filters[key] = ""; if (el(key)) el(key).value = ""; });
+        renderRows();
+      });
+      document.querySelectorAll(".tab-close").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.closest(".tab").remove();
+        });
+      });
+      bindSidebarAccordion();
+    }
+
+    function bindSidebarAccordion() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      const closeOthers = (activeSection) => { sections.forEach((section) => { if (section !== activeSection) section.classList.add("collapsed"); }); };
+      sections.forEach((section) => {
+        section.querySelector(".menu-title").addEventListener("click", () => {
+          const willOpen = section.classList.contains("collapsed");
+          section.classList.toggle("collapsed");
+          if (willOpen) closeOthers(section);
+        });
+      });
+      document.querySelectorAll(".submenu-item").forEach((item) => item.addEventListener("click", () => {
+        const activeSection = item.closest(".menu-section");
+        activeSection.classList.remove("collapsed");
+        closeOthers(activeSection);
+      }));
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      if (activeSection) { activeSection.classList.remove("collapsed"); closeOthers(activeSection); }
+    }
+
+    renderRows();
+    bind();
+  </script>
+</body>
+</html>

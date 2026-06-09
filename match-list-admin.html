@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 赛事列表</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #fff;
+      --panel: #f8fafc;
+      --text: #26313d;
+      --muted: #7a8795;
+      --line: #e2e8f0;
+      --line-strong: #cdd7e3;
+      --blue: #2f8df5;
+      --blue-soft: #eaf4ff;
+      --green: #67bd51;
+      --green-soft: #edf9e9;
+      --orange: #f3a946;
+      --orange-soft: #fff5e8;
+      --red: #d65a5a;
+      --gray-soft: #f2f4f7;
+      --shadow: 0 6px 18px rgba(32, 45, 59, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+    button, input, select { font: inherit; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #172331;
+      color: #dbe6ef;
+      border-right: 1px solid #0f1823;
+      padding: 16px 12px;
+    }
+
+    .brand {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      margin-bottom: 14px;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--blue);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 14px;
+      line-height: 18px;
+      color: #fff;
+    }
+
+    .brand-text span {
+      display: block;
+      color: #93a5b6;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    .menu-section {
+      display: grid;
+      gap: 4px;
+    }
+
+    .menu-title {
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 9px;
+      padding: 0 10px;
+      color: #f4f8fb;
+      background: #203244;
+      font-weight: 800;
+      font-size: 14px;
+      border: 0;
+      width: 100%;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .menu-title::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(47,141,245,.16);
+    }
+
+    .menu-arrow {
+      color: #9fb1c0;
+      transition: transform .22s ease;
+      font-size: 12px;
+    }
+
+    .menu-section.collapsed .menu-arrow {
+      transform: rotate(-90deg);
+    }
+
+    .submenu {
+      display: grid;
+      gap: 3px;
+      padding: 4px 0 0 22px;
+      max-height: 128px;
+      opacity: 1;
+      overflow: hidden;
+      transform: translateY(0);
+      transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease;
+    }
+
+    .menu-section.collapsed .submenu {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+    }
+
+    .submenu-item {
+      height: 34px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      color: #b9c8d5;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .submenu-item.active {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 6px 14px rgba(47,141,245,.22);
+    }
+
+    .shell {
+      min-width: 0;
+      min-height: 100vh;
+      padding: 14px 18px 24px;
+      background:
+        linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px),
+        var(--bg);
+    }
+
+    .frame {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .menu-icon {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      color: #4f5c68;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .module-btn {
+      height: 26px;
+      padding: 0 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #607080;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .tabs {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .tab {
+      height: 24px;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 0 8px 0 12px;
+      color: #657386;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .tab-link {
+      color: inherit;
+      text-decoration: none;
+      line-height: 22px;
+    }
+
+    .tab-close {
+      width: 16px;
+      height: 16px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+      padding: 0;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    .tab-close:hover {
+      background: rgba(38, 49, 61, .1);
+    }
+
+    .tab.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .filter-band {
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .filters {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      white-space: nowrap;
+      overflow-x: visible;
+      padding-bottom: 2px;
+    }
+
+    .label {
+      color: #5b6775;
+      font-weight: 700;
+      font-size: 11px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .filter-item {
+      display: grid;
+      grid-template-columns: auto 170px;
+      align-items: center;
+      gap: 8px;
+      min-width: max-content;
+    }
+
+    .filter-item.date {
+      grid-template-columns: auto 230px;
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    .field {
+      height: 30px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      border-radius: 7px;
+      padding: 0 10px;
+      min-width: 0;
+      color: var(--text);
+      outline: none;
+      font-size: 12px;
+    }
+
+    .field::placeholder { color: #b3beca; font-size: 12px; }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+
+    .btn {
+      height: 30px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--text);
+      border-radius: 7px;
+      padding: 0 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+      box-shadow: 0 5px 12px rgba(47, 141, 245, .2);
+    }
+
+    .toolbar {
+      padding: 16px 18px 12px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .pill-btn {
+      height: 30px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pill-btn.green { background: var(--green-soft); color: var(--green); border-color: #cfeec7; }
+    .pill-btn.orange { background: var(--orange-soft); color: var(--orange); border-color: #f7dfbd; }
+    .pill-btn.blue { background: var(--blue-soft); color: var(--blue); border-color: #c7e0ff; }
+    .pill-btn.disabled { opacity: .58; cursor: not-allowed; }
+
+    .table-wrap {
+      max-width: 100%;
+      padding: 0 18px 18px;
+      background: #fff;
+      overflow: auto;
+      max-height: calc(100vh - 248px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1720px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 11px 10px;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f8fafc;
+      color: #566374;
+      font-weight: 800;
+    }
+
+    tbody tr:hover td { background: #fbfdff; }
+    .check { width: 16px; height: 16px; accent-color: var(--blue); }
+    .muted { color: var(--muted); }
+    .name-cell {
+      text-align: left;
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      border: 1.5px solid transparent;
+      font-weight: 800;
+    }
+
+    .tag.gray { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .tag.green { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.orange { color: #8b5a00; background: #ffe7a8; border-color: #efc34f; }
+    .tag.blue { color: #1557b0; background: #cfe6ff; border-color: #7eb9ff; }
+    .tag.red { color: #9f3030; background: #ffd2d2; border-color: #ea8b8b; }
+    .tag.lineup-ok { color: #fff; background: #C98C2E; border-color: #C98C2E; }
+    .tag.lineup-wait { color: #fff; background: #F05359; border-color: #F05359; }
+    .tag.room-yes { color: #1557b0; background: #cfe6ff; border-color: #7eb9ff; }
+    .tag.room-no { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .tag.display-show { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.display-hide { color: #9f3030; background: #ffd2d2; border-color: #ea8b8b; }
+
+    .op {
+      border: 0;
+      background: transparent;
+      padding: 0 7px;
+      font-weight: 800;
+      cursor: pointer;
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .op.green { color: var(--green); }
+    .op.orange { color: var(--orange); }
+    .op.red { color: var(--red); }
+    .op.detail { color: #7b61ff; }
+    .op.display-toggle.green { color: var(--green); }
+    .op.display-toggle.orange { color: var(--orange); }
+
+    .summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      background: #fbfcfe;
+    }
+
+    .pager-left,
+    .pager-center,
+    .pager-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-size,
+    .goto-input {
+      height: 30px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      color: #657386;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .page-size {
+      width: 96px;
+      padding: 0 10px;
+      text-align: left;
+    }
+
+    .goto-input {
+      width: 52px;
+    }
+
+    .page-btn {
+      min-width: 30px;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7f9fc;
+      color: #657386;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .page-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(47,141,245,.22);
+    }
+
+    .page-btn.ghost {
+      color: #a8b3bf;
+      background: #f3f6fa;
+    }
+
+    .page-ellipsis {
+      color: #657386;
+      font-weight: 800;
+      padding: 0 2px;
+    }
+
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, .52);
+      padding: 24px;
+    }
+
+    .modal-mask.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(920px, calc(100vw - 48px));
+      max-height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 22px 58px rgba(15, 23, 42, .22);
+      overflow: hidden;
+    }
+
+    .modal-head,
+    .modal-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px;
+      background: #fff;
+    }
+
+    .modal-head {
+      border-bottom: 1px solid var(--line);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .modal-title-group {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .modal-title {
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .modal-summary {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .modal-close {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 8px;
+      background: #f5f7fa;
+      color: #7a8795;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 30px;
+    }
+
+    .modal-body {
+      padding: 16px 18px;
+      overflow: auto;
+      background: #fbfcfe;
+    }
+
+    .modal-table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(32, 45, 59, .06);
+    }
+
+    .modal-table-wrap table {
+      min-width: 820px;
+    }
+
+    .template-choice-wrap {
+      position: relative;
+      display: inline-grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .template-check,
+    .template-check-all {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .template-choice {
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border: 1.5px solid #cfd8e3;
+      border-radius: 50% !important;
+      display: inline-grid;
+      place-items: center;
+      pointer-events: none;
+    }
+
+    .template-check:checked + .template-choice,
+    .template-check-all:checked + .template-choice,
+    .template-check-all:indeterminate + .template-choice {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .template-check:checked + .template-choice::after,
+    .template-check-all:checked + .template-choice::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .template-check-all:indeterminate + .template-choice::after {
+      content: "";
+      width: 8px;
+      height: 2px;
+      border-radius: 2px;
+      background: #fff;
+    }
+
+    .modal-foot {
+      justify-content: flex-end;
+      border-top: 1px solid var(--line);
+    }
+
+    .modal-foot .btn {
+      min-width: 86px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      background: #192533;
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(70px);
+      transition: all .18s ease;
+      font-size: 13px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=no-stickers">
+  <style>
+    .tag.lineup-ok {
+      color: #fff !important;
+      background: #C98C2E !important;
+      border-color: #C98C2E !important;
+    }
+
+    .tag.lineup-wait {
+      color: #fff !important;
+      background: #F05359 !important;
+      border-color: #F05359 !important;
+    }
+
+    .filter-band .filters {
+      flex-wrap: wrap !important;
+      overflow-x: visible !important;
+      white-space: normal !important;
+      align-items: center !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" id="matchMenuToggle" type="button">
+          <span>赛事管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item active" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" id="roomMenuToggle" type="button">
+          <span>房间管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button">
+          <span>运营管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button">
+          <span>赛事注单</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+      <header class="topbar">
+        <div class="crumbs">
+          <span class="menu-icon">≡</span>
+          <strong>首页</strong>
+          <span>/</span>
+          <span>赛事管理</span>
+          <span>/</span>
+          <span>赛事列表</span>
+        </div>
+        <button class="module-btn">板球</button>
+      </header>
+
+      <nav class="tabs">
+        <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+        <span class="tab active"><a class="tab-link" href="match-list-admin.html">赛事列表</a><button class="tab-close" type="button" aria-label="关闭赛事列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="bet-order-list-admin.html">注单列表</a><button class="tab-close" type="button" aria-label="关闭注单列表">×</button></span>
+        </nav>
+
+      <section class="filter-band">
+        <div class="filters">
+          <label class="filter-item">
+            <span class="label">运动类型</span>
+            <select class="field" id="sportFilter">
+              <option value="">请选择运动类型</option>
+              <option value="cricket">板球</option>
+              <option value="football">足球</option>
+            </select>
+          </label>
+          <label class="filter-item">
+            <span class="label">联赛ID</span>
+            <input class="field" id="competitionId" placeholder="请输入联赛ID">
+          </label>
+          <label class="filter-item">
+            <span class="label">联赛名称</span>
+            <input class="field" id="competitionName" placeholder="请输入联赛名称">
+          </label>
+          <label class="filter-item">
+            <span class="label">比赛ID</span>
+            <input class="field" id="matchId" placeholder="请输入比赛ID">
+          </label>
+          <label class="filter-item">
+            <span class="label">比赛名称</span>
+            <input class="field" id="matchName" placeholder="请输入比赛名称">
+          </label>
+          <label class="filter-item">
+            <span class="label">阵容是否确定</span>
+            <select class="field" id="lineupFilter">
+              <option value="">请选择阵容确定状态</option>
+              <option value="yes">已确定</option>
+              <option value="no">未确定</option>
+            </select>
+          </label>
+          <label class="filter-item">
+            <span class="label">是否创建房间</span>
+            <select class="field" id="roomFilter">
+              <option value="">请选择是否创建房间</option>
+              <option value="yes">是</option>
+              <option value="no">否</option>
+            </select>
+          </label>
+          <label class="filter-item">
+            <span class="label">前端是否展示</span>
+            <select class="field" id="displayFilter">
+              <option value="">请选择前端展示状态</option>
+              <option value="show">展示</option>
+              <option value="hide">不展示</option>
+            </select>
+          </label>
+          <label class="filter-item date">
+            <span class="label">开赛时间</span>
+            <input class="field" id="dateRange" placeholder="开赛开始  -  开赛结束">
+          </label>
+          <label class="filter-item">
+            <span class="label">比赛状态</span>
+            <select class="field" id="statusFilter">
+              <option value="">请选择比赛状态</option>
+              <option value="未开始">未开始</option>
+              <option value="报名中">报名中</option>
+              <option value="比赛中">比赛中</option>
+              <option value="待结算">待结算</option>
+              <option value="已结算">已结算</option>
+              <option value="已下架">已下架</option>
+            </select>
+          </label>
+          <div class="filter-actions">
+            <button class="btn primary" id="searchBtn">搜索</button>
+            <button class="btn" id="resetBtn">重置</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="toolbar">
+        <button class="pill-btn blue bulk-action disabled" id="autoRoomBtn" disabled>添加到自动创建房间</button>
+        <button class="pill-btn green bulk-action display-bulk-action disabled" id="bulkShowBtn" disabled>开启前端展示</button>
+        <button class="pill-btn orange bulk-action display-bulk-action disabled" id="bulkHideBtn" disabled>关闭前端展示</button>
+        <button class="pill-btn green bulk-action disabled" disabled>上架</button>
+        <button class="pill-btn orange bulk-action disabled" disabled>下架</button>
+      </section>
+
+      <section class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><input class="check" type="checkbox" id="selectAll"></th>
+              <th>序号</th>
+              <th>商户ID</th>
+              <th>商户名</th>
+              <th>运动类型</th>
+              <th>联赛ID</th>
+              <th>联赛名称</th>
+              <th>赛制类型</th>
+              <th>比赛ID</th>
+              <th>比赛名称</th>
+              <th>主队</th>
+              <th>客队</th>
+              <th>开赛时间</th>
+              <th>完赛时间</th>
+              <th>阵容确定状态</th>
+              <th>比赛状态</th>
+              <th>是否自动创建房间</th>
+              <th>前端展示</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </section>
+
+      <footer class="summary">
+        <div class="pager-left">
+          <span id="countText">共 0 条数据</span>
+          <select class="page-size" aria-label="每页条数">
+            <option>10条/页</option>
+            <option selected>20条/页</option>
+            <option>50条/页</option>
+          </select>
+        </div>
+        <div class="pager-center">
+          <button class="page-btn ghost" type="button">‹</button>
+          <button class="page-btn active" type="button">1</button>
+          <button class="page-btn" type="button">2</button>
+          <button class="page-btn" type="button">3</button>
+          <button class="page-btn" type="button">4</button>
+          <button class="page-btn" type="button">5</button>
+          <button class="page-btn" type="button">6</button>
+          <span class="page-ellipsis">•••</span>
+          <button class="page-btn" type="button">136</button>
+          <button class="page-btn ghost" type="button">›</button>
+        </div>
+        <div class="pager-right">
+          <span>前往</span>
+          <input class="goto-input" value="1" aria-label="前往页码">
+          <span>页</span>
+        </div>
+      </footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="autoRoomModal">
+    <section class="modal">
+      <div class="modal-head">
+        <div class="modal-title-group">
+          <span class="modal-title">选择房间模板</span>
+          <span class="modal-summary" id="autoRoomModalSummary">已选择 0 个模板</span>
+        </div>
+        <button class="modal-close" type="button" id="closeAutoRoomModal" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  <label class="template-choice-wrap" aria-label="全选模板">
+                    <input class="template-check-all" type="checkbox" id="templateSelectAll">
+                    <span class="template-choice"></span>
+                  </label>
+                </th>
+                <th>序号</th>
+                <th>模板ID</th>
+                <th>模板名称</th>
+                <th>玩法类型</th>
+                <th>报名费</th>
+                <th>最大参赛人数</th>
+                <th>最低开赛人数</th>
+                <th>每用户最大队伍数</th>
+                <th>抽水比例</th>
+              </tr>
+            </thead>
+            <tbody id="templateRows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn primary" type="button" id="confirmAutoRoom">确定（已选 0 个）</button>
+        <button class="btn" type="button" id="cancelAutoRoom">取消</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">已操作</div>
+
+  <script>
+    const matchStatuses = ["未开始", "报名中", "比赛中", "待结算", "已结算", "已下架"];
+
+    const matches = [
+      ["96164", "Gloucestershire vs Surrey", "Gloucestershire", "Surrey", "2026-07-05 02:00:00", "2026-07-05 12:00:00", "no", "no", "hide"],
+      ["96161", "Sussex vs Essex", "Sussex", "Essex", "2026-07-04 02:00:00", "2026-07-04 12:00:00", "no", "no", "hide"],
+      ["96160", "Yorkshire vs Durham", "Yorkshire", "Durham", "2026-07-04 01:30:00", "2026-07-04 11:30:00", "no", "no", "hide"],
+      ["96159", "Nottinghamshire vs Lancashire", "Nottinghamshire", "Lancashire", "2026-07-04 01:30:00", "2026-07-04 11:30:00", "no", "no", "hide"],
+      ["96158", "Glamorgan vs Warwickshire", "Glamorgan", "Warwickshire", "2026-07-04 01:30:00", "2026-07-04 11:30:00", "no", "no", "hide"],
+      ["96157", "Worcestershire vs Kent", "Worcestershire", "Kent", "2026-07-04 00:30:00", "2026-07-04 10:30:00", "no", "no", "hide"],
+      ["96156", "Gloucestershire vs Northamptonshire", "Gloucestershire", "Northamptonshire", "2026-07-02 02:00:00", "2026-07-02 12:00:00", "no", "no", "show"],
+      ["96155", "Essex vs Surrey", "Essex", "Surrey", "2026-07-02 02:00:00", "2026-07-02 12:00:00", "no", "no", "show"],
+      ["96154", "Warwickshire vs Sussex", "Warwickshire", "Sussex", "2026-07-02 02:00:00", "2026-07-02 12:00:00", "no", "no", "show"],
+      ["96153", "Derbyshire vs Lancashire", "Derbyshire", "Lancashire", "2026-07-02 01:30:00", "2026-07-02 11:30:00", "no", "no", "show"],
+      ["96152", "Kent vs Hampshire", "Kent", "Hampshire", "2026-06-28 22:30:00", "2026-06-29 08:30:00", "no", "no", "show"],
+      ["96151", "Worcestershire vs Somerset", "Worcestershire", "Somerset", "2026-06-28 21:30:00", "2026-06-29 07:30:00", "no", "no", "show"],
+      ["96150", "Middlesex vs Essex", "Middlesex", "Essex", "2026-06-28 20:00:00", "2026-06-29 06:00:00", "yes", "yes", "show"],
+      ["96149", "Durham vs Lancashire", "Durham", "Lancashire", "2026-06-27 02:00:00", "2026-06-27 12:00:00", "yes", "yes", "show"],
+      ["96148", "Surrey vs Hampshire", "Surrey", "Hampshire", "2026-06-27 01:30:00", "2026-06-27 11:30:00", "yes", "no", "hide"],
+      ["96147", "Leicestershire vs Nottinghamshire", "Leicestershire", "Nottinghamshire", "2026-06-26 23:00:00", "2026-06-27 09:00:00", "yes", "yes", "hide"],
+      ["96146", "Somerset vs Gloucestershire", "Somerset", "Gloucestershire", "2026-06-26 22:30:00", "2026-06-27 08:30:00", "no", "yes", "show"],
+      ["96145", "Hampshire vs Kent", "Hampshire", "Kent", "2026-06-26 21:30:00", "2026-06-27 07:30:00", "yes", "no", "show"],
+      ["96144", "Lancashire vs Durham", "Lancashire", "Durham", "2026-06-25 02:00:00", "2026-06-25 12:00:00", "no", "yes", "hide"],
+      ["96143", "Essex vs Middlesex", "Essex", "Middlesex", "2026-06-25 01:30:00", "2026-06-25 11:30:00", "yes", "yes", "show"]
+    ].map((row, index) => ({
+      index: index + 1,
+      merchantId: "000000",
+      merchantName: "XXX有限公司",
+      sportType: index % 6 === 5 ? "football" : "cricket",
+      competitionId: "129953",
+      competitionName: "Vitality Blast",
+      format: "T20",
+      matchId: row[0],
+      matchName: row[1],
+      home: row[2],
+      away: row[3],
+      start: row[4],
+      end: row[5],
+      lineup: row[6],
+      autoRoom: row[7],
+      display: row[8],
+      status: matchStatuses[index % matchStatuses.length]
+    }));
+
+    const roomTemplates = [
+      [8, "sake 3duiwu", "Mega Contest", "10.00", 100, 20, 5, "10.00%"],
+      [7, "test333", "Winner Take All", "8.00", 100, 2, 1, "10.00%"],
+      [6, "1234", "Mega Contest", "9.00", 100, 2, 1, "10.00%"],
+      [5, "xxx", "High Rewards", "111.00", 100, 2, 1, "10.00%"],
+      [4, "two", "Head-to-Head", "50.00", 2, 2, 1, "10.00%"],
+      [3, "2 Winners", "2 Winners", "15.00", 120, 2, 2, "10.00%"],
+      [2, "10人", "4X or Nothing", "20.00", 20, 18, 2, "10.00%"],
+      [1, "热门-001", "Mega Contest", "10.00", 100, 50, 4, "10.00%"]
+    ].map((row, index) => ({
+      index: index + 1,
+      templateId: row[0],
+      templateName: row[1],
+      playType: row[2],
+      fee: row[3],
+      max: row[4],
+      min: row[5],
+      maxTeams: row[6],
+      rake: row[7]
+    }));
+
+    let selectedTemplateIds = [];
+
+    const filters = {
+      competitionId: "",
+      competitionName: "",
+      matchId: "",
+      matchName: "",
+      sportType: "",
+      room: "",
+      lineup: "",
+      display: "",
+      dateRange: "",
+      status: ""
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function filteredMatches() {
+      return matches.filter((m) => {
+        const cId = !filters.competitionId || m.competitionId.includes(filters.competitionId);
+        const cName = !filters.competitionName || m.competitionName.toLowerCase().includes(filters.competitionName.toLowerCase());
+        const mId = !filters.matchId || m.matchId.includes(filters.matchId);
+        const mName = !filters.matchName || m.matchName.toLowerCase().includes(filters.matchName.toLowerCase());
+        const sportType = !filters.sportType || m.sportType === filters.sportType;
+        const room = !filters.room || m.autoRoom === filters.room;
+        const lineup = !filters.lineup || m.lineup === filters.lineup;
+        const display = !filters.display || m.display === filters.display;
+        const status = !filters.status || m.status === filters.status;
+        return cId && cName && mId && mName && sportType && room && lineup && display && status;
+      });
+    }
+
+    function yesNo(value) {
+      return value === "yes" ? "是" : "否";
+    }
+
+    function statusClass(status) {
+      if (status === "未开始") return "blue";
+      if (status === "报名中") return "green";
+      if (status === "比赛中") return "orange";
+      if (status === "待结算") return "lineup-wait";
+      if (status === "已结算") return "gray";
+      if (status === "已下架") return "red";
+      return "gray";
+    }
+
+    function sportText(type) {
+      return type === "football" ? "足球" : "板球";
+    }
+
+    function selectedMatches() {
+      const selectedIds = Array.from(document.querySelectorAll(".row-check:checked")).map((input) => input.dataset.matchId);
+      return matches.filter((item) => selectedIds.includes(item.matchId));
+    }
+
+    function setButtonState(button, active) {
+      button.disabled = !active;
+      button.classList.toggle("disabled", !active);
+      button.setAttribute("aria-disabled", String(!active));
+    }
+
+    function updateToolbarState() {
+      const selected = selectedMatches();
+      const hasSelected = selected.length > 0;
+      const hasHidden = selected.some((item) => item.display === "hide");
+      const hasShown = selected.some((item) => item.display === "show");
+      document.querySelectorAll(".bulk-action:not(.display-bulk-action)").forEach((button) => {
+        setButtonState(button, hasSelected);
+      });
+      setButtonState(el("bulkShowBtn"), hasHidden);
+      setButtonState(el("bulkHideBtn"), hasShown);
+    }
+
+    function setSelectedDisplay(targetDisplay) {
+      const selected = selectedMatches();
+      const sourceDisplay = targetDisplay === "show" ? "hide" : "show";
+      const changed = selected.filter((item) => item.display === sourceDisplay);
+      if (!changed.length) return;
+      changed.forEach((item) => {
+        item.display = targetDisplay;
+      });
+      renderRows();
+      showToast(targetDisplay === "show" ? `已开启 ${changed.length} 场赛事前端展示` : `已关闭 ${changed.length} 场赛事前端展示`);
+    }
+
+    function renderTemplateRows() {
+      el("templateRows").innerHTML = roomTemplates.map((item) => `
+        <tr>
+          <td>
+            <label class="template-choice-wrap">
+              <input class="template-check" type="checkbox" value="${item.templateId}" ${selectedTemplateIds.includes(String(item.templateId)) ? "checked" : ""}>
+              <span class="template-choice"></span>
+            </label>
+          </td>
+          <td>${item.index}</td>
+          <td>${item.templateId}</td>
+          <td>${item.templateName}</td>
+          <td><span class="tag gray">${item.playType}</span></td>
+          <td>${item.fee}</td>
+          <td>${item.max}</td>
+          <td>${item.min}</td>
+          <td>${item.maxTeams}</td>
+          <td>${item.rake}</td>
+        </tr>
+      `).join("");
+      document.querySelectorAll(".template-check").forEach((input) => {
+        input.addEventListener("change", () => {
+          selectedTemplateIds = Array.from(document.querySelectorAll(".template-check:checked")).map((item) => item.value);
+          updateAutoRoomModalState();
+        });
+      });
+      el("templateSelectAll").checked = selectedTemplateIds.length === roomTemplates.length;
+      updateAutoRoomModalState();
+    }
+
+    function updateAutoRoomModalState() {
+      const count = selectedTemplateIds.length;
+      el("templateSelectAll").checked = count === roomTemplates.length;
+      el("templateSelectAll").indeterminate = count > 0 && count < roomTemplates.length;
+      el("autoRoomModalSummary").textContent = `已选择 ${count} 个模板`;
+      el("confirmAutoRoom").textContent = `确定（已选 ${count} 个）`;
+      el("confirmAutoRoom").disabled = count === 0;
+      el("confirmAutoRoom").classList.toggle("disabled", count === 0);
+    }
+
+    function openAutoRoomModal() {
+      if (!selectedMatches().length) {
+        showToast("请先选择比赛");
+        return;
+      }
+      selectedTemplateIds = [];
+      renderTemplateRows();
+      el("autoRoomModal").classList.add("open");
+    }
+
+    function closeAutoRoomModal() {
+      el("autoRoomModal").classList.remove("open");
+    }
+
+    function confirmAutoRoom() {
+      if (!selectedTemplateIds.length) {
+        showToast("请先选择房间模板");
+        return;
+      }
+      const selected = selectedMatches();
+      selected.forEach((item) => {
+        item.autoRoom = "yes";
+      });
+      closeAutoRoomModal();
+      renderRows();
+      showToast(`已添加 ${selected.length} 场比赛到自动创建房间`);
+    }
+
+    function renderRows() {
+      const rows = filteredMatches();
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("selectAll").checked = false;
+      el("rows").innerHTML = rows.map((m) => `
+        <tr>
+          <td><input class="check row-check" type="checkbox" data-match-id="${m.matchId}"></td>
+          <td>${m.index}</td>
+          <td class="muted">${m.merchantId}</td>
+          <td>${m.merchantName}</td>
+          <td><span class="tag ${m.sportType === "football" ? "blue" : "green"}">${sportText(m.sportType)}</span></td>
+          <td>${m.competitionId}</td>
+          <td>${m.competitionName}</td>
+          <td>${m.format}</td>
+          <td>${m.matchId}</td>
+          <td class="name-cell" title="${m.matchName}">${m.matchName}</td>
+          <td>${m.home}</td>
+          <td>${m.away}</td>
+          <td>${m.start}</td>
+          <td>${m.end}</td>
+          <td><span class="tag ${m.lineup === "yes" ? "lineup-ok" : "lineup-wait"}">${m.lineup === "yes" ? "已确定" : "未确定"}</span></td>
+          <td><span class="tag ${statusClass(m.status)}">${m.status}</span></td>
+          <td><span class="tag ${m.autoRoom === "yes" ? "room-yes" : "room-no"}">${yesNo(m.autoRoom)}</span></td>
+          <td><span class="tag ${m.display === "show" ? "display-show" : "display-hide"}">${m.display === "show" ? "展示" : "不展示"}</span></td>
+          <td>
+            <a class="op detail" href="match-detail-admin.html">详情</a>
+            <button class="op display-toggle ${m.display === "show" ? "orange" : "green"}" data-match-id="${m.matchId}">${m.display === "show" ? "关闭展示" : "开启展示"}</button>
+          </td>
+        </tr>
+      `).join("") || `<tr><td colspan="19">暂无匹配赛事</td></tr>`;
+      document.querySelectorAll(".display-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+          const match = matches.find((item) => item.matchId === button.dataset.matchId);
+          if (!match) return;
+          match.display = match.display === "show" ? "hide" : "show";
+          renderRows();
+          showToast(match.display === "show" ? "已开启前端展示" : "已关闭前端展示");
+        });
+      });
+      document.querySelectorAll(".row-check").forEach((input) => {
+        input.addEventListener("change", () => {
+          const checks = Array.from(document.querySelectorAll(".row-check"));
+          el("selectAll").checked = checks.length > 0 && checks.every((item) => item.checked);
+          updateToolbarState();
+        });
+      });
+      updateToolbarState();
+    }
+
+    function bind() {
+      const inputMap = [
+        ["competitionId", "competitionId"],
+        ["competitionName", "competitionName"],
+        ["matchId", "matchId"],
+        ["matchName", "matchName"],
+        ["dateRange", "dateRange"]
+      ];
+      inputMap.forEach(([id, key]) => {
+        el(id).addEventListener("input", (event) => {
+          filters[key] = event.target.value;
+        });
+      });
+      el("roomFilter").addEventListener("input", (event) => filters.room = event.target.value);
+      el("lineupFilter").addEventListener("input", (event) => filters.lineup = event.target.value);
+      el("displayFilter").addEventListener("input", (event) => filters.display = event.target.value);
+      el("sportFilter").addEventListener("input", (event) => filters.sportType = event.target.value);
+      el("statusFilter").addEventListener("input", (event) => filters.status = event.target.value);
+      el("searchBtn").addEventListener("click", renderRows);
+      el("resetBtn").addEventListener("click", () => {
+        Object.keys(filters).forEach((key) => filters[key] = "");
+        [...inputMap.map(([id]) => id), "sportFilter", "lineupFilter", "roomFilter", "displayFilter", "statusFilter"].forEach((id) => el(id).value = "");
+        renderRows();
+      });
+      el("selectAll").addEventListener("change", (event) => {
+        document.querySelectorAll(".row-check").forEach((input) => input.checked = event.target.checked);
+        updateToolbarState();
+      });
+      document.querySelectorAll(".bulk-action").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (button.disabled || button.classList.contains("disabled")) return;
+          if (button.id === "autoRoomBtn") {
+            openAutoRoomModal();
+            return;
+          }
+          if (button.id === "bulkShowBtn") {
+            setSelectedDisplay("show");
+            return;
+          }
+          if (button.id === "bulkHideBtn") {
+            setSelectedDisplay("hide");
+            return;
+          }
+          showToast(button.textContent.trim() + " 已提交");
+        });
+      });
+      el("closeAutoRoomModal").addEventListener("click", closeAutoRoomModal);
+      el("cancelAutoRoom").addEventListener("click", closeAutoRoomModal);
+      el("confirmAutoRoom").addEventListener("click", confirmAutoRoom);
+      el("templateSelectAll").addEventListener("change", (event) => {
+        selectedTemplateIds = event.target.checked ? roomTemplates.map((item) => String(item.templateId)) : [];
+        renderTemplateRows();
+      });
+      document.querySelectorAll(".tab-close").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.closest(".tab").remove();
+        });
+      });
+      bindSidebarAccordion();
+    }
+
+    function bindSidebarAccordion() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      const closeOthers = (activeSection) => {
+        sections.forEach((section) => {
+          if (section !== activeSection) section.classList.add("collapsed");
+        });
+      };
+      sections.forEach((section) => {
+        const toggle = section.querySelector(".menu-title");
+        toggle.addEventListener("click", () => {
+          const willOpen = section.classList.contains("collapsed");
+          section.classList.toggle("collapsed");
+          if (willOpen) closeOthers(section);
+        });
+      });
+      document.querySelectorAll(".submenu-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const activeSection = item.closest(".menu-section");
+          activeSection.classList.remove("collapsed");
+          closeOthers(activeSection);
+        });
+      });
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      if (activeSection) {
+        activeSection.classList.remove("collapsed");
+        closeOthers(activeSection);
+      }
+    }
+
+    renderRows();
+    bind();
+  </script>
+</body>
+</html>

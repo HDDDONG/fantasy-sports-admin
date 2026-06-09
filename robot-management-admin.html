@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 机器人管理</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #fff;
+      --text: #26313d;
+      --muted: #7a8795;
+      --line: #e2e8f0;
+      --line-strong: #cdd7e3;
+      --blue: #2f8df5;
+      --green: #67bd51;
+      --orange: #f3a946;
+      --red: #d65a5a;
+      --shadow: 0 6px 18px rgba(32, 45, 59, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+    button, input, select { font: inherit; }
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { background: #172331; color: #dbe6ef; border-right: 1px solid #0f1823; padding: 16px 12px; }
+    .brand { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 12px; }
+    .brand-text strong { display: block; font-size: 14px; line-height: 18px; color: #fff; }
+    .brand-text span { display: block; color: #93a5b6; font-size: 12px; line-height: 16px; }
+    .menu-section { display: grid; gap: 4px; margin-bottom: 8px; }
+    .menu-title { height: 38px; border-radius: 8px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 0 10px; color: #f4f8fb; background: #203244; font-weight: 800; font-size: 14px; border: 0; width: 100%; cursor: pointer; text-align: left; }
+    .menu-title::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(47,141,245,.16); }
+    .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
+    .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
+    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 128px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
+    .menu-section.collapsed .submenu { max-height: 0; opacity: 0; padding-top: 0; transform: translateY(-6px); pointer-events: none; }
+    .submenu-item { height: 34px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; color: #b9c8d5; text-decoration: none; font-size: 13px; }
+    .submenu-item.active { color: #fff; background: var(--blue); box-shadow: 0 6px 14px rgba(47,141,245,.22); }
+
+    .shell { min-width: 0; min-height: 100vh; padding: 14px 18px 24px; background: linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px), var(--bg); }
+    .frame { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .topbar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fbfdff; }
+    .crumbs { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .menu-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #4f5c68; font-weight: 800; font-size: 18px; }
+    .module-btn { height: 26px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: #607080; cursor: pointer; font-size: 12px; }
+    .tabs { height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 16px; border-bottom: 1px solid var(--line); background: #fff; overflow-x: auto; }
+    .tab { height: 24px; border-radius: 13px; border: 1px solid var(--line); background: #fff; padding: 0 8px 0 12px; color: #657386; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; flex: 0 0 auto; }
+    .tab-link { color: inherit; text-decoration: none; line-height: 22px; }
+    .tab-close { width: 16px; height: 16px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; display: inline-grid; place-items: center; padding: 0; font-size: 12px; line-height: 16px; }
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .section-tabs, .sub-tabs { display: flex; align-items: center; gap: 18px; height: 44px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fff; }
+    .section-tab, .sub-tab { height: 44px; border: 0; background: transparent; color: #4f5c68; font-size: 13px; font-weight: 800; cursor: pointer; border-bottom: 2px solid transparent; }
+    .section-tab.active, .sub-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .sub-tabs { gap: 8px; height: 42px; padding-top: 8px; align-items: flex-start; }
+    .sub-tab { height: 32px; padding: 0 16px; border: 1px solid var(--line); border-radius: 0; background: #fff; color: #566374; }
+    .sub-tab.active { color: var(--blue); background: #f3f8ff; border-color: #d3e7ff; border-bottom-color: #d3e7ff; }
+    .filter-band { padding: 14px 18px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+    .filters { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 18px; }
+    .label { color: #5b6775; font-weight: 700; font-size: 11px; text-align: right; white-space: nowrap; }
+    .filter-item { display: grid; grid-template-columns: auto 160px; align-items: center; gap: 8px; min-width: max-content; }
+    .filter-item.date { grid-template-columns: auto 220px; }
+    .filter-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+    .field { height: 30px; border: 1px solid var(--line-strong); background: #fff; border-radius: 7px; padding: 0 10px; min-width: 0; color: var(--text); outline: none; font-size: 12px; }
+    .field::placeholder { color: #b3beca; font-size: 12px; }
+    .btn { height: 30px; border: 1px solid var(--line-strong); background: #fff; color: var(--text); border-radius: 7px; padding: 0 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-size: 12px; }
+    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 5px 12px rgba(47, 141, 245, .2); }
+    .metric-band { display: none; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 0; padding: 14px 18px; border-bottom: 1px solid var(--line); background: #fff; }
+    .metric-band.show { display: grid; }
+    .metric { min-height: 54px; padding: 0 14px; border-right: 1px solid var(--line); display: grid; align-content: center; gap: 6px; }
+    .metric:last-child { border-right: 0; }
+    .metric span { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .metric strong { color: #4f5c68; font-size: 20px; font-weight: 700; letter-spacing: 0; }
+    .toolbar { padding: 14px 18px 12px; background: #fff; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+    .pill-btn { height: 30px; border: 1px solid transparent; border-radius: 8px; padding: 0 14px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .pill-btn.blue { background: #eaf4ff; color: var(--blue); border-color: #c7e0ff; }
+    .pill-btn.gray { background: #eef2f6; color: #64748b; border-color: #d8e0ea; }
+    .table-wrap { max-width: 100%; padding: 0 18px 18px; background: #fff; overflow: auto; max-height: calc(100vh - 344px); }
+    table { width: 100%; border-collapse: collapse; min-width: 2940px; font-size: 12px; }
+    .table-wrap.medium-table table { min-width: 1880px; }
+    .table-wrap.fit-screen { overflow-x: hidden; }
+    .table-wrap.fit-screen table { min-width: 100%; table-layout: fixed; }
+    .table-wrap.fit-screen th,
+    .table-wrap.fit-screen td { padding: 8px 6px; white-space: normal; line-height: 1.35; word-break: break-word; }
+    .table-wrap.fit-screen .tag { min-width: 42px; padding: 0 6px; }
+    .table-wrap.fit-screen .op { padding: 0 4px; }
+    .table-wrap.team-config table { table-layout: fixed; }
+    .table-wrap.placeholder-config table { table-layout: fixed; }
+    .table-wrap.team-config .col-seq { width: 42px; }
+    .table-wrap.team-config .col-id { width: 58px; }
+    .table-wrap.team-config .col-name { width: 112px; }
+    .table-wrap.team-config .col-room-id { width: 122px; }
+    .table-wrap.team-config .col-room-name { width: 178px; }
+    .table-wrap.team-config .col-number { width: 66px; }
+    .table-wrap.team-config .col-strategy { width: 58px; }
+    .table-wrap.team-config .col-rate { width: 70px; }
+    .table-wrap.team-config .col-status { width: 70px; }
+    .table-wrap.team-config .col-time { width: 120px; }
+    .table-wrap.team-config .col-actions { width: 138px; }
+    .table-wrap.placeholder-config .col-seq { width: 42px; }
+    .table-wrap.placeholder-config .col-id { width: 58px; }
+    .table-wrap.placeholder-config .col-name { width: 108px; }
+    .table-wrap.placeholder-config .col-room-id { width: 128px; }
+    .table-wrap.placeholder-config .col-room-name { width: 190px; }
+    .table-wrap.placeholder-config .col-number { width: 70px; }
+    .table-wrap.placeholder-config .col-long-number { width: 86px; }
+    .table-wrap.placeholder-config .col-type { width: 66px; }
+    .table-wrap.placeholder-config .col-status { width: 66px; }
+    .table-wrap.placeholder-config .col-time { width: 120px; }
+    .table-wrap.placeholder-config .col-actions { width: 138px; }
+    .table-wrap.team-config th,
+    .table-wrap.team-config td,
+    .table-wrap.placeholder-config th,
+    .table-wrap.placeholder-config td { white-space: nowrap; word-break: normal; }
+    .table-wrap.team-config .cell-name,
+    .table-wrap.team-config .cell-room-name,
+    .table-wrap.placeholder-config .cell-name,
+    .table-wrap.placeholder-config .cell-room-name { overflow: hidden; text-overflow: ellipsis; }
+    .table-wrap.team-config .cell-actions,
+    .table-wrap.placeholder-config .cell-actions { white-space: normal; line-height: 1.55; }
+    th, td { border: 1px solid var(--line); padding: 9px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #566374; font-weight: 800; }
+    tbody tr:hover td { background: #fbfdff; }
+    .muted { color: var(--muted); }
+    .link { color: var(--blue); font-weight: 800; text-decoration: none; }
+    .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; height: 23px; padding: 0 8px; border-radius: 6px; font-size: 12px; border: 1px solid transparent; font-weight: 800; }
+    .tag.green { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.red { color: #9f3030; background: #ffd2d2; border-color: #ea8b8b; }
+    .tag.orange { color: #9c5c0d; background: #ffe6bd; border-color: #f5c070; }
+    .tag.gray { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .op { border: 0; background: transparent; padding: 0 7px; font-weight: 800; cursor: pointer; color: var(--blue); }
+    .summary { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: #fbfcfe; }
+    .pager-left, .pager-center, .pager-right { display: flex; align-items: center; gap: 8px; }
+    .page-size, .goto-input { height: 30px; border: 1px solid var(--line); background: #fff; border-radius: 8px; color: #657386; font-size: 12px; text-align: center; }
+    .page-size { width: 96px; padding: 0 10px; text-align: left; }
+    .goto-input { width: 52px; }
+    .page-btn { min-width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc; color: #657386; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 10px rgba(47,141,245,.22); }
+    .page-btn.ghost { color: #a8b3bf; background: #f3f6fa; }
+    .page-ellipsis { color: #657386; font-weight: 800; padding: 0 2px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #192533; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0; transform: translateY(70px); transition: all .18s ease; font-size: 13px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=sport-sticker-overlay">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" type="button"><span>赛事管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" type="button"><span>房间管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button"><span>运营管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item active" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button">
+          <span>赛事注单</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+        <header class="topbar">
+          <div class="crumbs"><span class="menu-icon">≡</span><strong>首页</strong><span>/</span><span>运营管理</span><span>/</span><span>机器人管理</span></div>
+          <button class="module-btn">板球</button>
+        </header>
+
+        <nav class="tabs">
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">赛事列表</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="match-recommend-admin.html">赛事推荐</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-list-admin.html">房间列表</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-template-admin.html">模板管理</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-play-type-admin.html">玩法类型</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="banner-config-admin.html">BANNER配置</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="recommended-team-admin.html">推荐队伍</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab active"><a class="tab-link" href="robot-management-admin.html">机器人管理</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="bet-order-list-admin.html">注单列表</a><button class="tab-close" type="button" aria-label="关闭注单列表">×</button></span>
+        </nav>
+
+        <div class="section-tabs">
+          <button class="section-tab active">机器人列表</button>
+          <button class="section-tab">机器人占位配置</button>
+          <button class="section-tab">机器人队伍配置</button>
+        </div>
+        <div class="sub-tabs">
+          <button class="sub-tab active">机器人队伍明细</button>
+          <button class="sub-tab">机器人统计</button>
+          <button class="sub-tab">房间维度统计</button>
+          <button class="sub-tab">赛事维度统计</button>
+        </div>
+
+        <section class="filter-band">
+          <div class="filters">
+            <label class="filter-item"><span class="label">机器人ID</span><input class="field" id="robotId" placeholder="请输入机器人ID"></label>
+            <label class="filter-item"><span class="label">赛事ID</span><input class="field" id="matchId" placeholder="请输入赛事ID"></label>
+            <label class="filter-item"><span class="label">模板ID</span><input class="field" id="templateId" placeholder="请输入模板ID"></label>
+            <label class="filter-item"><span class="label">模板名称</span><input class="field" id="templateName" placeholder="请输入模板名称"></label>
+            <label class="filter-item"><span class="label">房间ID</span><input class="field" id="roomId" placeholder="请输入房间ID"></label>
+            <label class="filter-item"><span class="label">机器人队伍ID</span><input class="field" id="robotTeamId" placeholder="请输入队伍ID"></label>
+            <label class="filter-item"><span class="label">参考用户ID</span><input class="field" id="userId" placeholder="请输入用户ID"></label>
+            <label class="filter-item"><span class="label">参考用户队伍ID</span><input class="field" id="userTeamId" placeholder="请输入队伍ID"></label>
+            <label class="filter-item"><span class="label">阵容策略包含</span><select class="field" id="strategy"><option value="">请选择阵容策略</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></label>
+            <label class="filter-item"><span class="label">机器人类型</span><select class="field" id="robotType"><option value="">机器人类型</option><option value="template">模板型</option><option value="copy">复制型</option><option value="random">随机型</option></select></label>
+            <label class="filter-item"><span class="label">占位任务来源</span><select class="field" id="taskSource"><option value="">任务来源</option><option value="system">系统规则</option><option value="manual">人工配置</option></select></label>
+            <label class="filter-item"><span class="label">状态</span><select class="field" id="status"><option value="">状态</option><option value="cancelled">已取消</option><option value="joined">已加入</option><option value="pending">待加入</option></select></label>
+            <label class="filter-item date"><span class="label">加入时间</span><input class="field" id="dateRange" placeholder="开始时间  至  结束时间"></label>
+            <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+          </div>
+        </section>
+
+        <section class="metric-band" id="metricBand"></section>
+
+        <section class="toolbar" id="toolbar">
+          <button class="pill-btn blue">新增机器人</button>
+          <button class="pill-btn gray">机器人基础配置</button>
+        </section>
+
+        <section class="table-wrap" id="tableWrap">
+          <table id="dataTable">
+            <thead id="tableHead"></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+
+        <footer class="summary">
+          <div class="pager-left"><span id="countText">共 0 条数据</span><select class="page-size"><option>10条/页</option><option selected>15条/页</option><option>20条/页</option><option>50条/页</option></select></div>
+          <div class="pager-center"><button class="page-btn ghost">‹</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">4</button><button class="page-btn">5</button><button class="page-btn">6</button><span class="page-ellipsis">•••</span><button class="page-btn">136</button><button class="page-btn ghost">›</button></div>
+          <div class="pager-right"><span>前往</span><input class="goto-input" value="1"><span>页</span></div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">已操作</div>
+
+  <script>
+    const robots = Array.from({ length: 20 }, (_, index) => {
+      const templateId = index < 5 ? "8" : index < 12 ? "1" : String(2 + index % 6);
+      const templateName = templateId === "8" ? "sake 3duiwu" : templateId === "1" ? "热门-001" : "Mega 常规";
+      const type = ["template", "copy", "random"][index % 3];
+      const status = ["cancelled", "joined", "pending"][index % 3];
+      return {
+        index: index + 1,
+        robotId: index < 10 ? "" : `RBT${2000 + index}`,
+        matchId: "97165",
+        templateId,
+        templateName,
+        ruleName: index % 2 === 0 ? "最强的队伍" : "最强的队伍_copy",
+        roomId: index < 5 ? "2061993013370552322" : "2061993013353775105",
+        robotTeamId: index % 4 === 0 ? "" : `2062814088804016${String(120 + index).padStart(2, "0")}`,
+        userId: "4kskw9s",
+        userTeamId: "2062814088804016129",
+        strategy: ["A", "B", "C"][index % 3],
+        type,
+        taskSource: index % 5 === 0 ? "manual" : "system",
+        robotSource: index % 4 === 0 ? "系统占位" : "跟入",
+        status,
+        reason: status === "cancelled" ? "加入时间窗口已过" : "-",
+        userJoinAt: `2026/6/5 16:29:${index < 5 ? "57" : "51"}`,
+        robotJoinAt: status === "joined" ? `2026/6/5 16:30:${String(12 + index).padStart(2, "0")}` : "-",
+        delay: status === "joined" ? 15 + index : "-"
+      };
+    });
+
+    const robotStats = Array.from({ length: 20 }, (_, index) => ({
+      index: index + 1,
+      robotId: ["otb1s58t", "4t8oc4dz", "rec859zj", "26thwonn", "wssydw0s", "julh65rr", "dokbiil6v", "1l883uqt", "atbclkdh", "x6iwco5s"][index % 10],
+      type: ["template", "copy", "random"][index % 3],
+      taskStatus: index % 4 === 3 ? "idle" : "competing",
+      currentRooms: 1 + (index % 3),
+      currentTeams: 1 + (index % 2),
+      realtimeAmount: (10 + index * 1.5).toFixed(2),
+      totalStake: index % 5 === 0 ? "0.00" : (index * 12.5).toFixed(2),
+      totalReturn: index % 6 === 0 ? "0.00" : (index * 8.2).toFixed(2),
+      totalYield: index % 6 === 0 ? "0.0000%" : `${(index * 0.38).toFixed(4)}%`,
+      totalRooms: index * 2,
+      totalCreatedTeams: index,
+      totalWonTeams: Math.floor(index / 3),
+      historyYield: index % 5 === 0 ? "0.0000%" : `${(index * 0.22).toFixed(4)}%`,
+      lastTaskAt: `2026-06-05 16:${String(15 + index % 10).padStart(2, "0")}:06`,
+      createdAt: "2026-06-05 15:15:59",
+      status: index % 7 === 6 ? "disabled" : "enabled"
+    }));
+
+    const roomStats = Array.from({ length: 20 }, (_, index) => {
+      const stake = 120 + index * 18;
+      const returnAmount = index % 5 === 0 ? 0 : stake * (0.42 + index % 4 * 0.08);
+      const wonTeams = Math.floor(index / 2);
+      const createdTeams = 4 + index % 8;
+      return {
+        index: index + 1,
+        roomId: index < 8 ? "2061993013370552322" : `20619930133537751${String(20 + index).padStart(2, "0")}`,
+        roomName: ["sake 3duiwu", "热门-001", "Mega 常规", "Winner 常规", "Head-to-Head"][index % 5],
+        roomStatus: ["active", "settled", "cancelled"][index % 3],
+        stakeAmount: stake.toFixed(2),
+        returnAmount: returnAmount.toFixed(2),
+        yieldRate: stake ? `${((returnAmount - stake) / stake * 100).toFixed(4)}%` : "0.0000%",
+        joinedRooms: 1 + index % 5,
+        createdTeams,
+        wonTeams,
+        winRate: createdTeams ? `${(wonTeams / createdTeams * 100).toFixed(4)}%` : "0.0000%",
+        createdAt: `2026-06-${String(3 + index % 6).padStart(2, "0")} 15:${String(10 + index % 20).padStart(2, "0")}:59`
+      };
+    });
+
+    const matchStats = Array.from({ length: 20 }, (_, index) => {
+      const stake = 220 + index * 28;
+      const returnAmount = index % 6 === 0 ? 0 : stake * (0.48 + index % 5 * 0.06);
+      const wonTeams = Math.floor(index / 2) + index % 3;
+      const createdTeams = 6 + index % 9;
+      return {
+        index: index + 1,
+        matchId: ["97165", "96164", "96161", "96160", "96159", "96158"][index % 6],
+        matchName: ["Triumph Knights MNE vs Bandra", "Gloucestershire vs Surrey", "Sussex vs Essex", "Yorkshire vs Durham", "Somerset vs Glamorgan"][index % 5],
+        matchStatus: ["notStarted", "active", "ended", "cancelled"][index % 4],
+        stakeAmount: stake.toFixed(2),
+        returnAmount: returnAmount.toFixed(2),
+        yieldRate: stake ? `${((returnAmount - stake) / stake * 100).toFixed(4)}%` : "0.0000%",
+        joinedRooms: 2 + index % 6,
+        createdTeams,
+        wonTeams,
+        winRate: createdTeams ? `${(wonTeams / createdTeams * 100).toFixed(4)}%` : "0.0000%",
+        startAt: `2026-07-${String(1 + index % 8).padStart(2, "0")} ${String(12 + index % 8).padStart(2, "0")}:00:00`
+      };
+    });
+
+    const placeholderRules = Array.from({ length: 20 }, (_, index) => {
+      const ruleType = index % 3 === 0 ? "multiple" : "count";
+      return {
+        index: index + 1,
+        ruleId: String(1001 + index),
+        ruleName: ["20", "30", "2", "5_copy", "自动占位", "尾盘补位"][index % 6],
+        roomId: index % 2 === 0 ? "2061993013370552322" : "2061993013353775105",
+        roomName: ["sake 3duiwu - Eagle Thane Strikers", "热门-001 - Eagle Thane Strikers", "1234 - Eagle Thane Strikers vs Arcadia"][index % 3],
+        teamMultiple: ruleType === "multiple" ? (2 + index % 4).toFixed(2) : "-",
+        teamCount: ruleType === "count" ? (20 + index % 5 * 5).toFixed(2) : "-",
+        startJoinMinute: index % 4 === 0 ? 120 : 60,
+        endJoinMinute: index % 5 === 0 ? 10 : 0,
+        frequencySeconds: index % 3 === 0 ? 20 : 30,
+        frequencyCount: 1 + index % 5,
+        ruleType,
+        status: index % 7 === 6 ? "disabled" : "enabled",
+        createdAt: `2026/6/5 16:${String(10 + index % 50).padStart(2, "0")}:43`
+      };
+    });
+
+    const teamConfigRules = Array.from({ length: 20 }, (_, index) => {
+      const aggressiveRate = [100, 30, 80, 50][index % 4];
+      const balancedRate = index % 4 === 1 ? 30 : index % 4 === 3 ? 50 : 0;
+      const passiveRate = 100 - aggressiveRate - balancedRate;
+      const targetTeams = 10 + index % 6 * 5;
+      return {
+        index: index + 1,
+        ruleId: String(2001 + index),
+        ruleName: ["最强2", "C+VC", "最强的队伍_copy", "最强的队伍", "均衡补位"][index % 5],
+        roomId: index % 2 === 0 ? "2061993013366358020" : "2061993013370552322",
+        roomName: ["1234 - Eagle Thane Strikers", "热门-001 - Eagle Thane Strikers", "sake 3duiwu - Eagle Thane Strikers"][index % 3],
+        needTeams: index % 5 === 0 ? 0 : targetTeams,
+        templateTeams: index % 4 === 0 ? 0 : 2 + index % 6,
+        strategy: index % 3 === 1 ? "C、VC" : "C",
+        reuseTimes: index % 2 === 0 ? 3 : 10,
+        aggressiveRate: aggressiveRate.toFixed(2),
+        aggressiveTeams: Math.round(targetTeams * aggressiveRate / 100),
+        balancedRate: balancedRate.toFixed(2),
+        balancedTeams: Math.round(targetTeams * balancedRate / 100),
+        passiveRate: passiveRate.toFixed(2),
+        passiveTeams: Math.round(targetTeams * passiveRate / 100),
+        status: index % 6 === 5 ? "disabled" : "enabled",
+        createdAt: `2026/6/5 16:${String(2 + index % 58).padStart(2, "0")}:09`
+      };
+    });
+
+    const filters = { robotId: "", matchId: "", matchName: "", templateId: "", templateName: "", roomId: "", roomName: "", robotTeamId: "", userId: "", userTeamId: "", strategy: "", robotType: "", taskSource: "", ruleName: "", ruleType: "", status: "", dateRange: "" };
+    const el = (id) => document.getElementById(id);
+    const PAGE_SIZE = 15;
+    const typeText = { template: "模板型", copy: "复制型", random: "随机型" };
+    const sourceText = { system: "系统规则", manual: "人工配置" };
+    const statusText = { cancelled: "已取消", joined: "已加入", pending: "待加入" };
+    const robotStatusText = { enabled: "启用", disabled: "停用" };
+    const taskStatusText = { competing: "比赛中", idle: "空闲" };
+    const roomStatusText = { active: "进行中", settled: "已结算", cancelled: "已取消" };
+    const matchStatusText = { notStarted: "未开始", active: "进行中", ended: "已结束", cancelled: "已取消" };
+    const ruleTypeText = { count: "数量", multiple: "倍数" };
+    const placeholderStatusText = { enabled: "启用", disabled: "停用" };
+    let activeMainView = "list";
+    let activeSubView = "detail";
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function filteredRows() {
+      return robots.filter((r) => {
+        const robotId = !filters.robotId || r.robotId.includes(filters.robotId);
+        const matchId = !filters.matchId || r.matchId.includes(filters.matchId);
+        const templateId = !filters.templateId || r.templateId.includes(filters.templateId);
+        const templateName = !filters.templateName || r.templateName.toLowerCase().includes(filters.templateName.toLowerCase());
+        const roomId = !filters.roomId || r.roomId.includes(filters.roomId);
+        const robotTeamId = !filters.robotTeamId || r.robotTeamId.includes(filters.robotTeamId);
+        const userId = !filters.userId || r.userId.includes(filters.userId);
+        const userTeamId = !filters.userTeamId || r.userTeamId.includes(filters.userTeamId);
+        const strategy = !filters.strategy || r.strategy === filters.strategy;
+        const type = !filters.robotType || r.type === filters.robotType;
+        const source = !filters.taskSource || r.taskSource === filters.taskSource;
+        const status = !filters.status || r.status === filters.status;
+        return robotId && matchId && templateId && templateName && roomId && robotTeamId && userId && userTeamId && strategy && type && source && status;
+      });
+    }
+
+    function filteredStats() {
+      return robotStats.filter((r) => {
+        const robotId = !filters.robotId || r.robotId.includes(filters.robotId);
+        const type = !filters.robotType || r.type === filters.robotType;
+        const status = !filters.status || r.status === filters.status || r.taskStatus === filters.status;
+        return robotId && type && status;
+      });
+    }
+
+    function filteredRoomStats() {
+      return roomStats.filter((r) => {
+        const roomId = !filters.roomId || r.roomId.includes(filters.roomId);
+        const roomName = !filters.roomName || r.roomName.toLowerCase().includes(filters.roomName.toLowerCase());
+        const status = !filters.status || r.roomStatus === filters.status;
+        return roomId && roomName && status;
+      });
+    }
+
+    function filteredMatchStats() {
+      return matchStats.filter((r) => {
+        const matchId = !filters.matchId || r.matchId.includes(filters.matchId);
+        const matchName = !filters.matchName || r.matchName.toLowerCase().includes(filters.matchName.toLowerCase());
+        const status = !filters.status || r.matchStatus === filters.status;
+        return matchId && matchName && status;
+      });
+    }
+
+    function filteredPlaceholderRules() {
+      return placeholderRules.filter((r) => {
+        const ruleName = !filters.ruleName || r.ruleName.toLowerCase().includes(filters.ruleName.toLowerCase());
+        const ruleType = !filters.ruleType || r.ruleType === filters.ruleType;
+        const status = !filters.status || r.status === filters.status;
+        return ruleName && ruleType && status;
+      });
+    }
+
+    function filteredTeamConfigRules() {
+      return teamConfigRules.filter((r) => {
+        const ruleName = !filters.ruleName || r.ruleName.toLowerCase().includes(filters.ruleName.toLowerCase());
+        const status = !filters.status || r.status === filters.status;
+        return ruleName && status;
+      });
+    }
+
+    function renderDetailFilters() {
+      document.querySelector(".filter-band .filters").innerHTML = `
+        <label class="filter-item"><span class="label">机器人ID</span><input class="field" id="robotId" placeholder="请输入机器人ID"></label>
+        <label class="filter-item"><span class="label">赛事ID</span><input class="field" id="matchId" placeholder="请输入赛事ID"></label>
+        <label class="filter-item"><span class="label">模板ID</span><input class="field" id="templateId" placeholder="请输入模板ID"></label>
+        <label class="filter-item"><span class="label">模板名称</span><input class="field" id="templateName" placeholder="请输入模板名称"></label>
+        <label class="filter-item"><span class="label">房间ID</span><input class="field" id="roomId" placeholder="请输入房间ID"></label>
+        <label class="filter-item"><span class="label">机器人队伍ID</span><input class="field" id="robotTeamId" placeholder="请输入队伍ID"></label>
+        <label class="filter-item"><span class="label">参考用户ID</span><input class="field" id="userId" placeholder="请输入用户ID"></label>
+        <label class="filter-item"><span class="label">参考用户队伍ID</span><input class="field" id="userTeamId" placeholder="请输入队伍ID"></label>
+        <label class="filter-item"><span class="label">阵容策略包含</span><select class="field" id="strategy"><option value="">请选择阵容策略</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></label>
+        <label class="filter-item"><span class="label">机器人类型</span><select class="field" id="robotType"><option value="">机器人类型</option><option value="template">模板型</option><option value="copy">复制型</option><option value="random">随机型</option></select></label>
+        <label class="filter-item"><span class="label">占位任务来源</span><select class="field" id="taskSource"><option value="">任务来源</option><option value="system">系统规则</option><option value="manual">人工配置</option></select></label>
+        <label class="filter-item"><span class="label">状态</span><select class="field" id="status"><option value="">状态</option><option value="cancelled">已取消</option><option value="joined">已加入</option><option value="pending">待加入</option></select></label>
+        <label class="filter-item date"><span class="label">加入时间</span><input class="field" id="dateRange" placeholder="开始时间  至  结束时间"></label>
+        <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+      `;
+    }
+
+    function renderStatsFilters() {
+      document.querySelector(".filter-band .filters").innerHTML = `
+        <label class="filter-item"><span class="label">机器人ID</span><input class="field" id="robotId" placeholder="请输入机器人ID"></label>
+        <label class="filter-item"><span class="label">机器人类型</span><select class="field" id="robotType"><option value="">机器人类型</option><option value="template">模板型</option><option value="copy">复制型</option><option value="random">随机型</option></select></label>
+        <label class="filter-item"><span class="label">当前任务状态</span><select class="field" id="status"><option value="">任务状态</option><option value="competing">比赛中</option><option value="idle">空闲</option><option value="enabled">启用</option><option value="disabled">停用</option></select></label>
+        <label class="filter-item date"><span class="label">最近一次任务时间</span><input class="field" id="dateRange" placeholder="开始时间  至  结束时间"></label>
+        <label class="filter-item date"><span class="label">创建时间</span><input class="field" id="createdRange" placeholder="2026-06-05 18:13:21  至  2026-06-05 18:13:21"></label>
+        <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+      `;
+    }
+
+    function renderRoomFilters() {
+      document.querySelector(".filter-band .filters").innerHTML = `
+        <label class="filter-item"><span class="label">房间ID</span><input class="field" id="roomId" placeholder="请输入房间ID"></label>
+        <label class="filter-item"><span class="label">房间名称</span><input class="field" id="roomName" placeholder="请输入房间名称"></label>
+        <label class="filter-item"><span class="label">房间状态</span><select class="field" id="status"><option value="">房间状态</option><option value="active">进行中</option><option value="settled">已结算</option><option value="cancelled">已取消</option></select></label>
+        <label class="filter-item date"><span class="label">赛事时间</span><input class="field" id="dateRange" placeholder="开始日期  至  结束日期"></label>
+        <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+      `;
+    }
+
+    function renderMatchFilters() {
+      document.querySelector(".filter-band .filters").innerHTML = `
+        <label class="filter-item"><span class="label">赛事ID</span><input class="field" id="matchId" placeholder="请输入赛事ID"></label>
+        <label class="filter-item"><span class="label">赛事名称</span><input class="field" id="matchName" placeholder="请输入赛事名称"></label>
+        <label class="filter-item"><span class="label">赛事状态</span><select class="field" id="status"><option value="">赛事状态</option><option value="notStarted">未开始</option><option value="active">进行中</option><option value="ended">已结束</option><option value="cancelled">已取消</option></select></label>
+        <label class="filter-item date"><span class="label">赛事时间</span><input class="field" id="dateRange" placeholder="开始日期  至  结束日期"></label>
+        <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+      `;
+    }
+
+    function renderPlaceholderFilters() {
+      document.querySelector(".filter-band .filters").innerHTML = `
+        <label class="filter-item"><span class="label">规则名称</span><input class="field" id="ruleName" placeholder="请输入规则名称"></label>
+        <label class="filter-item"><span class="label">规则类型</span><select class="field" id="ruleType"><option value="">规则类型</option><option value="count">数量</option><option value="multiple">倍数</option></select></label>
+        <label class="filter-item"><span class="label">状态</span><select class="field" id="status"><option value="">状态</option><option value="enabled">启用</option><option value="disabled">停用</option></select></label>
+        <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+      `;
+    }
+
+    function renderTeamConfigFilters() {
+      document.querySelector(".filter-band .filters").innerHTML = `
+        <label class="filter-item"><span class="label">规则名称</span><input class="field" id="ruleName" placeholder="请输入规则名称"></label>
+        <label class="filter-item"><span class="label">状态</span><select class="field" id="status"><option value="">状态</option><option value="enabled">启用</option><option value="disabled">停用</option></select></label>
+        <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+      `;
+    }
+
+    function bindDynamicFilters() {
+      Object.keys(filters).forEach((key) => {
+        const node = el(key);
+        if (node) node.addEventListener("input", (event) => filters[key] = event.target.value);
+      });
+      el("searchBtn").addEventListener("click", renderRows);
+      el("resetBtn").addEventListener("click", () => {
+        Object.keys(filters).forEach((key) => {
+          filters[key] = "";
+          if (el(key)) el(key).value = "";
+        });
+        renderRows();
+      });
+    }
+
+    function renderMetrics(rows) {
+      const realtime = rows.reduce((sum, r) => sum + Number(r.realtimeAmount), 0).toFixed(2);
+      const totalStake = rows.reduce((sum, r) => sum + Number(r.totalStake), 0).toFixed(2);
+      const totalReturn = rows.reduce((sum, r) => sum + Number(r.totalReturn), 0).toFixed(2);
+      const totalRooms = rows.reduce((sum, r) => sum + r.totalRooms, 0);
+      const createdTeams = rows.reduce((sum, r) => sum + r.totalCreatedTeams, 0);
+      const wonTeams = rows.reduce((sum, r) => sum + r.totalWonTeams, 0);
+      el("metricBand").innerHTML = `
+        <div class="metric"><span>实时投注金额</span><strong>${realtime}</strong></div>
+        <div class="metric"><span>累计投注金额</span><strong>${totalStake}</strong></div>
+        <div class="metric"><span>累计返奖金额</span><strong>${totalReturn}</strong></div>
+        <div class="metric"><span>累计收益率</span><strong>0.0000 %</strong></div>
+        <div class="metric"><span>累计创建队伍数</span><strong>${createdTeams}</strong></div>
+        <div class="metric"><span>累计获奖队伍数</span><strong>${wonTeams}</strong></div>
+        <div class="metric"><span>累计参赛房间数</span><strong>${totalRooms}</strong></div>
+      `;
+    }
+
+    function renderRoomMetrics(rows) {
+      const stake = rows.reduce((sum, r) => sum + Number(r.stakeAmount), 0);
+      const returnAmount = rows.reduce((sum, r) => sum + Number(r.returnAmount), 0);
+      const createdTeams = rows.reduce((sum, r) => sum + r.createdTeams, 0);
+      const wonTeams = rows.reduce((sum, r) => sum + r.wonTeams, 0);
+      const yieldRate = stake ? `${((returnAmount - stake) / stake * 100).toFixed(4)}%` : "0.0000%";
+      const winRate = createdTeams ? `${(wonTeams / createdTeams * 100).toFixed(4)}%` : "0.0000%";
+      el("metricBand").innerHTML = `
+        <div class="metric"><span>投注金额</span><strong>${stake.toFixed(2)}</strong></div>
+        <div class="metric"><span>返奖金额</span><strong>${returnAmount.toFixed(2)}</strong></div>
+        <div class="metric"><span>收益率</span><strong>${yieldRate}</strong></div>
+        <div class="metric"><span>创建队伍数</span><strong>${createdTeams}</strong></div>
+        <div class="metric"><span>获奖队伍数</span><strong>${wonTeams}</strong></div>
+        <div class="metric"><span>获奖率</span><strong>${winRate}</strong></div>
+      `;
+    }
+
+    function renderMatchMetrics(rows) {
+      const stake = rows.reduce((sum, r) => sum + Number(r.stakeAmount), 0);
+      const returnAmount = rows.reduce((sum, r) => sum + Number(r.returnAmount), 0);
+      const createdTeams = rows.reduce((sum, r) => sum + r.createdTeams, 0);
+      const wonTeams = rows.reduce((sum, r) => sum + r.wonTeams, 0);
+      const yieldRate = stake ? `${((returnAmount - stake) / stake * 100).toFixed(4)}%` : "0.0000%";
+      const winRate = createdTeams ? `${(wonTeams / createdTeams * 100).toFixed(4)}%` : "0.0000%";
+      el("metricBand").innerHTML = `
+        <div class="metric"><span>投注金额</span><strong>${stake.toFixed(2)}</strong></div>
+        <div class="metric"><span>返奖金额</span><strong>${returnAmount.toFixed(2)}</strong></div>
+        <div class="metric"><span>收益率</span><strong>${yieldRate}</strong></div>
+        <div class="metric"><span>创建队伍数</span><strong>${createdTeams}</strong></div>
+        <div class="metric"><span>获奖队伍数</span><strong>${wonTeams}</strong></div>
+        <div class="metric"><span>获奖率</span><strong>${winRate}</strong></div>
+      `;
+    }
+
+    function setTableMode(mode) {
+      const tableWrap = el("tableWrap");
+      tableWrap.classList.remove("medium-table", "fit-screen", "team-config", "placeholder-config");
+      if (mode === "medium") tableWrap.classList.add("medium-table");
+      if (mode === "fit") tableWrap.classList.add("fit-screen");
+      if (mode === "team") tableWrap.classList.add("fit-screen", "team-config");
+      if (mode === "placeholder") tableWrap.classList.add("fit-screen", "placeholder-config");
+    }
+
+    function setTableCols(cols = "") {
+      el("dataTable").querySelector("colgroup")?.remove();
+      if (cols) el("dataTable").insertAdjacentHTML("afterbegin", `<colgroup>${cols}</colgroup>`);
+    }
+
+    function renderRows() {
+      if (activeMainView === "placeholder") {
+        renderPlaceholderRows();
+        return;
+      }
+      if (activeSubView === "stats") {
+        renderStatsRows();
+        return;
+      }
+      if (activeSubView === "room") {
+        renderRoomRows();
+        return;
+      }
+      if (activeSubView === "match") {
+        renderMatchRows();
+        return;
+      }
+      const rows = filteredRows();
+      const visibleRows = rows.slice(0, PAGE_SIZE);
+      setTableMode("wide");
+      setTableCols();
+      el("metricBand").classList.remove("show");
+      el("toolbar").style.display = "flex";
+      el("toolbar").innerHTML = `<button class="pill-btn blue">新增机器人</button><button class="pill-btn gray">机器人基础配置</button>`;
+      el("tableHead").innerHTML = `<tr><th>序号</th><th>机器人ID</th><th>赛事ID</th><th>模板ID</th><th>模板名称</th><th>规则名称</th><th>房间ID</th><th>机器人队伍ID</th><th>参考用户ID</th><th>参考用户队伍ID</th><th>阵容策略</th><th>队伍类型</th><th>占位任务来源</th><th>机器人队伍来源</th><th>状态</th><th>取消原因</th><th>用户队伍加入时间</th><th>机器人队伍加入时间</th><th>跟入延迟(秒)</th><th>操作</th></tr>`;
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("rows").innerHTML = visibleRows.map((r) => `
+        <tr>
+          <td>${r.index}</td>
+          <td>${r.robotId || "-"}</td>
+          <td>${r.matchId}</td>
+          <td>${r.templateId}</td>
+          <td>${r.templateName}</td>
+          <td>${r.ruleName}</td>
+          <td>${r.roomId}</td>
+          <td>${r.robotTeamId || "-"}</td>
+          <td>${r.userId}</td>
+          <td><a class="link" href="#">${r.userTeamId}</a></td>
+          <td>${r.strategy}</td>
+          <td><span class="tag green">${typeText[r.type]}</span></td>
+          <td>${sourceText[r.taskSource]}</td>
+          <td>${r.robotSource}</td>
+          <td><span class="tag ${r.status === "cancelled" ? "red" : r.status === "joined" ? "green" : "orange"}">${statusText[r.status]}</span></td>
+          <td>${r.reason}</td>
+          <td>${r.userJoinAt}</td>
+          <td>${r.robotJoinAt}</td>
+          <td>${r.delay}</td>
+          <td><button class="op">队伍比较</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="20">暂无机器人数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => button.addEventListener("click", () => showToast("队伍比较已提交")));
+      bindToolbarButtons();
+    }
+
+    function renderStatsRows() {
+      const rows = filteredStats();
+      const visibleRows = rows.slice(0, PAGE_SIZE);
+      setTableMode("medium");
+      setTableCols();
+      el("metricBand").classList.add("show");
+      renderMetrics(rows);
+      el("toolbar").style.display = "flex";
+      el("toolbar").innerHTML = `<button class="pill-btn gray">启用</button><button class="pill-btn orange">停用</button>`;
+      el("tableHead").innerHTML = `<tr><th><input class="check" type="checkbox"></th><th>序号</th><th>机器人ID</th><th>机器人类型</th><th>当前任务状态</th><th>当前参与房间数</th><th>当前队伍数</th><th>实时投注金额</th><th>累计投注金额</th><th>累计返奖金额</th><th>累计收益率</th><th>累计参与房间数</th><th>累计创建队伍数</th><th>累计获奖队伍数</th><th>历史获奖率</th><th>最近一次任务时间</th><th>创建时间</th><th>操作</th></tr>`;
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("rows").innerHTML = visibleRows.map((r) => `
+        <tr>
+          <td><input class="check" type="checkbox"></td>
+          <td>${r.index}</td>
+          <td>${r.robotId}</td>
+          <td><span class="tag green">${typeText[r.type]}</span></td>
+          <td><span class="tag ${r.taskStatus === "competing" ? "green" : "gray"}">${taskStatusText[r.taskStatus]}</span></td>
+          <td>${r.currentRooms}</td>
+          <td>${r.currentTeams}</td>
+          <td>${r.realtimeAmount}</td>
+          <td>${r.totalStake}</td>
+          <td>${r.totalReturn}</td>
+          <td>${r.totalYield}</td>
+          <td>${r.totalRooms}</td>
+          <td>${r.totalCreatedTeams}</td>
+          <td>${r.totalWonTeams}</td>
+          <td>${r.historyYield}</td>
+          <td>${r.lastTaskAt}</td>
+          <td>${r.createdAt}</td>
+          <td><button class="op">${r.status === "enabled" ? "停用" : "启用"}</button><button class="op">详情</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="18">暂无机器人统计数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交")));
+      bindToolbarButtons();
+    }
+
+    function renderRoomRows() {
+      const rows = filteredRoomStats();
+      const visibleRows = rows.slice(0, PAGE_SIZE);
+      setTableMode("fit");
+      setTableCols();
+      el("metricBand").classList.add("show");
+      renderRoomMetrics(rows);
+      el("toolbar").style.display = "none";
+      el("tableHead").innerHTML = `<tr><th>序号</th><th>房间ID</th><th>房间名称</th><th>房间状态</th><th>投注金额</th><th>返奖金额</th><th>收益率</th><th>机器人参与房间数</th><th>机器人创建队伍数</th><th>机器人获奖队伍数</th><th>获奖率</th><th>房间创建时间</th><th>操作</th></tr>`;
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("rows").innerHTML = visibleRows.map((r) => `
+        <tr>
+          <td>${r.index}</td>
+          <td>${r.roomId}</td>
+          <td>${r.roomName}</td>
+          <td><span class="tag ${r.roomStatus === "active" ? "green" : r.roomStatus === "settled" ? "blue" : "red"}">${roomStatusText[r.roomStatus]}</span></td>
+          <td>${r.stakeAmount}</td>
+          <td>${r.returnAmount}</td>
+          <td>${r.yieldRate}</td>
+          <td>${r.joinedRooms}</td>
+          <td>${r.createdTeams}</td>
+          <td>${r.wonTeams}</td>
+          <td>${r.winRate}</td>
+          <td>${r.createdAt}</td>
+          <td><button class="op">详情</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="13">暂无房间维度统计数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => button.addEventListener("click", () => showToast("详情已提交")));
+    }
+
+    function renderPlaceholderRows() {
+      const rows = filteredPlaceholderRules();
+      const visibleRows = rows.slice(0, PAGE_SIZE);
+      setTableMode("placeholder");
+      setTableCols(`
+        <col class="col-seq"><col class="col-id"><col class="col-name"><col class="col-room-id"><col class="col-room-name">
+        <col class="col-number"><col class="col-number"><col class="col-long-number"><col class="col-long-number">
+        <col class="col-number"><col class="col-number"><col class="col-type"><col class="col-status"><col class="col-time"><col class="col-actions">
+      `);
+      el("metricBand").classList.remove("show");
+      el("toolbar").style.display = "flex";
+      el("toolbar").innerHTML = `<button class="pill-btn blue">新增</button>`;
+      el("tableHead").innerHTML = `<tr><th>序号</th><th>规则ID</th><th>规则名称</th><th>房间ID</th><th>房间名称</th><th>生成队伍倍数</th><th>生成队伍数量</th><th>距开赛开始加入(分)</th><th>距开赛结束加入(分)</th><th>加入频率(秒)</th><th>频率加入数量</th><th>规则类型</th><th>状态</th><th>创建时间</th><th>操作</th></tr>`;
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("rows").innerHTML = visibleRows.map((r) => `
+        <tr>
+          <td>${r.index}</td>
+          <td>${r.ruleId}</td>
+          <td class="cell-name">${r.ruleName}</td>
+          <td>${r.roomId}</td>
+          <td class="cell-room-name">${r.roomName}</td>
+          <td>${r.teamMultiple}</td>
+          <td>${r.teamCount}</td>
+          <td>${r.startJoinMinute}</td>
+          <td>${r.endJoinMinute}</td>
+          <td>${r.frequencySeconds}</td>
+          <td>${r.frequencyCount}</td>
+          <td><span class="tag ${r.ruleType === "count" ? "orange" : "blue"}">${ruleTypeText[r.ruleType]}</span></td>
+          <td><span class="tag ${r.status === "enabled" ? "green" : "gray"}">${placeholderStatusText[r.status]}</span></td>
+          <td>${r.createdAt}</td>
+          <td class="cell-actions"><button class="op toggle">${r.status === "enabled" ? "停用" : "启用"}</button><button class="op">编辑</button><button class="op toggle">复制</button><button class="op delete">删除</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="15">暂无机器人占位配置数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交")));
+      bindToolbarButtons();
+    }
+
+    function renderTeamConfigRows() {
+      const rows = filteredTeamConfigRules();
+      const visibleRows = rows.slice(0, PAGE_SIZE);
+      setTableMode("team");
+      setTableCols(`
+        <col class="col-seq"><col class="col-id"><col class="col-name"><col class="col-room-id"><col class="col-room-name">
+        <col class="col-number"><col class="col-number"><col class="col-strategy"><col class="col-number">
+        <col class="col-rate"><col class="col-number"><col class="col-rate"><col class="col-number"><col class="col-rate"><col class="col-number">
+        <col class="col-status"><col class="col-time"><col class="col-actions">
+      `);
+      el("metricBand").classList.remove("show");
+      el("toolbar").style.display = "flex";
+      el("toolbar").innerHTML = `<button class="pill-btn blue">新增</button>`;
+      el("tableHead").innerHTML = `<tr><th>序号</th><th>规则ID</th><th>规则名称</th><th>房间ID</th><th>房间名称</th><th>需生成队伍数</th><th>跟入队伍模板数</th><th>阵容策略</th><th>同队伍可使用次数</th><th>积极型占比(%)</th><th>积极性队伍可生成数</th><th>均衡型占比(%)</th><th>均衡性队伍可生成数</th><th>消极型占比(%)</th><th>消极性队伍可生成数</th><th>状态</th><th>创建时间</th><th>操作</th></tr>`;
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("rows").innerHTML = visibleRows.map((r) => `
+        <tr>
+          <td>${r.index}</td>
+          <td>${r.ruleId}</td>
+          <td class="cell-name">${r.ruleName}</td>
+          <td>${r.roomId}</td>
+          <td class="cell-room-name">${r.roomName}</td>
+          <td>${r.needTeams}</td>
+          <td>${r.templateTeams}</td>
+          <td>${r.strategy}</td>
+          <td>${r.reuseTimes}</td>
+          <td>${r.aggressiveRate}</td>
+          <td>${r.aggressiveTeams}</td>
+          <td>${r.balancedRate}</td>
+          <td>${r.balancedTeams}</td>
+          <td>${r.passiveRate}</td>
+          <td>${r.passiveTeams}</td>
+          <td><span class="tag ${r.status === "enabled" ? "green" : "gray"}">${placeholderStatusText[r.status]}</span></td>
+          <td>${r.createdAt}</td>
+          <td class="cell-actions"><button class="op toggle">${r.status === "enabled" ? "停用" : "启用"}</button><button class="op">编辑</button><button class="op toggle">复制</button><button class="op delete">删除</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="18">暂无机器人队伍配置数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交")));
+      bindToolbarButtons();
+    }
+
+    function renderMatchRows() {
+      const rows = filteredMatchStats();
+      const visibleRows = rows.slice(0, PAGE_SIZE);
+      setTableMode("fit");
+      setTableCols();
+      el("metricBand").classList.add("show");
+      renderMatchMetrics(rows);
+      el("toolbar").style.display = "none";
+      el("tableHead").innerHTML = `<tr><th>序号</th><th>赛事ID</th><th>赛事名称</th><th>赛事状态</th><th>投注金额</th><th>返奖金额</th><th>收益率</th><th>机器人参与房间数</th><th>机器人创建队伍数</th><th>机器人获奖队伍数</th><th>获奖率</th><th>比赛开始时间</th><th>操作</th></tr>`;
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("rows").innerHTML = visibleRows.map((r) => `
+        <tr>
+          <td>${r.index}</td>
+          <td>${r.matchId}</td>
+          <td>${r.matchName}</td>
+          <td><span class="tag ${r.matchStatus === "active" ? "green" : r.matchStatus === "notStarted" ? "blue" : r.matchStatus === "ended" ? "gray" : "red"}">${matchStatusText[r.matchStatus]}</span></td>
+          <td>${r.stakeAmount}</td>
+          <td>${r.returnAmount}</td>
+          <td>${r.yieldRate}</td>
+          <td>${r.joinedRooms}</td>
+          <td>${r.createdTeams}</td>
+          <td>${r.wonTeams}</td>
+          <td>${r.winRate}</td>
+          <td>${r.startAt}</td>
+          <td><button class="op">详情</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="13">暂无赛事维度统计数据</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => button.addEventListener("click", () => showToast("详情已提交")));
+    }
+
+    function bindSidebarAccordion() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      const closeOthers = (activeSection) => {
+        sections.forEach((section) => {
+          if (section !== activeSection) section.classList.add("collapsed");
+        });
+      };
+      sections.forEach((section) => {
+        const toggle = section.querySelector(".menu-title");
+        toggle.addEventListener("click", () => {
+          const willOpen = section.classList.contains("collapsed");
+          section.classList.toggle("collapsed");
+          if (willOpen) closeOthers(section);
+        });
+      });
+      document.querySelectorAll(".submenu-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const activeSection = item.closest(".menu-section");
+          activeSection.classList.remove("collapsed");
+          closeOthers(activeSection);
+        });
+      });
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      if (activeSection) {
+        activeSection.classList.remove("collapsed");
+        closeOthers(activeSection);
+      }
+    }
+
+    function bindToolbarButtons() {
+      document.querySelectorAll(".pill-btn").forEach((button) => {
+        button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交"));
+      });
+    }
+
+    function switchSubView(view) {
+      activeMainView = "list";
+      activeSubView = view;
+      Object.keys(filters).forEach((key) => filters[key] = "");
+      document.querySelector(".sub-tabs").style.display = "flex";
+      document.querySelectorAll(".sub-tab").forEach((tab) => tab.classList.remove("active"));
+      const activeLabel = view === "stats" ? "机器人统计" : view === "room" ? "房间维度统计" : view === "match" ? "赛事维度统计" : "机器人队伍明细";
+      Array.from(document.querySelectorAll(".sub-tab")).find((tab) => tab.textContent.trim() === activeLabel)?.classList.add("active");
+      if (view === "stats") {
+        renderStatsFilters();
+      } else if (view === "room") {
+        renderRoomFilters();
+      } else if (view === "match") {
+        renderMatchFilters();
+      } else {
+        renderDetailFilters();
+      }
+      bindDynamicFilters();
+      renderRows();
+    }
+
+    function switchMainView(view) {
+      activeMainView = view;
+      Object.keys(filters).forEach((key) => filters[key] = "");
+      document.querySelectorAll(".section-tab").forEach((tab) => tab.classList.remove("active"));
+      const activeLabel = view === "placeholder" ? "机器人占位配置" : view === "team" ? "机器人队伍配置" : "机器人列表";
+      Array.from(document.querySelectorAll(".section-tab")).find((tab) => tab.textContent.trim() === activeLabel)?.classList.add("active");
+      if (view === "placeholder") {
+        document.querySelector(".sub-tabs").style.display = "none";
+        renderPlaceholderFilters();
+        bindDynamicFilters();
+        renderPlaceholderRows();
+        return;
+      }
+      if (view === "team") {
+        document.querySelector(".sub-tabs").style.display = "none";
+        renderTeamConfigFilters();
+        bindDynamicFilters();
+        renderTeamConfigRows();
+        return;
+      }
+      document.querySelector(".sub-tabs").style.display = "flex";
+      switchSubView("detail");
+    }
+
+    function bind() {
+      bindDynamicFilters();
+      bindToolbarButtons();
+      document.querySelectorAll(".section-tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          const text = button.textContent.trim();
+          if (text === "机器人列表") {
+            switchMainView("list");
+            return;
+          }
+          if (text === "机器人占位配置") {
+            switchMainView("placeholder");
+            return;
+          }
+          if (text === "机器人队伍配置") {
+            switchMainView("team");
+            return;
+          }
+          showToast(text + " 已提交");
+        });
+      });
+      document.querySelectorAll(".sub-tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          const text = button.textContent.trim();
+          if (text === "机器人统计") {
+            switchSubView("stats");
+            return;
+          }
+          if (text === "机器人队伍明细") {
+            switchSubView("detail");
+            return;
+          }
+          if (text === "房间维度统计") {
+            switchSubView("room");
+            return;
+          }
+          if (text === "赛事维度统计") {
+            switchSubView("match");
+            return;
+          }
+          showToast(text + " 已提交");
+        });
+      });
+      document.querySelectorAll(".tab-close").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.closest(".tab").remove();
+        });
+      });
+      bindSidebarAccordion();
+    }
+
+    renderRows();
+    bind();
+  </script>
+</body>
+</html>

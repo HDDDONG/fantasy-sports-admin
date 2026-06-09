@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 赛事推荐</title>
+  <style>
+    :root {
+      --bg: #f3f6fa;
+      --surface: #fff;
+      --text: #25313d;
+      --muted: #758293;
+      --line: #e4eaf1;
+      --line-strong: #ccd6e2;
+      --blue: #2f80ed;
+      --green: #2f9f67;
+      --orange: #d9951f;
+      --red: #d95656;
+      --shadow: 0 12px 28px rgba(39, 54, 71, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+    button, input, select { font: inherit; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #142231;
+      color: #dbe6ef;
+      border-right: 1px solid #0f1823;
+      padding: 16px 12px;
+    }
+
+    .brand {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      margin-bottom: 14px;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--blue);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .brand-text strong { display: block; font-size: 14px; line-height: 18px; color: #fff; }
+    .brand-text span { display: block; color: #93a5b6; font-size: 12px; line-height: 16px; }
+
+    .menu-section { display: grid; gap: 4px; }
+
+    .menu-title {
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 9px;
+      padding: 0 10px;
+      color: #f4f8fb;
+      background: #203348;
+      font-weight: 800;
+      font-size: 14px;
+      border: 0;
+      width: 100%;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .menu-title::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(47,141,245,.16);
+    }
+
+    .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
+    .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
+    .submenu {
+      display: grid;
+      gap: 3px;
+      padding: 4px 0 0 22px;
+      max-height: 128px;
+      opacity: 1;
+      overflow: hidden;
+      transform: translateY(0);
+      transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease;
+    }
+    .menu-section.collapsed .submenu {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+    }
+
+    .submenu-item {
+      height: 34px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      color: #b9c8d5;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .submenu-item.active {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 6px 14px rgba(47,141,245,.22);
+    }
+
+    .shell {
+      min-width: 0;
+      min-height: 100vh;
+      padding: 16px 18px 24px;
+      background: linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px), var(--bg);
+    }
+
+    .frame {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .crumbs { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .menu-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #4f5c68; font-weight: 800; font-size: 18px; }
+    .module-btn { height: 26px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: #607080; cursor: pointer; font-size: 12px; }
+
+    .tabs {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .tab {
+      height: 24px;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 0 8px 0 12px;
+      color: #657386;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .tab-link {
+      color: inherit;
+      text-decoration: none;
+      line-height: 22px;
+    }
+
+    .tab-close {
+      width: 16px;
+      height: 16px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+      padding: 0;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    .tab-close:hover { background: rgba(38, 49, 61, .1); }
+
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    .filter-band {
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      white-space: nowrap;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .label {
+      color: #5b6775;
+      font-weight: 700;
+      font-size: 11px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .filter-item {
+      display: grid;
+      grid-template-columns: auto 170px;
+      align-items: center;
+      gap: 8px;
+      min-width: max-content;
+    }
+
+    .filter-item.date {
+      grid-template-columns: auto 230px;
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    .field {
+      height: 30px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      border-radius: 7px;
+      padding: 0 10px;
+      min-width: 0;
+      color: var(--text);
+      outline: none;
+      font-size: 12px;
+    }
+
+    .field::placeholder { color: #b3beca; font-size: 12px; }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+
+    .btn {
+      height: 30px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--text);
+      border-radius: 7px;
+      padding: 0 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .filter-actions .btn {
+      min-width: 88px;
+    }
+
+    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 5px 12px rgba(47, 141, 245, .2); }
+
+    .toolbar {
+      padding: 14px 18px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .pill-btn {
+      height: 32px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pill-btn.green { background: #e9f7ef; color: #237a4f; border-color: #c8ead6; }
+    .pill-btn.orange { background: #fff4df; color: #9b650d; border-color: #efd4a4; }
+    .pill-btn.blue { background: #eef6ff; color: #246dbd; border-color: #c8ddf7; }
+    .pill-btn.red { background: #fff0f0; color: var(--red); border-color: #f0c8c8; }
+
+    .table-wrap {
+      max-width: 100%;
+      padding: 0 18px 16px;
+      background: #fff;
+      overflow: auto;
+      max-height: calc(100vh - 248px);
+    }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1880px; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    th, td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 10px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+    th:last-child, td:last-child { border-right: 0; }
+    tbody tr:last-child td { border-bottom: 0; }
+    th { position: sticky; top: 0; z-index: 2; background: #f6f8fb; color: #526070; font-weight: 800; }
+    tbody tr:hover td { background: #f8fbff; }
+
+    .check { width: 16px; height: 16px; accent-color: var(--blue); }
+    .muted { color: var(--muted); }
+    .name-cell { text-align: left; max-width: 210px; overflow: hidden; text-overflow: ellipsis; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      border: 1px solid transparent;
+      font-weight: 800;
+    }
+
+    .tag.gray { color: #52606c; background: #edf1f5; border-color: #d7e0e8; }
+    .tag.green { color: #117044; background: #dff5e9; border-color: #a9dfc2; }
+    .tag.orange { color: #875804; background: #fff0ce; border-color: #eac778; }
+    .tag.blue { color: #155aa7; background: #e2f0ff; border-color: #adcef3; }
+    .tag.red { color: #a83a3a; background: #ffe2e2; border-color: #efaaaa; }
+
+    .op { border: 0; background: transparent; padding: 0 7px; font-weight: 800; cursor: pointer; color: var(--blue); }
+    .op.green { color: #2f8b44; }
+    .op.orange { color: #b26a0b; }
+    .op.red { color: var(--red); }
+
+    .summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      background: #fbfcfe;
+    }
+
+    .pager-left,
+    .pager-center,
+    .pager-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-size,
+    .goto-input {
+      height: 30px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      color: #657386;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .page-size {
+      width: 96px;
+      padding: 0 10px;
+      text-align: left;
+    }
+
+    .goto-input {
+      width: 52px;
+    }
+
+    .page-btn {
+      min-width: 30px;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7f9fc;
+      color: #657386;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .page-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(47,141,245,.22);
+    }
+
+    .page-btn.ghost {
+      color: #a8b3bf;
+      background: #f3f6fa;
+    }
+
+    .page-ellipsis {
+      color: #657386;
+      font-weight: 800;
+      padding: 0 2px;
+    }
+
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 24, 35, .42);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    .modal-mask.open { display: flex; }
+
+    .modal {
+      width: 760px;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 60px rgba(15,24,35,.26);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 900;
+    }
+
+    .modal-body {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 96px 1fr 96px 1fr;
+      gap: 14px 12px;
+      align-items: center;
+    }
+
+    .sort-list {
+      grid-column: 1 / -1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .sort-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 120px;
+      gap: 12px;
+      align-items: center;
+      min-height: 46px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .sort-row:last-child { border-bottom: 0; }
+
+    .sort-row.head {
+      min-height: 38px;
+      background: #f8fafc;
+      color: #566374;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .sort-match {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sort-input {
+      width: 92px;
+      height: 30px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      padding: 0 8px;
+      text-align: center;
+    }
+
+    .modal-foot {
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 0 18px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      background: #192533;
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(70px);
+      transition: all .18s ease;
+      font-size: 13px;
+      z-index: 30;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=no-stickers">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" id="matchMenuToggle" type="button">
+          <span>赛事管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item active" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" id="roomMenuToggle" type="button">
+          <span>房间管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button">
+          <span>运营管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button">
+          <span>赛事注单</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+        <header class="topbar">
+          <div class="crumbs">
+            <span class="menu-icon">≡</span>
+            <strong>首页</strong>
+            <span>/</span>
+            <span>赛事管理</span>
+            <span>/</span>
+            <span>赛事推荐</span>
+          </div>
+          <button class="module-btn">板球</button>
+        </header>
+
+        <nav class="tabs">
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">赛事列表</a><button class="tab-close" type="button" aria-label="关闭赛事列表">×</button></span>
+          <span class="tab active"><a class="tab-link" href="match-recommend-admin.html">赛事推荐</a><button class="tab-close" type="button" aria-label="关闭赛事推荐">×</button></span>
+          <span class="tab"><a class="tab-link" href="bet-order-list-admin.html">注单列表</a><button class="tab-close" type="button" aria-label="关闭注单列表">×</button></span>
+        </nav>
+
+        <section class="filter-band">
+          <div class="filters">
+            <label class="filter-item">
+              <span class="label">运动类型</span>
+              <select class="field" id="sportFilter">
+                <option value="">请选择运动类型</option>
+                <option value="cricket">板球</option>
+                <option value="football">足球</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">联赛ID</span>
+              <input class="field" id="competitionId" placeholder="请输入联赛ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">联赛名称</span>
+              <input class="field" id="competitionName" placeholder="请输入联赛名称">
+            </label>
+            <label class="filter-item">
+              <span class="label">比赛ID</span>
+              <input class="field" id="matchId" placeholder="请输入比赛ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">比赛名称</span>
+              <input class="field" id="matchName" placeholder="请输入比赛名称">
+            </label>
+            <label class="filter-item">
+              <span class="label">推荐位置（预留）</span>
+              <select class="field" id="positionFilter">
+                <option value="">请选择推荐位置</option>
+                <option value="home">首页推荐</option>
+                <option value="hot">热门赛事</option>
+                <option value="banner">Banner</option>
+                <option value="category">分类推荐</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">推荐状态</span>
+              <select class="field" id="recommendFilter">
+                <option value="">请选择推荐状态</option>
+                <option value="recommended">已推荐</option>
+                <option value="not_recommended">未推荐</option>
+              </select>
+            </label>
+            <label class="filter-item date">
+              <span class="label">日期范围</span>
+              <input class="field" id="dateRange" placeholder="推荐开始  -  推荐结束">
+            </label>
+            <div class="filter-actions">
+              <button class="btn primary" id="searchBtn">搜索</button>
+              <button class="btn" id="resetBtn">重置</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="toolbar">
+          <button class="pill-btn green recommend-bulk-action disabled" id="batchRecommendBtn" disabled>推荐</button>
+          <button class="pill-btn orange recommend-bulk-action disabled" id="batchCancelRecommendBtn" disabled>取消推荐</button>
+          <button class="pill-btn blue" id="batchSortBtn">批量调整排序</button>
+        </section>
+
+        <section class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th><input class="check" type="checkbox" id="selectAll"></th>
+                <th>序号</th>
+                <th>商户ID</th>
+                <th>商户名</th>
+                <th>运动类型</th>
+                <th>联赛ID</th>
+                <th>联赛名称</th>
+                <th>赛制类型</th>
+                <th>比赛ID</th>
+                <th>比赛名称</th>
+                <th>主队</th>
+                <th>客队</th>
+                <th>开赛时间</th>
+                <th>比赛状态</th>
+                <th>推荐开始时间</th>
+                <th>推荐结束时间</th>
+                <th>推荐状态</th>
+                <th>推荐位置（预留）</th>
+                <th>推荐排序</th>
+                <th>更新时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+
+        <footer class="summary">
+          <div class="pager-left">
+            <span id="countText">共 0 条数据</span>
+            <select class="page-size" aria-label="每页条数">
+              <option>10条/页</option>
+              <option selected>20条/页</option>
+              <option>50条/页</option>
+            </select>
+          </div>
+          <div class="pager-center">
+            <button class="page-btn ghost" type="button">‹</button>
+            <button class="page-btn active" type="button">1</button>
+            <button class="page-btn" type="button">2</button>
+            <button class="page-btn" type="button">3</button>
+            <button class="page-btn" type="button">4</button>
+            <button class="page-btn" type="button">5</button>
+            <button class="page-btn" type="button">6</button>
+            <span class="page-ellipsis">•••</span>
+            <button class="page-btn" type="button">136</button>
+            <button class="page-btn ghost" type="button">›</button>
+          </div>
+          <div class="pager-right">
+            <span>前往</span>
+            <input class="goto-input" value="1" aria-label="前往页码">
+            <span>页</span>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="sortModal">
+    <section class="modal">
+      <div class="modal-head">
+        <span>批量调整推荐排序</span>
+        <button class="btn" id="closeSortModal">关闭</button>
+      </div>
+      <div class="modal-body">
+        <div class="sort-list" id="sortList"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="cancelSortModal">取消</button>
+        <button class="btn primary" id="saveSortModal">保存排序</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">已操作</div>
+
+  <script>
+    const recommendations = [
+      ["R1001", "96164", "Gloucestershire vs Surrey", "Gloucestershire", "Surrey", "未开始", "home", 1, "2026-07-01 00:00:00", "2026-07-05 23:59:59", "not_recommended"],
+      ["R1002", "96161", "Sussex vs Essex", "Sussex", "Essex", "未开始", "hot", 2, "2026-07-01 00:00:00", "2026-07-04 23:59:59", "recommended"],
+      ["R1003", "96160", "Yorkshire vs Durham", "Yorkshire", "Durham", "未开始", "banner", 1, "2026-07-01 12:00:00", "2026-07-04 11:30:00", "recommended"],
+      ["R1004", "96159", "Nottinghamshire vs Lancashire", "Nottinghamshire", "Lancashire", "未开始", "category", 3, "2026-07-01 12:00:00", "2026-07-04 11:30:00", "not_recommended"],
+      ["R1005", "96158", "Glamorgan vs Warwickshire", "Glamorgan", "Warwickshire", "未开始", "hot", 4, "2026-07-01 00:00:00", "2026-07-04 11:30:00", "not_recommended"],
+      ["R1006", "96157", "Worcestershire vs Kent", "Worcestershire", "Kent", "未开始", "home", 5, "2026-07-01 00:00:00", "2026-07-04 10:30:00", "not_recommended"],
+      ["R1007", "96156", "Gloucestershire vs Northamptonshire", "Gloucestershire", "Northamptonshire", "进行中", "category", 1, "2026-07-01 00:00:00", "2026-07-02 12:00:00", "recommended"],
+      ["R1008", "96155", "Essex vs Surrey", "Essex", "Surrey", "进行中", "banner", 2, "2026-07-01 00:00:00", "2026-07-02 12:00:00", "not_recommended"],
+      ["R1009", "96154", "Warwickshire vs Sussex", "Warwickshire", "Sussex", "已结束", "hot", 7, "2026-06-28 00:00:00", "2026-07-02 12:00:00", "not_recommended"],
+      ["R1010", "96153", "Derbyshire vs Lancashire", "Derbyshire", "Lancashire", "已取消", "home", 8, "2026-06-28 00:00:00", "2026-07-02 11:30:00", "not_recommended"],
+      ["R1011", "96152", "Kent vs Hampshire", "Kent", "Hampshire", "已结束", "banner", 3, "2026-06-27 00:00:00", "2026-06-29 08:30:00", "recommended"],
+      ["R1012", "96151", "Worcestershire vs Somerset", "Worcestershire", "Somerset", "已结束", "category", 4, "2026-06-27 00:00:00", "2026-06-29 07:30:00", "not_recommended"],
+      ["R1013", "96150", "Middlesex vs Essex", "Middlesex", "Essex", "进行中", "home", 2, "2026-06-27 00:00:00", "2026-06-29 06:00:00", "recommended"],
+      ["R1014", "96149", "Durham vs Lancashire", "Durham", "Lancashire", "未开始", "hot", 6, "2026-06-26 00:00:00", "2026-06-27 12:00:00", "not_recommended"],
+      ["R1015", "96148", "Surrey vs Hampshire", "Surrey", "Hampshire", "已取消", "category", 5, "2026-06-26 00:00:00", "2026-06-27 11:30:00", "recommended"],
+      ["R1016", "96147", "Leicestershire vs Nottinghamshire", "Leicestershire", "Nottinghamshire", "未开始", "banner", 4, "2026-06-26 00:00:00", "2026-06-27 09:00:00", "not_recommended"],
+      ["R1017", "96146", "Somerset vs Gloucestershire", "Somerset", "Gloucestershire", "进行中", "home", 3, "2026-06-25 00:00:00", "2026-06-27 08:30:00", "recommended"],
+      ["R1018", "96145", "Hampshire vs Kent", "Hampshire", "Kent", "已结束", "hot", 9, "2026-06-25 00:00:00", "2026-06-27 07:30:00", "not_recommended"],
+      ["R1019", "96144", "Lancashire vs Durham", "Lancashire", "Durham", "已取消", "banner", 5, "2026-06-24 00:00:00", "2026-06-25 12:00:00", "not_recommended"],
+      ["R1020", "96143", "Essex vs Middlesex", "Essex", "Middlesex", "未开始", "category", 6, "2026-06-24 00:00:00", "2026-06-25 11:30:00", "recommended"]
+    ].map((row, index) => ({
+      index: index + 1,
+      recommendId: row[0],
+      merchantId: "000000",
+      merchantName: "XXX有限公司",
+      sportType: index % 6 === 5 ? "football" : "cricket",
+      competitionId: "129953",
+      competitionName: "Vitality Blast",
+      format: "T20",
+      matchId: row[1],
+      matchName: row[2],
+      home: row[3],
+      away: row[4],
+      matchStatus: row[5],
+      position: row[6],
+      sort: row[7],
+      start: row[8],
+      end: row[9],
+      recommendStatus: row[10],
+      updatedAt: "2026-06-05 18:30:00"
+    }));
+
+    const filters = { sportType: "", competitionId: "", competitionName: "", matchId: "", matchName: "", position: "", recommend: "", dateRange: "" };
+    const el = (id) => document.getElementById(id);
+    const positionText = { home: "首页推荐", hot: "热门赛事", banner: "Banner", category: "分类推荐" };
+    const recommendText = { recommended: "已推荐", not_recommended: "未推荐" };
+
+    function sportText(type) {
+      return type === "football" ? "足球" : "板球";
+    }
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function statusClass(status) {
+      if (status === "未开始") return "blue";
+      if (status === "进行中") return "green";
+      if (status === "已结束") return "gray";
+      if (status === "已取消") return "red";
+      if (status === "已推荐") return "green";
+      if (status === "未推荐") return "gray";
+      return "gray";
+    }
+
+    function filteredRows() {
+      return recommendations.filter((r) => {
+        const sportType = !filters.sportType || r.sportType === filters.sportType;
+        const cId = !filters.competitionId || r.competitionId.includes(filters.competitionId);
+        const cName = !filters.competitionName || r.competitionName.toLowerCase().includes(filters.competitionName.toLowerCase());
+        const mId = !filters.matchId || r.matchId.includes(filters.matchId);
+        const mName = !filters.matchName || r.matchName.toLowerCase().includes(filters.matchName.toLowerCase());
+        const position = !filters.position || r.position === filters.position;
+        const recommend = !filters.recommend || r.recommendStatus === filters.recommend;
+        return sportType && cId && cName && mId && mName && position && recommend;
+      });
+    }
+
+    function renderRows() {
+      const rows = filteredRows();
+      el("countText").textContent = `共 ${rows.length} 条数据`;
+      el("selectAll").checked = false;
+      el("rows").innerHTML = rows.map((r) => `
+          <tr>
+          <td><input class="check row-check" type="checkbox" data-recommend-id="${r.recommendId}"></td>
+          <td>${r.index}</td>
+          <td class="muted">${r.merchantId}</td>
+          <td>${r.merchantName}</td>
+          <td><span class="tag ${r.sportType === "football" ? "blue" : "green"}">${sportText(r.sportType)}</span></td>
+          <td>${r.competitionId}</td>
+          <td>${r.competitionName}</td>
+          <td>${r.format}</td>
+          <td>${r.matchId}</td>
+          <td class="name-cell" title="${r.matchName}">${r.matchName}</td>
+          <td>${r.home}</td>
+          <td>${r.away}</td>
+          <td>${r.start}</td>
+          <td><span class="tag ${statusClass(r.matchStatus)}">${r.matchStatus}</span></td>
+          <td>${r.start}</td>
+          <td>${r.end}</td>
+          <td><span class="tag ${statusClass(recommendText[r.recommendStatus])}">${recommendText[r.recommendStatus]}</span></td>
+          <td><span class="tag blue">${positionText[r.position]}</span></td>
+          <td>${r.sort}</td>
+          <td>${r.updatedAt}</td>
+          <td>
+            <button class="op ${r.recommendStatus === "recommended" ? "orange" : "green"}" data-recommend-id="${r.recommendId}" data-action="toggle-recommend">${r.recommendStatus === "recommended" ? "取消推荐" : "推荐"}</button>
+          </td>
+        </tr>
+      `).join("") || `<tr><td colspan="21">暂无推荐赛事</td></tr>`;
+      document.querySelectorAll(".op").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (button.dataset.action === "toggle-recommend") {
+            toggleRecommendation(button.dataset.recommendId);
+            return;
+          }
+          showToast(button.textContent.trim() + " 已提交");
+        });
+      });
+      document.querySelectorAll(".row-check").forEach((input) => {
+        input.addEventListener("change", () => {
+          const checks = Array.from(document.querySelectorAll(".row-check"));
+          el("selectAll").checked = checks.length > 0 && checks.every((item) => item.checked);
+          updateRecommendToolbarState();
+        });
+      });
+      updateRecommendToolbarState();
+    }
+
+    function setRecommendationStatus(items, status) {
+      if (!items.length) {
+        showToast("请先选择推荐赛事");
+        return;
+      }
+      items.forEach((item) => item.recommendStatus = status);
+      renderRows();
+      showToast(status === "recommended" ? "已推荐" : "已取消推荐");
+    }
+
+    function toggleRecommendation(recommendId) {
+      const item = recommendations.find((row) => row.recommendId === recommendId);
+      if (!item) return;
+      item.recommendStatus = item.recommendStatus === "recommended" ? "not_recommended" : "recommended";
+      renderRows();
+      showToast(item.recommendStatus === "recommended" ? "已推荐" : "已取消推荐");
+    }
+
+    function selectedRecommendations() {
+      const selectedIds = Array.from(document.querySelectorAll(".row-check:checked")).map((input) => input.dataset.recommendId);
+      return recommendations.filter((item) => selectedIds.includes(item.recommendId));
+    }
+
+    function setButtonState(button, active) {
+      button.disabled = !active;
+      button.classList.toggle("disabled", !active);
+      button.setAttribute("aria-disabled", String(!active));
+    }
+
+    function updateRecommendToolbarState() {
+      const active = selectedRecommendations().length > 0;
+      document.querySelectorAll(".recommend-bulk-action").forEach((button) => {
+        setButtonState(button, active);
+      });
+    }
+
+    function renderSortModalItems(items) {
+      el("sortList").innerHTML = `
+        <div class="sort-row head">
+          <span>比赛ID</span>
+          <span>比赛名称</span>
+          <span>推荐排序</span>
+        </div>
+        ${items.map((item) => `
+          <div class="sort-row">
+            <strong>${item.matchId}</strong>
+            <span class="sort-match" title="${item.matchName}">${item.matchName}</span>
+            <input class="sort-input" type="number" min="1" value="${item.sort}" data-recommend-id="${item.recommendId}">
+          </div>
+        `).join("")}
+      `;
+    }
+
+    function openSortModal() {
+      const items = selectedRecommendations();
+      if (!items.length) {
+        showToast("请先选择要调整排序的推荐赛事");
+        return;
+      }
+      renderSortModalItems(items);
+      el("sortModal").classList.add("open");
+    }
+
+    function bind() {
+      const inputMap = [
+        ["competitionId", "competitionId"],
+        ["competitionName", "competitionName"],
+        ["matchId", "matchId"],
+        ["matchName", "matchName"],
+        ["dateRange", "dateRange"]
+      ];
+      inputMap.forEach(([id, key]) => el(id).addEventListener("input", (event) => filters[key] = event.target.value));
+      el("sportFilter").addEventListener("input", (event) => filters.sportType = event.target.value);
+      el("positionFilter").addEventListener("input", (event) => filters.position = event.target.value);
+      el("recommendFilter").addEventListener("input", (event) => filters.recommend = event.target.value);
+      el("searchBtn").addEventListener("click", renderRows);
+      el("resetBtn").addEventListener("click", () => {
+        Object.keys(filters).forEach((key) => filters[key] = "");
+        [...inputMap.map(([id]) => id), "sportFilter", "positionFilter", "recommendFilter"].forEach((id) => el(id).value = "");
+        renderRows();
+      });
+      el("selectAll").addEventListener("change", (event) => {
+        document.querySelectorAll(".row-check").forEach((input) => input.checked = event.target.checked);
+        updateRecommendToolbarState();
+      });
+      bindSidebarAccordion();
+      document.querySelectorAll(".pill-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (["batchSortBtn", "batchRecommendBtn", "batchCancelRecommendBtn"].includes(button.id)) return;
+          showToast(button.textContent.trim() + " 已提交");
+        });
+      });
+      document.querySelectorAll(".tab-close").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.closest(".tab").remove();
+        });
+      });
+      el("batchRecommendBtn").addEventListener("click", () => {
+        if (el("batchRecommendBtn").disabled) return;
+        setRecommendationStatus(selectedRecommendations(), "recommended");
+      });
+      el("batchCancelRecommendBtn").addEventListener("click", () => {
+        if (el("batchCancelRecommendBtn").disabled) return;
+        setRecommendationStatus(selectedRecommendations(), "not_recommended");
+      });
+      el("batchSortBtn").addEventListener("click", (event) => {
+        event.stopPropagation();
+        openSortModal();
+      });
+      el("closeSortModal").addEventListener("click", () => el("sortModal").classList.remove("open"));
+      el("cancelSortModal").addEventListener("click", () => el("sortModal").classList.remove("open"));
+      el("saveSortModal").addEventListener("click", () => {
+        const inputs = Array.from(document.querySelectorAll(".sort-input"));
+        const invalid = inputs.some((input) => !input.value || Number(input.value) < 1);
+        if (invalid) {
+          showToast("排序必须为大于 0 的数字");
+          return;
+        }
+        inputs.forEach((input) => {
+          const item = recommendations.find((row) => row.recommendId === input.dataset.recommendId);
+          if (item) item.sort = Number(input.value);
+        });
+        el("sortModal").classList.remove("open");
+        renderRows();
+        showToast("推荐排序已保存");
+      });
+    }
+
+    function bindSidebarAccordion() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      const closeOthers = (activeSection) => {
+        sections.forEach((section) => {
+          if (section !== activeSection) section.classList.add("collapsed");
+        });
+      };
+      sections.forEach((section) => {
+        const toggle = section.querySelector(".menu-title");
+        toggle.addEventListener("click", () => {
+          const willOpen = section.classList.contains("collapsed");
+          section.classList.toggle("collapsed");
+          if (willOpen) closeOthers(section);
+        });
+      });
+      document.querySelectorAll(".submenu-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const activeSection = item.closest(".menu-section");
+          activeSection.classList.remove("collapsed");
+          closeOthers(activeSection);
+        });
+      });
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      if (activeSection) {
+        activeSection.classList.remove("collapsed");
+        closeOthers(activeSection);
+      }
+    }
+
+    renderRows();
+    bind();
+  </script>
+</body>
+</html>
