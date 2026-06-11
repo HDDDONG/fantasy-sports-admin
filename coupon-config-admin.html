@@ -1,0 +1,1943 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 优惠券配置</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #fff;
+      --text: #26313d;
+      --muted: #7a8795;
+      --line: #e2e8f0;
+      --line-strong: #cdd7e3;
+      --blue: #2f8df5;
+      --green: #67bd51;
+      --orange: #f3a946;
+      --red: #d65a5a;
+      --shadow: 0 6px 18px rgba(32, 45, 59, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow: hidden; }
+    button, input, select { font: inherit; }
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); height: 100vh; align-items: start; overflow: hidden; }
+    .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: #172331; color: #dbe6ef; border-right: 1px solid #0f1823; padding: 16px 12px; }
+    .brand { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 12px; }
+    .brand-text strong { display: block; font-size: 14px; line-height: 18px; color: #fff; }
+    .brand-text span { display: block; color: #93a5b6; font-size: 12px; line-height: 16px; }
+    .menu-section { display: grid; gap: 4px; margin-bottom: 8px; }
+    .menu-title { height: 38px; border-radius: 8px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 0 10px; color: #f4f8fb; background: #203244; font-weight: 800; font-size: 14px; border: 0; width: 100%; cursor: pointer; text-align: left; }
+    .menu-title::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(47,141,245,.16); }
+    .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
+    .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
+    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 180px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
+    .menu-section.collapsed .submenu { max-height: 0; opacity: 0; padding-top: 0; transform: translateY(-6px); pointer-events: none; }
+    .submenu-item { height: 34px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; color: #b9c8d5; text-decoration: none; font-size: 13px; }
+    .submenu-item.active { color: #fff; background: var(--blue); box-shadow: 0 6px 14px rgba(47,141,245,.22); }
+
+    .shell { min-width: 0; height: 100vh; overflow-y: auto; padding: 14px 18px 24px; background: linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px), var(--bg); }
+    .frame { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+    .topbar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fbfdff; }
+    .crumbs { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .menu-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #4f5c68; font-weight: 800; font-size: 18px; }
+    .module-btn { height: 26px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: #607080; cursor: pointer; font-size: 12px; }
+    .tabs { height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 16px; border-bottom: 1px solid var(--line); background: #fff; }
+    .tab { height: 24px; border-radius: 13px; border: 1px solid var(--line); background: #fff; padding: 0 8px 0 12px; color: #657386; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+    .tab-link { color: inherit; text-decoration: none; line-height: 22px; }
+    .tab-close { width: 16px; height: 16px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; display: inline-grid; place-items: center; padding: 0; font-size: 12px; line-height: 16px; }
+    .tab-close:hover { background: rgba(38, 49, 61, .1); }
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .page-switch { height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fff; }
+    .inner-switch { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fff; }
+    .switch-btn { height: 32px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #4e5969; padding: 0 14px; font-size: 13px; font-weight: 800; cursor: pointer; }
+    .switch-btn.active { background: #e8f3ff; color: var(--blue); border-color: #add6ff; }
+    .panel-hidden { display: none !important; }
+    .filter-band { padding: 10px 18px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+    .filters { display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap; white-space: nowrap; overflow: visible; padding-bottom: 2px; }
+    .label { color: #5b6775; font-weight: 700; font-size: 11px; text-align: right; white-space: nowrap; }
+    .filter-item { display: grid; grid-template-columns: auto 170px; align-items: center; gap: 8px; min-width: max-content; }
+    .filter-item.date { grid-template-columns: auto 220px; }
+    .filter-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+    .field { height: 30px; border: 1px solid var(--line-strong); background: #fff; border-radius: 7px; padding: 0 10px; min-width: 0; color: var(--text); outline: none; font-size: 12px; }
+    .field::placeholder { color: #b3beca; font-size: 12px; }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .btn { height: 30px; border: 1px solid var(--line-strong); background: #fff; color: var(--text); border-radius: 7px; padding: 0 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-size: 12px; }
+    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 5px 12px rgba(47, 141, 245, .2); }
+    .section-title { height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; background: #fff; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 800; color: #344050; }
+    .section-title small { color: var(--muted); font-size: 12px; font-weight: 600; }
+    .toolbar { padding: 14px 18px 12px; background: #fff; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+    .pill-btn { height: 30px; border: 1px solid transparent; border-radius: 8px; padding: 0 14px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .pill-btn.green { background: #edf9e9; color: var(--green); border-color: #cfeec7; }
+    .table-wrap { max-width: 100%; padding: 0 18px 18px; background: #fff; overflow: auto; }
+    .table-wrap.stat-table table { min-width: 1380px; }
+    table { width: 100%; border-collapse: collapse; min-width: 1780px; font-size: 13px; }
+    th, td { border: 1px solid var(--line); padding: 10px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #566374; font-weight: 800; }
+    tbody tr:hover td { background: #fbfdff; }
+    .muted { color: var(--muted); }
+    .coupon-name { text-align: left; max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+    .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; height: 24px; padding: 0 8px; border-radius: 6px; font-size: 12px; border: 1px solid transparent; font-weight: 800; }
+    .tag.green { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.gray { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .tag.blue { color: #1557b0; background: #cfe6ff; border-color: #7eb9ff; }
+    .tag.orange { color: #9c5c0d; background: #ffe6bd; border-color: #f5c070; }
+    .tag.red { color: #9f1d1d; background: #ffd7d7; border-color: #ff9c9c; }
+    .op { border: 0; background: transparent; padding: 0 7px; font-weight: 800; cursor: pointer; }
+    .op.edit { color: var(--blue); }
+    .op.toggle { color: var(--orange); }
+    .op.delete { color: var(--red); }
+    .summary { order: 90; display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: #fbfcfe; }
+    .pager-left, .pager-center, .pager-right { display: flex; align-items: center; gap: 8px; }
+    .page-size, .goto-input { height: 30px; border: 1px solid var(--line); background: #fff; border-radius: 8px; color: #657386; font-size: 12px; text-align: center; }
+    .page-size { width: 96px; padding: 0 10px; text-align: left; }
+    .goto-input { width: 52px; }
+    .page-btn { min-width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc; color: #657386; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 10px rgba(47,141,245,.22); }
+    .page-btn.ghost { color: #a8b3bf; background: #f3f6fa; }
+    .page-ellipsis { color: #657386; font-weight: 800; padding: 0 2px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #192533; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0; transform: translateY(70px); transition: all .18s ease; font-size: 13px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .modal-mask { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(29, 33, 41, .52); padding: 24px; }
+    .modal-mask.show { display: flex; }
+    .coupon-modal { width: min(620px, calc(100vw - 48px)); max-height: calc(100vh - 64px); overflow: auto; background: #fff; border-radius: 12px; box-shadow: 0 18px 48px rgba(29, 33, 41, .22); }
+    .send-modal { width: min(760px, calc(100vw - 48px)); }
+    .modal-head { height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 0; font-size: 18px; font-weight: 700; color: var(--text); }
+    .modal-close { width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #9aa6b2; cursor: pointer; font-size: 24px; line-height: 1; }
+    .modal-close:hover { background: #f2f5f9; color: var(--text); }
+    .modal-body { padding: 18px 22px 8px; display: grid; gap: 16px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; align-items: end; }
+    .modal-field { display: grid; gap: 8px; }
+    .modal-field label { color: #4e5969; font-size: 13px; font-weight: 700; }
+    .required { color: #f53f3f; margin-right: 3px; }
+    .modal-input { height: 34px; width: 100%; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 12px; color: var(--text); outline: none; background: #fff; }
+    .modal-input::placeholder { color: #b8c2cc; }
+    .modal-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .inline-condition { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; }
+    .inline-condition span { color: var(--text); font-weight: 700; white-space: nowrap; }
+    .date-range-input { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; height: 34px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 12px; color: #b8c2cc; }
+    .date-range-input input { border: 0; outline: 0; min-width: 0; text-align: center; color: var(--text); background: transparent; }
+    .date-range-input input::placeholder { color: #b8c2cc; }
+    .date-range-input:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .conditional-field.hidden { display: none; }
+    .upload-box { border: 1px dashed #b8c6d6; border-radius: 10px; min-height: 96px; display: grid; place-items: center; gap: 6px; padding: 14px; color: #7a8795; background: #fbfdff; cursor: pointer; }
+    .upload-box strong { color: var(--blue); font-size: 13px; }
+    .upload-box input { display: none; }
+    .tag-picker { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: #fbfdff; }
+    .tag-choice { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: #4e5969; font-size: 12px; cursor: pointer; }
+    .tag-choice input { accent-color: var(--blue); }
+    .modal-help { color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .review-panel { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+    .review-head { height: 34px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border-bottom: 1px solid var(--line); font-weight: 800; color: #4e5969; font-size: 12px; }
+    .review-body { max-height: 190px; overflow: auto; }
+    .review-body table { min-width: 620px; font-size: 12px; }
+    .review-body th, .review-body td { padding: 8px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 12px; padding: 18px 22px 20px; border-top: 1px solid var(--line); }
+    .requirement-panel { order: 100; margin: 14px 18px 18px; padding: 14px 16px; background: #fbfdff; border: 1px solid var(--line); border-radius: 10px; color: #4e5969; font-size: 12px; line-height: 1.7; }
+    .requirement-panel h4 { margin: 0 0 10px; color: #1d2630; font-size: 14px; }
+    .requirement-grid { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start; gap: 16px 64px; }
+    .requirement-grid > div { flex: 0 1 280px; }
+    .requirement-grid strong { display: block; color: #344050; margin-bottom: 4px; font-size: 12px; }
+    .requirement-grid p { margin: 0; }
+    .requirement-grid ul { margin: 0; padding-left: 16px; }
+    .requirement-grid li { margin: 2px 0; }
+    @media (max-width: 760px) {
+      .modal-grid { grid-template-columns: 1fr; }
+      .requirement-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=coupon-modal">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" type="button">
+          <span>赛事管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" type="button">
+          <span>房间管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button">
+          <span>运营管理</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item active" href="coupon-config-admin.html">优惠券配置</a>
+          <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button">
+          <span>赛事注单</span>
+          <span class="menu-arrow">⌄</span>
+        </button>
+        <div class="submenu">
+          <a class="submenu-item" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+        <header class="topbar">
+          <div class="crumbs">
+            <span class="menu-icon">≡</span>
+            <strong>首页</strong>
+            <span>/</span>
+            <span>运营管理</span>
+            <span>/</span>
+            <span>优惠券配置</span>
+          </div>
+        </header>
+
+        <nav class="tabs">
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">赛事列表</a><button class="tab-close" type="button" aria-label="关闭赛事列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="match-recommend-admin.html">赛事推荐</a><button class="tab-close" type="button" aria-label="关闭赛事推荐">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-list-admin.html">房间列表</a><button class="tab-close" type="button" aria-label="关闭房间列表">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-template-admin.html">模板管理</a><button class="tab-close" type="button" aria-label="关闭模板管理">×</button></span>
+          <span class="tab"><a class="tab-link" href="room-play-type-admin.html">玩法类型</a><button class="tab-close" type="button" aria-label="关闭玩法类型">×</button></span>
+          <span class="tab"><a class="tab-link" href="banner-config-admin.html">BANNER配置</a><button class="tab-close" type="button" aria-label="关闭BANNER配置">×</button></span>
+          <span class="tab active"><a class="tab-link" href="coupon-config-admin.html">优惠券配置</a><button class="tab-close" type="button" aria-label="关闭优惠券配置">×</button></span>
+          <span class="tab"><a class="tab-link" href="recommended-team-admin.html">推荐队伍</a><button class="tab-close" type="button" aria-label="关闭推荐队伍">×</button></span>
+          <span class="tab"><a class="tab-link" href="robot-management-admin.html">机器人管理</a><button class="tab-close" type="button" aria-label="关闭机器人管理">×</button></span>
+          <span class="tab"><a class="tab-link" href="bet-order-list-admin.html">注单列表</a><button class="tab-close" type="button" aria-label="关闭注单列表">×</button></span>
+        </nav>
+
+        <section class="page-switch">
+          <button class="switch-btn active" type="button" data-page-tab="stats">优惠券使用统计</button>
+          <button class="switch-btn" type="button" data-page-tab="issueStats">优惠券发放统计</button>
+          <button class="switch-btn" type="button" data-page-tab="config">优惠券配置</button>
+          <button class="switch-btn" type="button" data-page-tab="systemRules">系统发放规则</button>
+        </section>
+
+        <section class="inner-switch" id="statDimensionTabs">
+          <button class="switch-btn active" type="button" data-stat-tab="time">时间维度</button>
+          <button class="switch-btn" type="button" data-stat-tab="user">用户维度</button>
+          <button class="switch-btn" type="button" data-stat-tab="coupon">优惠券维度</button>
+        </section>
+
+        <section class="filter-band" data-panel="stats">
+          <div class="filters">
+            <label class="filter-item panel-hidden" data-stat-filter="coupon">
+              <span class="label">优惠券ID</span>
+              <input class="field" id="couponStatCouponId" placeholder="请输入优惠券ID">
+            </label>
+            <label class="filter-item panel-hidden" data-stat-filter="user">
+              <span class="label">用户ID</span>
+              <input class="field" id="userStatUserId" placeholder="请输入用户ID">
+            </label>
+            <label class="filter-item panel-hidden" data-stat-filter="user">
+              <span class="label">发放方式</span>
+              <select class="field" id="userStatIssueMethod">
+                <option value="">请选择发放方式</option>
+                <option value="manual">手动发放</option>
+                <option value="system">系统发放</option>
+              </select>
+            </label>
+            <label class="filter-item panel-hidden" data-stat-filter="coupon">
+              <span class="label">发放方式</span>
+              <select class="field" id="couponStatIssueMethod">
+                <option value="">请选择发放方式</option>
+                <option value="manual">手动发放</option>
+                <option value="system">系统发放</option>
+              </select>
+            </label>
+            <label class="filter-item date">
+              <span class="label">统计时间</span>
+              <input class="field" id="statDateRange" placeholder="开始日期  -  结束日期">
+            </label>
+            <div class="filter-actions">
+              <button class="btn primary" id="statSearchBtn">搜索</button>
+              <button class="btn" id="statResetBtn">重置</button>
+              <button class="btn primary" id="statExportBtn">导出</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="filter-band panel-hidden" data-panel="config">
+          <div class="filters">
+            <label class="filter-item">
+              <span class="label">优惠券名称</span>
+              <input class="field" id="couponName" placeholder="请输入优惠券名称">
+            </label>
+            <label class="filter-item">
+              <span class="label">优惠类型</span>
+              <select class="field" id="couponType">
+                <option value="">请选择优惠类型</option>
+                <option value="discount">折扣券</option>
+                <option value="cash">满减券</option>
+                <option value="entry">报名费券</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">适用范围</span>
+              <select class="field" id="scope">
+                <option value="">请选择适用范围</option>
+                <option value="all">全部房间</option>
+                <option value="playType">指定玩法</option>
+                <option value="room">指定房间</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">发放方式</span>
+              <select class="field" id="issueMethod">
+                <option value="">请选择发放方式</option>
+                <option value="manual">手动发放</option>
+                <option value="system">系统发放</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">状态</span>
+              <select class="field" id="couponStatus">
+                <option value="">请选择状态</option>
+                <option value="online">上架</option>
+                <option value="offline">下架</option>
+              </select>
+            </label>
+            <label class="filter-item date">
+              <span class="label">有效期</span>
+              <input class="field" id="dateRange" placeholder="开始日期  -  结束日期">
+            </label>
+            <div class="filter-actions">
+              <button class="btn primary" id="searchBtn">搜索</button>
+              <button class="btn" id="resetBtn">重置</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="filter-band panel-hidden" data-panel="issueStats">
+          <div class="filters">
+            <label class="filter-item">
+              <span class="label">优惠券ID</span>
+              <input class="field" id="issueCouponId" placeholder="请输入优惠券ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">操作人</span>
+              <input class="field" id="issueOperator" placeholder="请输入操作人">
+            </label>
+            <label class="filter-item">
+              <span class="label">发放方式</span>
+              <select class="field" id="issueLogMethod">
+                <option value="">请选择发放方式</option>
+                <option value="manual">手动发放</option>
+                <option value="system">系统发放</option>
+              </select>
+            </label>
+            <label class="filter-item date">
+              <span class="label">发放时间</span>
+              <input class="field" id="issueLogDateRange" placeholder="开始日期  -  结束日期">
+            </label>
+            <div class="filter-actions">
+              <button class="btn primary" id="issueLogSearchBtn">搜索</button>
+              <button class="btn" id="issueLogResetBtn">重置</button>
+              <button class="btn primary" id="issueLogExportBtn">导出</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="filter-band panel-hidden" data-panel="systemRules">
+          <div class="filters">
+            <label class="filter-item">
+              <span class="label">规则名称</span>
+              <input class="field" id="ruleNameFilter" placeholder="请输入规则名称">
+            </label>
+            <label class="filter-item">
+              <span class="label">优惠券ID</span>
+              <input class="field" id="ruleCouponIdFilter" placeholder="请输入优惠券ID">
+            </label>
+            <label class="filter-item">
+              <span class="label">标签条件</span>
+              <select class="field" id="ruleTriggerFilter">
+                <option value="">请选择标签条件</option>
+                <option value="tag">标签等于</option>
+              </select>
+            </label>
+            <label class="filter-item">
+              <span class="label">状态</span>
+              <select class="field" id="ruleStatusFilter">
+                <option value="">请选择状态</option>
+                <option value="enabled">启用</option>
+                <option value="disabled">停用</option>
+              </select>
+            </label>
+            <div class="filter-actions">
+              <button class="btn primary" id="ruleSearchBtn">搜索</button>
+              <button class="btn" id="ruleResetBtn">重置</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="toolbar panel-hidden" data-panel="config">
+          <button class="pill-btn green" id="addCouponBtn">新增</button>
+          <button class="pill-btn green" id="sendCouponBtn">指定用户发送</button>
+          <button class="pill-btn green" id="systemRuleSendBtn">系统规则发送</button>
+        </section>
+
+        <section class="toolbar panel-hidden" data-panel="systemRules">
+          <button class="pill-btn green" id="addSystemRuleBtn">新增规则</button>
+        </section>
+
+        <section class="table-wrap panel-hidden" data-panel="issueStats">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>发放批次ID</th>
+                <th>优惠券ID</th>
+                <th>优惠券名称</th>
+                <th>发放方式</th>
+                <th>发放原因</th>
+                <th>发放人数</th>
+                <th>发放总张数</th>
+                <th>目标用户</th>
+                <th>操作人</th>
+                <th>发放时间</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="issueLogRows"></tbody>
+          </table>
+        </section>
+
+        <section class="requirement-panel panel-hidden" data-panel="issueStats">
+          <h4>优惠券发放统计需求</h4>
+          <div class="requirement-grid">
+            <div>
+              <strong>功能说明</strong>
+              <p>用于记录每次优惠券发放动作，形成批次级日志，便于追踪运营手动发放、系统发放和批量导入发放的结果。</p>
+            </div>
+            <div>
+              <strong>页面交互</strong>
+              <ul>
+                <li>点击搜索按筛选条件刷新发放日志。</li>
+                <li>点击重置清空优惠券ID、操作人、发放方式、发放时间。</li>
+                <li>点击导出导出当前筛选后的发放统计。</li>
+                <li>点击发放明细打开批次明细弹窗。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>筛选规则</strong>
+              <ul>
+                <li>优惠券ID支持精确或模糊查询。</li>
+                <li>操作人支持按后台账号或 system 查询。</li>
+                <li>发放方式枚举：手动发放、系统发放。</li>
+                <li>手动发放：后台运营通过指定用户发送或批量导入主动发放。</li>
+                <li>系统发放：系统根据活动、任务、规则自动触发发放。</li>
+                <li>发放时间按批次创建/执行时间范围过滤。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>字段说明</strong>
+              <ul>
+                <li>发放批次ID：一次发放动作的唯一标识。</li>
+                <li>发放人数/总张数：本批次覆盖用户数和优惠券数量。</li>
+                <li>目标用户：展示部分用户ID，完整数据在明细中查看。</li>
+                <li>状态枚举：发放成功、部分成功。</li>
+                <li>发放成功：本批次目标用户全部发放完成。</li>
+                <li>部分成功：本批次存在部分用户未发放成功，需要查看明细。</li>
+                <li>发放明细弹窗：展示用户ID、昵称、数量、结果、原因、时间。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="table-wrap stat-table" data-panel="stats" data-stat-panel="time">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>统计日期</th>
+                <th>发放券数</th>
+                <th>使用券数</th>
+                <th>未使用券数</th>
+                <th>锁定券数</th>
+                <th>过期券数</th>
+                <th>使用率</th>
+                <th>优惠金额</th>
+                <th>手动发放</th>
+                <th>系统发放</th>
+              </tr>
+            </thead>
+            <tbody id="timeStatRows"></tbody>
+          </table>
+        </section>
+
+        <section class="requirement-panel" data-panel="stats" data-stat-panel="time">
+          <h4>时间维度统计需求</h4>
+          <div class="requirement-grid">
+            <div>
+              <strong>功能说明</strong>
+              <p>按统计日期汇总优惠券发放、使用、未使用、锁定、过期和优惠金额，用于观察每天优惠券整体表现。</p>
+            </div>
+            <div>
+              <strong>页面交互</strong>
+              <ul>
+                <li>点击时间维度页签展示本表。</li>
+                <li>点击搜索按统计时间刷新数据。</li>
+                <li>点击重置清空统计时间。</li>
+                <li>点击导出导出当前时间维度统计。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>筛选规则</strong>
+              <ul>
+                <li>仅保留统计时间筛选。</li>
+                <li>默认按统计日期倒序展示，最新日期在第一行。</li>
+                <li>未选择日期时展示默认一个月统计周期数据。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>字段说明</strong>
+              <ul>
+                <li>统计日期：数据聚合日期。</li>
+                <li>发放券数/使用券数/未使用券数/锁定券数/过期券数：当日券状态数量。</li>
+                <li>使用率：使用券数 / 发放券数。</li>
+                <li>优惠金额：当日已使用优惠券产生的优惠总额。</li>
+                <li>发放来源枚举：手动发放、系统发放。</li>
+                <li>手动发放：后台运营通过指定用户发送或批量导入主动发放。</li>
+                <li>系统发放：系统根据活动、任务、规则自动触发发放。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="table-wrap stat-table panel-hidden" data-panel="stats" data-stat-panel="user">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>用户ID</th>
+                <th>用户昵称</th>
+                <th>持有券数</th>
+                <th>已使用券数</th>
+                <th>未使用券数</th>
+                <th>已锁定券数</th>
+                <th>已过期券数</th>
+                <th>累计优惠金额</th>
+                <th>上一次发放时间</th>
+                <th>最近使用时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="userStatRows"></tbody>
+          </table>
+        </section>
+
+        <section class="requirement-panel panel-hidden" data-panel="stats" data-stat-panel="user">
+          <h4>用户维度统计需求</h4>
+          <div class="requirement-grid">
+            <div>
+              <strong>功能说明</strong>
+              <p>按用户汇总优惠券持有、使用、锁定、过期和累计优惠金额，用于查看单个用户的券资产和使用情况。</p>
+            </div>
+            <div>
+              <strong>页面交互</strong>
+              <ul>
+                <li>点击用户维度页签展示本表。</li>
+                <li>点击搜索按用户筛选条件刷新数据。</li>
+                <li>点击重置清空用户维度筛选条件。</li>
+                <li>点击导出导出当前用户维度统计。</li>
+                <li>点击使用记录打开该用户优惠券使用记录弹窗。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>筛选规则</strong>
+              <ul>
+                <li>用户ID支持精确或模糊查询。</li>
+                <li>用户维度不提供优惠券ID筛选。</li>
+                <li>发放方式枚举：手动发放、系统发放。</li>
+                <li>手动发放：后台运营通过指定用户发送或批量导入主动发放。</li>
+                <li>系统发放：系统根据活动、任务、规则自动触发发放。</li>
+                <li>统计时间按用户券统计日期范围过滤。</li>
+                <li>默认按最近使用时间倒序，未使用用户排在后面。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>字段说明</strong>
+              <ul>
+                <li>持有券数：用户当前持有优惠券总数。</li>
+                <li>已使用/未使用/已锁定/已过期券数：用户券状态拆分。</li>
+                <li>累计优惠金额：用户使用优惠券累计节省金额。</li>
+                <li>上一次发放时间：最近一次收到优惠券的时间。</li>
+                <li>使用记录状态枚举：已使用、未使用、已锁定、已过期、已回退。</li>
+                <li>已使用：用户已在报名或指定场景中核销优惠券。</li>
+                <li>未使用：用户已领取但尚未核销。</li>
+                <li>已锁定：用户报名时系统已默认匹配并占用该券，等待报名、房间或比赛结果确认。</li>
+                <li>已过期：优惠券超过有效期且不可继续使用。</li>
+                <li>已回退：用户使用优惠券后因比赛未开始、比赛被下架等原因退回优惠券。</li>
+                <li>使用记录弹窗：展示优惠券ID、名称、优惠金额、使用场景、使用时间、状态。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="table-wrap stat-table panel-hidden" data-panel="stats" data-stat-panel="coupon">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>优惠券ID</th>
+                <th>优惠券名称</th>
+                <th>发放方式</th>
+                <th>发放券数</th>
+                <th>使用券数</th>
+                <th>未使用券数</th>
+                <th>锁定券数</th>
+                <th>过期券数</th>
+                <th>回退券数</th>
+                <th>使用率</th>
+                <th>优惠金额</th>
+                <th>领取用户数</th>
+                <th>使用用户数</th>
+                <th>最近发放时间</th>
+                <th>最近使用时间</th>
+              </tr>
+            </thead>
+            <tbody id="couponStatRows"></tbody>
+          </table>
+        </section>
+
+        <section class="requirement-panel panel-hidden" data-panel="stats" data-stat-panel="coupon">
+          <h4>优惠券维度统计需求</h4>
+          <div class="requirement-grid">
+            <div>
+              <strong>功能说明</strong>
+              <p>按优惠券ID汇总发放、使用、未使用、锁定、过期、回退和优惠金额，用于查看单张优惠券的整体效果。</p>
+            </div>
+            <div>
+              <strong>页面交互</strong>
+              <ul>
+                <li>点击优惠券维度页签展示本表。</li>
+                <li>点击搜索按优惠券ID、发放方式和统计时间刷新数据。</li>
+                <li>点击重置清空优惠券维度筛选条件。</li>
+                <li>点击导出导出当前优惠券维度统计。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>筛选规则</strong>
+              <ul>
+                <li>优惠券ID支持精确或模糊查询。</li>
+                <li>优惠券维度不提供用户ID筛选。</li>
+                <li>发放方式枚举：手动发放、系统发放。</li>
+                <li>手动发放：后台运营通过指定用户发送或批量导入主动发放。</li>
+                <li>系统发放：系统根据活动、任务、规则自动触发发放。</li>
+                <li>统计时间按优惠券统计日期范围过滤。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>字段说明</strong>
+              <ul>
+                <li>优惠券ID/名称：被统计的优惠券。</li>
+                <li>发放券数/使用券数/未使用券数/锁定券数/过期券数/回退券数：按优惠券ID聚合的状态数量。</li>
+                <li>使用率：使用券数 / 发放券数。</li>
+                <li>优惠金额：该优惠券累计产生的优惠总额。</li>
+                <li>领取用户数/使用用户数：领取和实际核销优惠券的用户数量。</li>
+                <li>最近发放时间/最近使用时间：该优惠券最近一次发放和使用时间。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="table-wrap panel-hidden" data-panel="config">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>租户</th>
+                <th>优惠券ID</th>
+                <th>优惠券名称</th>
+                <th>优惠类型</th>
+                <th>优惠内容</th>
+                <th>使用说明</th>
+                <th>发放方式</th>
+                <th>优惠上限</th>
+                <th>最低报名费</th>
+                <th>适用范围</th>
+                <th>可用房间数</th>
+                <th>每用户限用</th>
+                <th>开始时间</th>
+                <th>结束时间</th>
+                <th>前端展示</th>
+                <th>状态</th>
+                <th>修改人</th>
+                <th>修改时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+
+        <section class="requirement-panel panel-hidden" data-panel="config">
+          <h4>优惠券配置需求</h4>
+          <div class="requirement-grid">
+            <div>
+              <strong>功能说明</strong>
+              <p>用于维护平台优惠券基础配置，包括优惠类型、发放方式、适用范围、有效期、展示状态和上下架状态。</p>
+            </div>
+            <div>
+              <strong>页面交互</strong>
+              <ul>
+                <li>点击新增打开新增优惠券弹窗。</li>
+                <li>点击指定用户发送打开定向发放弹窗，支持单用户和文件批量导入。</li>
+                <li>用户报名时默认直接使用优惠券，不需要用户手动选择。</li>
+                <li>当用户拥有多张可用券时，系统按当前报名费实时计算每张券的实际减免金额，默认使用优惠力度最大的券。</li>
+                <li>优惠力度优先按实际减免金额比较；例如报名费100时50%折扣券优惠50，大于满减49，优先使用50%折扣券；报名费90时50%折扣券优惠45，小于满减49，优先使用满减49券。</li>
+                <li>当实际减免金额相同时，再按券类型优先级使用：报名费券、满减券、折扣券。</li>
+                <li>点击编辑进入当前优惠券配置编辑。</li>
+                <li>点击上架/下架切换优惠券可用状态。</li>
+                <li>点击删除删除优惠券配置。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>筛选规则</strong>
+              <ul>
+                <li>优惠券名称支持模糊查询。</li>
+                <li>优惠类型枚举：折扣券、满减券、报名费券。</li>
+                <li>折扣券：按报名费比例减免，配置折扣比例和优惠上限。</li>
+                <li>满减券：满足最低报名费后抵扣固定金额。</li>
+                <li>报名费券：针对报名费直接抵扣或减免。</li>
+                <li>适用范围枚举：全部房间、指定玩法、指定房间。</li>
+                <li>全部房间：所有满足时间和状态条件的房间均可使用。</li>
+                <li>指定玩法：仅指定玩法类型下的房间可使用。</li>
+                <li>指定房间：仅配置的具体房间可使用。</li>
+                <li>发放方式枚举：手动发放、系统发放。</li>
+                <li>手动发放：后台运营通过指定用户发送或批量导入主动发放。</li>
+                <li>系统发放：系统根据活动、任务、规则自动触发发放。</li>
+                <li>状态枚举：上架、下架。</li>
+                <li>上架：优惠券可被发放或使用。</li>
+                <li>下架：优惠券停止发放或不可继续使用。</li>
+                <li>有效期按开始时间和结束时间范围过滤。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>字段说明</strong>
+              <ul>
+                <li>优惠券ID/名称：券配置唯一标识和展示名称。</li>
+                <li>优惠内容：折扣比例、抵扣金额或报名费优惠。</li>
+                <li>优惠上限/最低报名费/每用户限用：使用限制规则，并参与计算当前报名费下的实际优惠金额。</li>
+                <li>可用房间数：当前适用范围匹配到的房间数量。</li>
+                <li>券实例状态枚举：未使用、已锁定、已使用、已过期、已回退。</li>
+                <li>未使用：用户已获得优惠券但尚未报名核销。</li>
+                <li>已锁定：用户进入报名支付流程时优惠券被系统占用，等待报名结果确认。</li>
+                <li>已使用：报名成功后优惠券完成核销。</li>
+                <li>已过期：超过有效期且不可继续使用。</li>
+                <li>已回退：比赛未开始、比赛被下架等场景导致已使用优惠券退回。</li>
+                <li>前端展示枚举：展示、不展示。</li>
+                <li>展示：用户端可以看到该优惠券入口或信息。</li>
+                <li>不展示：用户端隐藏该优惠券入口或信息。</li>
+                <li>指定用户发送弹窗：选择优惠券、填写发放原因、用户ID、数量，或上传文件进入导入审查。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="table-wrap panel-hidden" data-panel="systemRules">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>规则ID</th>
+                <th>规则名称</th>
+                <th>优惠券ID</th>
+                <th>优惠券名称</th>
+                <th>标签值</th>
+                <th>发放数量</th>
+                <th>发放原因</th>
+                <th>状态</th>
+                <th>发放后失效天数</th>
+                <th>修改人</th>
+                <th>修改时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="systemRuleRows"></tbody>
+          </table>
+        </section>
+
+        <section class="requirement-panel panel-hidden" data-panel="systemRules">
+          <h4>系统发放规则需求</h4>
+          <div class="requirement-grid">
+            <div>
+              <strong>功能说明</strong>
+              <p>用于维护系统自动发放优惠券的规则。当前触发条件先按用户标签发放，后续可扩展为注册、登录、充值、比赛行为等条件。</p>
+            </div>
+            <div>
+              <strong>页面交互</strong>
+              <ul>
+                <li>点击新增规则或优惠券配置页的系统规则发送，打开系统规则发送弹窗。</li>
+                <li>点击编辑进入规则编辑。</li>
+                <li>点击启用/停用切换规则状态。</li>
+                <li>点击删除删除当前规则配置。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>筛选规则</strong>
+              <ul>
+                <li>规则名称支持模糊查询。</li>
+                <li>优惠券ID支持精确或模糊查询。</li>
+                <li>标签条件枚举：标签等于。</li>
+                <li>标签等于：当用户命中所选标签时触发系统发放。</li>
+                <li>标签值枚举：新用户、高活跃、沉默召回、VIP用户、高价值用户、未首充。</li>
+                <li>状态枚举：启用、停用。</li>
+                <li>启用：规则开启后可自动触发发放。</li>
+                <li>停用：规则不会继续触发发放。</li>
+              </ul>
+            </div>
+            <div>
+              <strong>字段说明</strong>
+              <ul>
+                <li>规则ID/规则名称：系统发放规则的唯一标识和展示名称。</li>
+                <li>优惠券ID/名称：规则触发后发放的优惠券。</li>
+                <li>标签值：满足规则的人群标签，当前单选。</li>
+                <li>发放数量：符合条件的用户每人发放的优惠券数量。</li>
+                <li>发放原因：写入发放记录和用户券记录的原因。</li>
+                <li>发放后失效天数：优惠券发放成功后从发放时间起计算失效时间。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <footer class="summary">
+          <div class="pager-left">
+            <span id="countText">配置共 0 条数据</span>
+            <select class="page-size" aria-label="每页条数">
+              <option>10条/页</option>
+              <option selected>20条/页</option>
+              <option>50条/页</option>
+            </select>
+          </div>
+          <div class="pager-center">
+            <button class="page-btn ghost" type="button">‹</button>
+            <button class="page-btn active" type="button">1</button>
+            <button class="page-btn" type="button">2</button>
+            <button class="page-btn" type="button">3</button>
+            <button class="page-btn" type="button">4</button>
+            <button class="page-btn" type="button">5</button>
+            <button class="page-btn" type="button">6</button>
+            <span class="page-ellipsis">•••</span>
+            <button class="page-btn" type="button">136</button>
+            <button class="page-btn ghost" type="button">›</button>
+          </div>
+          <div class="pager-right">
+            <span>前往</span>
+            <input class="goto-input" value="1" aria-label="前往页码">
+            <span>页</span>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="couponModal" aria-hidden="true">
+    <section class="coupon-modal" role="dialog" aria-modal="true" aria-labelledby="couponModalTitle">
+      <header class="modal-head">
+        <h3 id="couponModalTitle">新增优惠券</h3>
+        <button class="modal-close" id="couponModalClose" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <section class="modal-grid">
+          <div class="modal-field">
+            <label><span class="required">*</span>优惠券名称</label>
+            <input class="modal-input" id="modalCouponName" placeholder="请输入优惠券名称">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>优惠类型</label>
+            <select class="modal-input" id="modalCouponType">
+              <option value="discount">折扣券</option>
+              <option value="cash">满减券</option>
+              <option value="entry">报名费券</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>折扣比例 / 面额</label>
+            <input class="modal-input" id="modalCouponValue" placeholder="例如 20 或 10">
+          </div>
+          <div class="modal-field">
+            <label>使用说明</label>
+            <input class="modal-input" id="modalCouponDesc" placeholder="例如 报名费优惠">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>发放方式</label>
+            <select class="modal-input" id="modalIssueMethod">
+              <option value="manual">手动发放</option>
+              <option value="system">系统发放</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label>优惠上限</label>
+            <input class="modal-input" id="modalCouponCap" placeholder="例如 10.00">
+          </div>
+          <div class="modal-field">
+            <label>最低报名费</label>
+            <input class="modal-input" id="modalMinEntry" placeholder="例如 1.00">
+          </div>
+          <div class="modal-field">
+            <label>每用户限用次数</label>
+            <input class="modal-input" id="modalUserLimit" placeholder="例如 1">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>适用范围</label>
+            <select class="modal-input" id="modalScope">
+              <option value="all">全部房间</option>
+              <option value="playType">指定玩法</option>
+              <option value="room">指定房间</option>
+            </select>
+          </div>
+          <div class="modal-field conditional-field hidden" id="playTypeField">
+            <label>玩法类型</label>
+            <select class="modal-input" id="modalPlayType">
+              <option value="">请选择玩法类型</option>
+              <option value="MEGA_CONTEST">Mega Contest</option>
+              <option value="WINNER_TAKE_ALL">Winner Take All</option>
+              <option value="HEAD_TO_HEAD">Head-to-Head</option>
+            </select>
+          </div>
+          <div class="modal-field conditional-field hidden" id="roomField">
+            <label>房间ID</label>
+            <input class="modal-input" id="modalRoomId" placeholder="请输入房间ID">
+          </div>
+          <div class="modal-field">
+            <label>前端展示</label>
+            <select class="modal-input" id="modalDisplay">
+              <option value="show">展示</option>
+              <option value="hide">不展示</option>
+            </select>
+          </div>
+        </section>
+        <div class="modal-field">
+          <label><span class="required">*</span>有效期</label>
+          <div class="date-range-input">
+            <input id="modalStartTime" placeholder="开始时间">
+            <span>-</span>
+            <input id="modalEndTime" placeholder="结束时间">
+          </div>
+        </div>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn" id="couponModalCancel" type="button">取消</button>
+        <button class="btn primary" id="couponModalConfirm" type="button">确定</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="modal-mask" id="sendCouponModal" aria-hidden="true">
+    <section class="coupon-modal send-modal" role="dialog" aria-modal="true" aria-labelledby="sendCouponTitle">
+      <header class="modal-head">
+        <h3 id="sendCouponTitle">指定用户发送</h3>
+        <button class="modal-close" id="sendCouponClose" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <section class="modal-grid">
+          <div class="modal-field">
+            <label><span class="required">*</span>选择优惠券</label>
+            <select class="modal-input" id="sendCouponSelect"></select>
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>发放原因</label>
+            <input class="modal-input" id="sendReason" placeholder="请输入发放原因">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>单个用户ID</label>
+            <input class="modal-input" id="singleUserId" placeholder="请输入用户ID">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>发放数量</label>
+            <input class="modal-input" id="sendCount" value="1">
+          </div>
+        </section>
+        <label class="upload-box" for="userFileInput">
+          <strong>上传文件批量导入</strong>
+          <span>支持 csv / xlsx，字段包含 user_id、数量、发放原因；上传后先进入审查，不会直接发放</span>
+          <input id="userFileInput" type="file" accept=".csv,.xlsx,.xls">
+        </label>
+        <section class="review-panel">
+          <div class="review-head">
+            <span>导入审查</span>
+            <span id="reviewSummary">待上传</span>
+          </div>
+          <div class="review-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>用户ID</th>
+                  <th>数量</th>
+                  <th>发放原因</th>
+                </tr>
+              </thead>
+              <tbody id="reviewRows">
+                <tr><td colspan="4">暂无导入数据</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn" id="sendCouponCancel" type="button">取消</button>
+        <button class="btn primary" id="sendCouponConfirm" type="button">确认发送</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="modal-mask" id="systemRuleModal" aria-hidden="true">
+    <section class="coupon-modal send-modal" role="dialog" aria-modal="true" aria-labelledby="systemRuleTitle">
+      <header class="modal-head">
+        <h3 id="systemRuleTitle">系统规则发送</h3>
+        <button class="modal-close" id="systemRuleClose" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <section class="modal-grid">
+          <div class="modal-field">
+            <label><span class="required">*</span>规则名称</label>
+            <input class="modal-input" id="systemRuleName" placeholder="请输入规则名称">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>选择优惠券</label>
+            <select class="modal-input" id="systemRuleCoupon"></select>
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>触发条件</label>
+            <div class="inline-condition">
+              <span>标签等于</span>
+              <select class="modal-input" id="systemRuleTag">
+                <option value="">请选择标签</option>
+                <option value="新用户">新用户</option>
+                <option value="高活跃">高活跃</option>
+                <option value="沉默召回">沉默召回</option>
+                <option value="VIP用户">VIP用户</option>
+                <option value="高价值用户">高价值用户</option>
+                <option value="未首充">未首充</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>符合条件的用户每人发放的优惠券数量</label>
+            <input class="modal-input" id="systemRuleCount" value="1">
+          </div>
+          <div class="modal-field">
+            <label><span class="required">*</span>发放原因</label>
+            <input class="modal-input" id="systemRuleReason" placeholder="请输入发放原因">
+          </div>
+          <div class="modal-field">
+            <label>规则状态</label>
+            <select class="modal-input" id="systemRuleStatus">
+              <option value="enabled">启用</option>
+              <option value="disabled">停用</option>
+            </select>
+          </div>
+        </section>
+        <div class="modal-field">
+          <label><span class="required">*</span>发放后几天失效</label>
+          <input class="modal-input" id="systemRuleExpireDays" value="7" placeholder="请输入失效天数">
+          <div class="modal-help">保存后进入“系统发放规则”表维护，命中标签用户时按规则发放优惠券，失效时间按发放后天数计算。</div>
+        </div>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn" id="systemRuleCancel" type="button">取消</button>
+        <button class="btn primary" id="systemRuleConfirm" type="button">保存规则</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="modal-mask" id="usageRecordModal" aria-hidden="true">
+    <section class="coupon-modal send-modal" role="dialog" aria-modal="true" aria-labelledby="usageRecordTitle">
+      <header class="modal-head">
+        <h3 id="usageRecordTitle">优惠券使用记录</h3>
+        <button class="modal-close" id="usageRecordClose" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <div class="section-title">
+          <span id="usageRecordSummary">用户使用记录</span>
+          <small>按最近使用时间倒序</small>
+        </div>
+        <section class="review-panel">
+          <div class="review-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>优惠券ID</th>
+                  <th>优惠券名称</th>
+                  <th>优惠金额</th>
+                  <th>使用场景</th>
+                  <th>使用时间</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody id="usageRecordRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn primary" id="usageRecordConfirm" type="button">关闭</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="modal-mask" id="issueDetailModal" aria-hidden="true">
+    <section class="coupon-modal send-modal" role="dialog" aria-modal="true" aria-labelledby="issueDetailTitle">
+      <header class="modal-head">
+        <h3 id="issueDetailTitle">发放明细</h3>
+        <button class="modal-close" id="issueDetailClose" type="button" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <div class="section-title">
+          <span id="issueDetailSummary">批次发放明细</span>
+          <small id="issueDetailMeta">共 0 人</small>
+        </div>
+        <section class="review-panel">
+          <div class="review-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>用户ID</th>
+                  <th>用户昵称</th>
+                  <th>发放数量</th>
+                  <th>发放结果</th>
+                  <th>发放原因</th>
+                  <th>发放时间</th>
+                </tr>
+              </thead>
+              <tbody id="issueDetailRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn primary" id="issueDetailConfirm" type="button">关闭</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">已操作</div>
+
+  <script>
+    const coupons = [
+      ["CP1001", "Crazy Week", "discount", "20% OFF", "Use for entry fee discounts", "manual", "10.00", "1.00", "all", 18, 1, "show", "online"],
+      ["CP1002", "New User First Entry", "cash", "₹10 OFF", "新用户报名费抵扣", "system", "10.00", "20.00", "playType", 6, 1, "show", "online"],
+      ["CP1003", "Mega Contest Boost", "discount", "15% OFF", "Mega 房间专属优惠", "manual", "8.00", "10.00", "room", 3, 2, "show", "online"],
+      ["CP1004", "Winner Rush", "entry", "₹5 ENTRY", "指定玩法报名优惠", "system", "5.00", "0.00", "playType", 4, 1, "hide", "offline"],
+      ["CP1005", "Weekend Entry Saver", "discount", "25% OFF", "周末报名费折扣", "manual", "12.00", "15.00", "all", 26, 1, "show", "online"],
+      ["CP1006", "Practice Contest Coupon", "cash", "₹3 OFF", "练习赛报名抵扣", "system", "3.00", "5.00", "playType", 8, 3, "hide", "offline"],
+      ["CP1007", "Head-to-Head Bonus", "discount", "10% OFF", "单挑房间优惠", "manual", "6.00", "10.00", "room", 2, 1, "show", "online"],
+      ["CP1008", "Limited Seats Reward", "cash", "₹8 OFF", "限座房报名抵扣", "manual", "8.00", "30.00", "all", 12, 1, "show", "online"],
+      ["CP1009", "Season Special", "discount", "30% OFF", "赛季活动折扣", "system", "15.00", "20.00", "playType", 7, 1, "hide", "offline"],
+      ["CP1010", "High Entry Saver", "cash", "₹20 OFF", "高报名费房间抵扣", "manual", "20.00", "100.00", "room", 1, 1, "show", "online"],
+      ["CP1011", "Small Entry Coupon", "entry", "₹1 ENTRY", "小额报名费优惠", "system", "1.00", "0.00", "all", 20, 5, "show", "online"],
+      ["CP1012", "Guaranteed Pool Coupon", "discount", "18% OFF", "奖池房间报名折扣", "manual", "9.00", "12.00", "playType", 5, 1, "show", "online"]
+    ].map((row, index) => ({
+      index: index + 1,
+      tenant: "000000",
+      couponId: row[0],
+      name: row[1],
+      type: row[2],
+      value: row[3],
+      desc: row[4],
+      issueMethod: row[5],
+      cap: row[6],
+      minEntry: row[7],
+      scope: row[8],
+      roomCount: row[9],
+      userLimit: row[10],
+      display: row[11],
+      status: row[12],
+      start: `2026-06-${String(1 + index).padStart(2, "0")} 00:00:00`,
+      end: `2026-06-${String(11 + index).padStart(2, "0")} 23:59:59`,
+      operator: index % 3 === 0 ? "admin" : "operator",
+      updatedAt: "2026-06-05 18:30:00"
+    }));
+
+    const extraCoupons = [
+      ["CP1013", "Beginner Friendly", "entry", "₹2 ENTRY", "新手房报名优惠", "system", "2.00", "0.00", "all", 15, 2, "show", "online"],
+      ["CP1014", "Private Room Saver", "cash", "₹6 OFF", "私密房报名抵扣", "manual", "6.00", "15.00", "room", 2, 1, "hide", "offline"],
+      ["CP1015", "Limited Seats Boost", "discount", "12% OFF", "限座玩法报名折扣", "system", "7.00", "12.00", "playType", 5, 1, "show", "online"],
+      ["CP1016", "Daily Login Reward", "cash", "₹4 OFF", "每日登录奖励", "system", "4.00", "8.00", "all", 21, 1, "show", "online"],
+      ["CP1017", "Room Challenge Coupon", "discount", "22% OFF", "挑战房报名折扣", "manual", "11.00", "25.00", "room", 4, 1, "show", "online"],
+      ["CP1018", "Big Pool Entry", "cash", "₹15 OFF", "大奖池报名抵扣", "manual", "15.00", "80.00", "playType", 6, 1, "hide", "offline"],
+      ["CP1019", "Return User Bonus", "entry", "₹3 ENTRY", "回流用户报名优惠", "system", "3.00", "0.00", "all", 16, 3, "show", "online"],
+      ["CP1020", "Final Sprint Saver", "discount", "16% OFF", "冲刺活动报名折扣", "manual", "10.00", "18.00", "playType", 7, 1, "show", "online"]
+    ];
+
+    extraCoupons.forEach((row) => {
+      const index = coupons.length;
+      coupons.push({
+        index: index + 1,
+        tenant: "000000",
+        couponId: row[0],
+        name: row[1],
+        type: row[2],
+        value: row[3],
+        desc: row[4],
+        issueMethod: row[5],
+        cap: row[6],
+        minEntry: row[7],
+        scope: row[8],
+        roomCount: row[9],
+        userLimit: row[10],
+        display: row[11],
+        status: row[12],
+        start: `2026-06-${String(1 + index).padStart(2, "0")} 00:00:00`,
+        end: `2026-06-${String(11 + index).padStart(2, "0")} 23:59:59`,
+        operator: index % 3 === 0 ? "admin" : "operator",
+        updatedAt: "2026-06-05 18:30:00"
+      });
+    });
+
+    const couponStats = Array.from({ length: 20 }, (_, index) => ({
+      couponId: coupons[index % coupons.length].couponId,
+      couponName: coupons[index % coupons.length].name,
+      issueMethod: index % 4 === 0 ? "system" : "manual",
+      userId: ["da8ms5g", "7gky466", "4kskw9s", "62pqk7v", "j87q4xnq", "xuwy2orm"][index % 6],
+      nickname: ["Amit", "Rahul", "Kiran", "Neha", "Vikram", "Isha"][index % 6],
+      total: 6 + index,
+      used: index % 5,
+      unused: 4 + (index % 4),
+      locked: index % 4,
+      expired: index % 3,
+      discountAmount: (12.5 + index * 4.8).toFixed(2),
+      lastIssuedAt: `2026-06-${String(10 - (index % 10)).padStart(2, "0")} 13:2${index % 10}:00`,
+      usedAt: index % 3 === 0 ? "--" : `2026-06-${String(10 - (index % 8)).padStart(2, "0")} 18:0${index % 10}:00`
+    }));
+
+    const couponDimensionStats = Array.from({ length: 20 }, (_, index) => {
+      const coupon = coupons[index % coupons.length];
+      const issued = 96 + index * 8;
+      const used = 35 + index * 3;
+      const returned = index % 5;
+      return {
+        couponId: coupon.couponId,
+        couponName: coupon.name,
+        issueMethod: coupon.issueMethod,
+        issued,
+        used,
+        locked: index % 7,
+        unused: Math.max(0, issued - used - (index % 6) - returned - (index % 7)),
+        expired: index % 6,
+        returned,
+        useRate: `${((used / issued) * 100).toFixed(2)}%`,
+        discountAmount: (used * (3.2 + index * .3)).toFixed(2),
+        receiveUsers: 42 + index * 2,
+        useUsers: 18 + index,
+        lastIssuedAt: `2026-06-${String(10 - (index % 10)).padStart(2, "0")} 13:${String(20 + index).padStart(2, "0")}:00`,
+        lastUsedAt: index % 4 === 0 ? "--" : `2026-06-${String(10 - (index % 8)).padStart(2, "0")} 18:${String(index).padStart(2, "0")}:00`
+      };
+    });
+
+    const timeStats = Array.from({ length: 20 }, (_, index) => {
+      const issued = 80 + index * 7;
+      const used = 32 + index * 5;
+      const locked = index % 5;
+      return {
+        date: `2026-${String(index < 10 ? 6 : 5).padStart(2, "0")}-${String(index < 10 ? 10 - index : 31 - (index - 10)).padStart(2, "0")}`,
+        issued,
+        used,
+        unused: issued - used - (index % 4) - locked,
+        locked,
+        expired: index % 4,
+        useRate: `${((used / issued) * 100).toFixed(2)}%`,
+        discountAmount: (used * 4.6).toFixed(2),
+        manual: 28 + index,
+        system: issued - 28 - index
+      };
+    });
+
+    const issueLogs = Array.from({ length: 20 }, (_, index) => {
+      const coupon = coupons[index % coupons.length];
+      const userCount = 4 + (index % 9);
+      const perUserCount = 1 + (index % 3);
+      return {
+        index: index + 1,
+        batchId: `ISS${String(2600 + index).padStart(4, "0")}`,
+        couponId: coupon.couponId,
+        couponName: coupon.name,
+        issueMethod: index % 4 === 0 ? "system" : "manual",
+        reason: ["运营活动补发", "新用户定向发放", "VIP用户权益", "客服补偿", "比赛取消补偿"][index % 5],
+        userCount,
+        totalCount: userCount * perUserCount,
+        users: ["da8ms5g", "7gky466", "4kskw9s", "62pqk7v", "j87q4xnq", "xuwy2orm"].slice(0, Math.min(4, userCount)).join("、") + (userCount > 4 ? " 等" : ""),
+        operator: index % 4 === 0 ? "system" : ["admin", "operator01", "service02"][index % 3],
+        issuedAt: `2026-06-${String(10 - (index % 10)).padStart(2, "0")} ${String(18 - (index % 8)).padStart(2, "0")}:30:00`,
+        status: index % 6 === 0 ? "partial" : "success"
+      };
+    }).sort((a, b) => dateValue(b.issuedAt) - dateValue(a.issuedAt));
+
+    const systemRules = Array.from({ length: 20 }, (_, index) => {
+      const coupon = coupons[index % coupons.length];
+      const tagGroups = [
+        ["新用户", "未首充"],
+        ["高活跃", "VIP用户"],
+        ["沉默召回"],
+        ["高价值用户", "VIP用户"],
+        ["新用户"]
+      ];
+      return {
+        index: index + 1,
+        ruleId: `SR${String(3001 + index)}`,
+        ruleName: ["新用户注册送券", "高活跃用户奖励", "沉默用户召回", "VIP权益发放", "首单转化补贴"][index % 5],
+        couponId: coupon.couponId,
+        couponName: coupon.name,
+        trigger: "tag",
+        tag: tagGroups[index % tagGroups.length][0],
+        count: 1 + (index % 3),
+        reason: ["标签人群自动发放", "运营规则自动发放", "用户分层激励", "召回活动补偿"][index % 4],
+        status: index % 4 === 0 ? "disabled" : "enabled",
+        expireDays: [3, 7, 14, 30][index % 4],
+        operator: index % 3 === 0 ? "admin" : "operator",
+        updatedAt: "2026-06-05 18:30:00"
+      };
+    });
+
+    const filters = { couponName: "", couponType: "", scope: "", issueMethod: "", couponStatus: "", dateRange: "" };
+    const issueLogFilters = { couponId: "", operator: "", issueMethod: "", dateRange: "" };
+    const userStatFilters = { userId: "", issueMethod: "", dateRange: "" };
+    const couponStatFilters = { couponId: "", issueMethod: "", dateRange: "" };
+    const systemRuleFilters = { ruleName: "", couponId: "", trigger: "", status: "" };
+    let currentPageTab = "stats";
+    let currentStatTab = "time";
+    const el = (id) => document.getElementById(id);
+    const statusText = { online: "上架", offline: "下架" };
+    const typeText = { discount: "折扣券", cash: "满减券", entry: "报名费券" };
+    const scopeText = { all: "全部房间", playType: "指定玩法", room: "指定房间" };
+    const displayText = { show: "展示", hide: "不展示" };
+    const issueText = { manual: "手动发放", system: "系统发放" };
+    const issueStatusText = { success: "发放成功", partial: "部分成功" };
+    const ruleTriggerText = { tag: "标签等于" };
+    const ruleStatusText = { enabled: "启用", disabled: "停用" };
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function dateValue(value) {
+      if (!value || value === "--") return 0;
+      return new Date(value.replace(" ", "T")).getTime();
+    }
+
+    function openCouponModal() {
+      el("modalCouponName").value = "";
+      el("modalCouponType").value = "discount";
+      el("modalCouponValue").value = "20";
+      el("modalCouponDesc").value = "Use for entry fee discounts";
+      el("modalIssueMethod").value = "manual";
+      el("modalCouponCap").value = "10.00";
+      el("modalMinEntry").value = "1.00";
+      el("modalUserLimit").value = "1";
+      el("modalScope").value = "all";
+      el("modalDisplay").value = "show";
+      updateScopeFields();
+      el("couponModal").classList.add("show");
+      el("couponModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeCouponModal() {
+      el("couponModal").classList.remove("show");
+      el("couponModal").setAttribute("aria-hidden", "true");
+    }
+
+    function updateScopeFields() {
+      const scope = el("modalScope").value;
+      el("playTypeField").classList.toggle("hidden", scope !== "playType");
+      el("roomField").classList.toggle("hidden", scope !== "room");
+    }
+
+    function filteredRows() {
+      return coupons.filter((item) => {
+        const name = !filters.couponName || item.name.toLowerCase().includes(filters.couponName.toLowerCase());
+        const type = !filters.couponType || item.type === filters.couponType;
+        const scope = !filters.scope || item.scope === filters.scope;
+        const issueMethod = !filters.issueMethod || item.issueMethod === filters.issueMethod;
+        const status = !filters.couponStatus || item.status === filters.couponStatus;
+        return name && type && scope && issueMethod && status;
+      });
+    }
+
+    function filteredIssueLogs() {
+      return issueLogs.filter((item) => {
+        const couponId = !issueLogFilters.couponId || item.couponId.toLowerCase().includes(issueLogFilters.couponId.toLowerCase());
+        const operator = !issueLogFilters.operator || item.operator.toLowerCase().includes(issueLogFilters.operator.toLowerCase());
+        const issueMethod = !issueLogFilters.issueMethod || item.issueMethod === issueLogFilters.issueMethod;
+        return couponId && operator && issueMethod;
+      });
+    }
+
+    function filteredUserStats() {
+      return couponStats.filter((item) => {
+        const userId = !userStatFilters.userId || item.userId.toLowerCase().includes(userStatFilters.userId.toLowerCase());
+        const issueMethod = !userStatFilters.issueMethod || item.issueMethod === userStatFilters.issueMethod;
+        return userId && issueMethod;
+      });
+    }
+
+    function filteredCouponStats() {
+      return couponDimensionStats.filter((item) => {
+        const couponId = !couponStatFilters.couponId || item.couponId.toLowerCase().includes(couponStatFilters.couponId.toLowerCase());
+        const issueMethod = !couponStatFilters.issueMethod || item.issueMethod === couponStatFilters.issueMethod;
+        return couponId && issueMethod;
+      });
+    }
+
+    function filteredSystemRules() {
+      return systemRules.filter((item) => {
+        const ruleName = !systemRuleFilters.ruleName || item.ruleName.toLowerCase().includes(systemRuleFilters.ruleName.toLowerCase());
+        const couponId = !systemRuleFilters.couponId || item.couponId.toLowerCase().includes(systemRuleFilters.couponId.toLowerCase());
+        const trigger = !systemRuleFilters.trigger || item.trigger === systemRuleFilters.trigger;
+        const status = !systemRuleFilters.status || item.status === systemRuleFilters.status;
+        return ruleName && couponId && trigger && status;
+      });
+    }
+
+    function renderTimeStats() {
+      el("timeStatRows").innerHTML = timeStats.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.date}</td>
+          <td>${item.issued}</td>
+          <td>${item.used}</td>
+          <td>${item.unused}</td>
+          <td>${item.locked}</td>
+          <td>${item.expired}</td>
+          <td>${item.useRate}</td>
+          <td>${item.discountAmount}</td>
+          <td>${item.manual}</td>
+          <td>${item.system}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="11">暂无时间维度统计数据</td></tr>`;
+    }
+
+    function renderUserStats() {
+      const rows = [...filteredUserStats()].sort((a, b) => dateValue(b.usedAt) - dateValue(a.usedAt));
+      el("userStatRows").innerHTML = rows.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.userId}</td>
+          <td>${item.nickname}</td>
+          <td>${item.total}</td>
+          <td>${item.used}</td>
+          <td>${item.unused}</td>
+          <td>${item.locked}</td>
+          <td>${item.expired}</td>
+          <td>${item.discountAmount}</td>
+          <td>${item.lastIssuedAt}</td>
+          <td>${item.usedAt}</td>
+          <td><button class="op edit" data-user-record="${item.userId}">使用记录</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="12">暂无用户券统计数据</td></tr>`;
+      document.querySelectorAll("[data-user-record]").forEach((button) => {
+        button.addEventListener("click", () => openUsageRecordModal(button.dataset.userRecord));
+      });
+    }
+
+    function renderIssueLogs() {
+      const rows = filteredIssueLogs();
+      el("issueLogRows").innerHTML = rows.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.batchId}</td>
+          <td>${item.couponId}</td>
+          <td class="coupon-name" title="${item.couponName}">${item.couponName}</td>
+          <td><span class="tag ${item.issueMethod === "manual" ? "orange" : "blue"}">${issueText[item.issueMethod]}</span></td>
+          <td class="coupon-name" title="${item.reason}">${item.reason}</td>
+          <td>${item.userCount}</td>
+          <td>${item.totalCount}</td>
+          <td class="coupon-name" title="${item.users}">${item.users}</td>
+          <td>${item.operator}</td>
+          <td>${item.issuedAt}</td>
+          <td><span class="tag ${item.status === "success" ? "green" : "orange"}">${issueStatusText[item.status]}</span></td>
+          <td><button class="op edit" data-issue-detail="${item.batchId}">发放明细</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="13">暂无优惠券发放统计数据</td></tr>`;
+      document.querySelectorAll("[data-issue-detail]").forEach((button) => {
+        button.addEventListener("click", () => openIssueDetailModal(button.dataset.issueDetail));
+      });
+      updatePagerText();
+    }
+
+    function updatePagerText() {
+      if (currentPageTab === "config") {
+        el("countText").textContent = `配置共 ${filteredRows().length} 条数据`;
+        return;
+      }
+      if (currentPageTab === "issueStats") {
+        el("countText").textContent = `发放统计共 ${filteredIssueLogs().length} 条数据`;
+        return;
+      }
+      if (currentPageTab === "systemRules") {
+        el("countText").textContent = `规则共 ${filteredSystemRules().length} 条数据`;
+        return;
+      }
+      const countMap = { time: timeStats.length, user: filteredUserStats().length, coupon: filteredCouponStats().length };
+      const nameMap = { time: "时间维度", user: "用户维度", coupon: "优惠券维度" };
+      el("countText").textContent = `${nameMap[currentStatTab]}共 ${countMap[currentStatTab]} 条数据`;
+    }
+
+    function renderRows() {
+      const rows = filteredRows();
+      el("rows").innerHTML = rows.map((item) => `
+        <tr>
+          <td>${item.index}</td>
+          <td class="muted">${item.tenant}</td>
+          <td>${item.couponId}</td>
+          <td class="coupon-name" title="${item.name}">${item.name}</td>
+          <td><span class="tag blue">${typeText[item.type]}</span></td>
+          <td>${item.value}</td>
+          <td class="coupon-name" title="${item.desc}">${item.desc}</td>
+          <td><span class="tag ${item.issueMethod === "manual" ? "orange" : "blue"}">${issueText[item.issueMethod]}</span></td>
+          <td>${item.cap}</td>
+          <td>${item.minEntry}</td>
+          <td><span class="tag ${item.scope === "all" ? "green" : "orange"}">${scopeText[item.scope]}</span></td>
+          <td>${item.roomCount}</td>
+          <td>${item.userLimit}</td>
+          <td>${item.start}</td>
+          <td>${item.end}</td>
+          <td><span class="tag ${item.display === "show" ? "green" : "gray"}">${displayText[item.display]}</span></td>
+          <td><span class="tag ${item.status === "online" ? "green" : "gray"}">${statusText[item.status]}</span></td>
+          <td>${item.operator}</td>
+          <td class="muted">${item.updatedAt}</td>
+          <td><button class="op edit">编辑</button><button class="op toggle">${item.status === "online" ? "下架" : "上架"}</button><button class="op delete">删除</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="20">暂无优惠券数据</td></tr>`;
+      document.querySelectorAll("#rows .op").forEach((button) => {
+        button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交"));
+      });
+      updatePagerText();
+    }
+
+    function renderStats() {
+      renderTimeStats();
+      renderUserStats();
+      renderCouponStats();
+      updatePagerText();
+    }
+
+    function renderCouponStats() {
+      const rows = filteredCouponStats();
+      el("couponStatRows").innerHTML = rows.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.couponId}</td>
+          <td class="coupon-name" title="${item.couponName}">${item.couponName}</td>
+          <td><span class="tag ${item.issueMethod === "manual" ? "orange" : "blue"}">${issueText[item.issueMethod]}</span></td>
+          <td>${item.issued}</td>
+          <td>${item.used}</td>
+          <td>${item.unused}</td>
+          <td>${item.locked}</td>
+          <td>${item.expired}</td>
+          <td>${item.returned}</td>
+          <td>${item.useRate}</td>
+          <td>${item.discountAmount}</td>
+          <td>${item.receiveUsers}</td>
+          <td>${item.useUsers}</td>
+          <td>${item.lastIssuedAt}</td>
+          <td>${item.lastUsedAt}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="16">暂无优惠券维度统计数据</td></tr>`;
+    }
+
+    function renderSystemRules() {
+      const rows = filteredSystemRules();
+      el("systemRuleRows").innerHTML = rows.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.ruleId}</td>
+          <td class="coupon-name" title="${item.ruleName}">${item.ruleName}</td>
+          <td>${item.couponId}</td>
+          <td class="coupon-name" title="${item.couponName}">${item.couponName}</td>
+          <td><span class="tag green">${item.tag}</span></td>
+          <td>${item.count}</td>
+          <td class="coupon-name" title="${item.reason}">${item.reason}</td>
+          <td><span class="tag ${item.status === "enabled" ? "green" : "gray"}">${ruleStatusText[item.status]}</span></td>
+          <td>${item.expireDays} 天</td>
+          <td>${item.operator}</td>
+          <td class="muted">${item.updatedAt}</td>
+          <td><button class="op edit">编辑</button><button class="op toggle">${item.status === "enabled" ? "停用" : "启用"}</button><button class="op delete">删除</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="13">暂无系统发放规则数据</td></tr>`;
+      document.querySelectorAll("#systemRuleRows .op").forEach((button) => {
+        button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交"));
+      });
+      updatePagerText();
+    }
+
+    function switchPageTab(tab) {
+      currentPageTab = tab;
+      document.querySelectorAll("[data-page-tab]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.pageTab === tab);
+      });
+      document.querySelectorAll("[data-panel]").forEach((node) => {
+        node.classList.toggle("panel-hidden", node.dataset.panel !== tab);
+      });
+      el("statDimensionTabs").classList.toggle("panel-hidden", tab !== "stats");
+      if (tab === "stats") {
+        switchStatTab(currentStatTab);
+      }
+      updatePagerText();
+    }
+
+    function switchStatTab(tab) {
+      currentStatTab = tab;
+      document.querySelectorAll("[data-stat-tab]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.statTab === tab);
+      });
+      document.querySelectorAll("[data-stat-panel]").forEach((node) => {
+        const shouldShow = currentPageTab === "stats" && node.dataset.statPanel === tab;
+        node.classList.toggle("panel-hidden", !shouldShow);
+      });
+      document.querySelectorAll("[data-stat-filter]").forEach((node) => {
+        const shouldShow = currentPageTab === "stats" && node.dataset.statFilter === tab;
+        node.classList.toggle("panel-hidden", !shouldShow);
+      });
+      updatePagerText();
+    }
+
+    function openUsageRecordModal(userId) {
+      const user = couponStats.find((item) => item.userId === userId);
+      const recordStatusList = ["已使用", "已锁定", "已回退", "已使用", "已使用"];
+      const recordStatusClass = { 已使用: "green", 未使用: "gray", 已锁定: "blue", 已过期: "gray", 已回退: "orange" };
+      const records = Array.from({ length: Math.max(3, Math.min(8, user?.used || 3)) }, (_, index) => {
+        const coupon = coupons[(index + (user?.total || 0)) % coupons.length];
+        return {
+          couponId: coupon.couponId,
+          couponName: coupon.name,
+          amount: (3.5 + index * 2.2).toFixed(2),
+          scene: ["报名费抵扣", "Mega Contest", "热门赛事房间", "新用户活动"][index % 4],
+          usedAt: `2026-06-${String(10 - index).padStart(2, "0")} ${String(18 - index).padStart(2, "0")}:0${index}:00`,
+          status: recordStatusList[index % recordStatusList.length]
+        };
+      });
+      el("usageRecordSummary").textContent = `${userId} / ${user?.nickname || "-"} 的使用记录`;
+      el("usageRecordRows").innerHTML = records.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.couponId}</td>
+          <td class="coupon-name" title="${item.couponName}">${item.couponName}</td>
+          <td>${item.amount}</td>
+          <td>${item.scene}</td>
+          <td>${item.usedAt}</td>
+          <td><span class="tag ${recordStatusClass[item.status] || "gray"}">${item.status}</span></td>
+        </tr>
+      `).join("");
+      el("usageRecordModal").classList.add("show");
+      el("usageRecordModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeUsageRecordModal() {
+      el("usageRecordModal").classList.remove("show");
+      el("usageRecordModal").setAttribute("aria-hidden", "true");
+    }
+
+    function openIssueDetailModal(batchId) {
+      const log = issueLogs.find((item) => item.batchId === batchId);
+      const users = ["da8ms5g", "7gky466", "4kskw9s", "62pqk7v", "j87q4xnq", "xuwy2orm", "a1m9k2s", "b8r4p0q", "c6n3x8z", "d2u7w1e"];
+      const rows = Array.from({ length: log?.userCount || 6 }, (_, index) => ({
+        userId: users[index % users.length],
+        nickname: ["Amit", "Rahul", "Kiran", "Neha", "Vikram", "Isha", "Ravi", "Maya", "Dev", "Sara"][index % 10],
+        count: Math.max(1, Math.floor((log?.totalCount || 10) / (log?.userCount || 6))),
+        result: index === 3 && log?.status === "partial" ? "失败" : "成功",
+        reason: log?.reason || "运营活动补发",
+        issuedAt: log?.issuedAt || "2026-06-10 18:30:00"
+      }));
+      el("issueDetailSummary").textContent = `${batchId} / ${log?.couponName || "-"} 发放明细`;
+      el("issueDetailMeta").textContent = `共 ${rows.length} 人，${log?.totalCount || 0} 张`;
+      el("issueDetailRows").innerHTML = rows.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.userId}</td>
+          <td>${item.nickname}</td>
+          <td>${item.count}</td>
+          <td><span class="tag ${item.result === "成功" ? "green" : "red"}">${item.result}</span></td>
+          <td>${item.reason}</td>
+          <td>${item.issuedAt}</td>
+        </tr>
+      `).join("");
+      el("issueDetailModal").classList.add("show");
+      el("issueDetailModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeIssueDetailModal() {
+      el("issueDetailModal").classList.remove("show");
+      el("issueDetailModal").setAttribute("aria-hidden", "true");
+    }
+
+    function openSendCouponModal() {
+      el("sendCouponSelect").innerHTML = coupons.map((item) => `<option value="${item.couponId}">${item.couponId} - ${item.name}</option>`).join("");
+      el("singleUserId").value = "";
+      el("sendReason").value = "";
+      el("sendCount").value = "1";
+      el("reviewSummary").textContent = "待上传";
+      el("reviewRows").innerHTML = `<tr><td colspan="4">暂无导入数据</td></tr>`;
+      el("sendCouponModal").classList.add("show");
+      el("sendCouponModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeSendCouponModal() {
+      el("sendCouponModal").classList.remove("show");
+      el("sendCouponModal").setAttribute("aria-hidden", "true");
+    }
+
+    function openSystemRuleModal() {
+      el("systemRuleName").value = "";
+      el("systemRuleCoupon").innerHTML = coupons.map((item) => `<option value="${item.couponId}">${item.couponId} - ${item.name}</option>`).join("");
+      el("systemRuleTag").value = "";
+      el("systemRuleCount").value = "1";
+      el("systemRuleReason").value = "";
+      el("systemRuleStatus").value = "enabled";
+      el("systemRuleExpireDays").value = "7";
+      el("systemRuleModal").classList.add("show");
+      el("systemRuleModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeSystemRuleModal() {
+      el("systemRuleModal").classList.remove("show");
+      el("systemRuleModal").setAttribute("aria-hidden", "true");
+    }
+
+    function saveSystemRule() {
+      const tag = el("systemRuleTag").value;
+      const coupon = coupons.find((item) => item.couponId === el("systemRuleCoupon").value) || coupons[0];
+      if (!el("systemRuleName").value.trim() || !tag || !el("systemRuleReason").value.trim() || !el("systemRuleCount").value.trim() || !el("systemRuleExpireDays").value.trim()) {
+        showToast("请填写规则名称、标签、发放原因、发放数量和失效天数");
+        return;
+      }
+      systemRules.unshift({
+        index: systemRules.length + 1,
+        ruleId: `SR${String(3001 + systemRules.length)}`,
+        ruleName: el("systemRuleName").value.trim(),
+        couponId: coupon.couponId,
+        couponName: coupon.name,
+        trigger: "tag",
+        tag,
+        count: el("systemRuleCount").value.trim(),
+        reason: el("systemRuleReason").value.trim(),
+        status: el("systemRuleStatus").value,
+        expireDays: el("systemRuleExpireDays").value.trim(),
+        operator: "admin",
+        updatedAt: "2026-06-10 18:30:00"
+      });
+      closeSystemRuleModal();
+      renderSystemRules();
+      switchPageTab("systemRules");
+      showToast("系统发放规则已保存");
+    }
+
+    function reviewUploadedUsers(fileName) {
+      const rows = [
+        ["da8ms5g", 1, "活动补偿"],
+        ["7gky466", 1, "新用户奖励"],
+        ["4kskw9s", 2, "VIP用户加发"],
+        ["bad_user_01", 1, "用户ID待确认"],
+        ["62pqk7v", 1, "客服补发"]
+      ];
+      el("reviewSummary").textContent = `${fileName}：共 ${rows.length} 条待发送`;
+      el("reviewRows").innerHTML = rows.map((row, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${row[0]}</td>
+          <td>${row[1]}</td>
+          <td>${row[2]}</td>
+        </tr>
+      `).join("");
+    }
+
+    function bindSidebarAccordion() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      const closeOthers = (activeSection) => {
+        sections.forEach((section) => {
+          if (section !== activeSection) section.classList.add("collapsed");
+        });
+      };
+      sections.forEach((section) => {
+        const toggle = section.querySelector(".menu-title");
+        toggle.addEventListener("click", () => {
+          const willOpen = section.classList.contains("collapsed");
+          section.classList.toggle("collapsed");
+          if (willOpen) closeOthers(section);
+        });
+      });
+      document.querySelectorAll(".submenu-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const activeSection = item.closest(".menu-section");
+          activeSection.classList.remove("collapsed");
+          closeOthers(activeSection);
+        });
+      });
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      if (activeSection) {
+        activeSection.classList.remove("collapsed");
+        closeOthers(activeSection);
+      }
+    }
+
+    function bind() {
+      document.querySelectorAll("[data-page-tab]").forEach((button) => {
+        button.addEventListener("click", () => switchPageTab(button.dataset.pageTab));
+      });
+      document.querySelectorAll("[data-stat-tab]").forEach((button) => {
+        button.addEventListener("click", () => switchStatTab(button.dataset.statTab));
+      });
+      el("statSearchBtn").addEventListener("click", () => {
+        renderStats();
+        showToast("统计筛选已刷新");
+      });
+      el("statExportBtn").addEventListener("click", () => {
+        const nameMap = { time: "时间维度", user: "用户维度", coupon: "优惠券维度" };
+        showToast(`${nameMap[currentStatTab]}统计已导出`);
+      });
+      el("statResetBtn").addEventListener("click", () => {
+        Object.keys(userStatFilters).forEach((key) => userStatFilters[key] = "");
+        Object.keys(couponStatFilters).forEach((key) => couponStatFilters[key] = "");
+        ["statDateRange", "userStatUserId", "userStatIssueMethod", "couponStatCouponId", "couponStatIssueMethod"].forEach((id) => el(id).value = "");
+        renderStats();
+      });
+      el("userStatUserId").addEventListener("input", (event) => userStatFilters.userId = event.target.value);
+      el("userStatIssueMethod").addEventListener("input", (event) => userStatFilters.issueMethod = event.target.value);
+      el("couponStatCouponId").addEventListener("input", (event) => couponStatFilters.couponId = event.target.value);
+      el("couponStatIssueMethod").addEventListener("input", (event) => couponStatFilters.issueMethod = event.target.value);
+      el("statDateRange").addEventListener("input", (event) => {
+        userStatFilters.dateRange = event.target.value;
+        couponStatFilters.dateRange = event.target.value;
+      });
+      el("issueCouponId").addEventListener("input", (event) => issueLogFilters.couponId = event.target.value);
+      el("issueOperator").addEventListener("input", (event) => issueLogFilters.operator = event.target.value);
+      el("issueLogMethod").addEventListener("input", (event) => issueLogFilters.issueMethod = event.target.value);
+      el("issueLogDateRange").addEventListener("input", (event) => issueLogFilters.dateRange = event.target.value);
+      el("issueLogSearchBtn").addEventListener("click", () => {
+        renderIssueLogs();
+        showToast("发放统计筛选已刷新");
+      });
+      el("issueLogExportBtn").addEventListener("click", () => {
+        showToast("优惠券发放统计已导出");
+      });
+      el("issueLogResetBtn").addEventListener("click", () => {
+        Object.keys(issueLogFilters).forEach((key) => issueLogFilters[key] = "");
+        ["issueCouponId", "issueOperator", "issueLogMethod", "issueLogDateRange"].forEach((id) => el(id).value = "");
+        renderIssueLogs();
+      });
+      el("ruleNameFilter").addEventListener("input", (event) => systemRuleFilters.ruleName = event.target.value);
+      el("ruleCouponIdFilter").addEventListener("input", (event) => systemRuleFilters.couponId = event.target.value);
+      el("ruleTriggerFilter").addEventListener("input", (event) => systemRuleFilters.trigger = event.target.value);
+      el("ruleStatusFilter").addEventListener("input", (event) => systemRuleFilters.status = event.target.value);
+      el("ruleSearchBtn").addEventListener("click", () => {
+        renderSystemRules();
+        showToast("系统发放规则筛选已刷新");
+      });
+      el("ruleResetBtn").addEventListener("click", () => {
+        Object.keys(systemRuleFilters).forEach((key) => systemRuleFilters[key] = "");
+        ["ruleNameFilter", "ruleCouponIdFilter", "ruleTriggerFilter", "ruleStatusFilter"].forEach((id) => el(id).value = "");
+        renderSystemRules();
+      });
+      el("couponName").addEventListener("input", (event) => filters.couponName = event.target.value);
+      el("couponType").addEventListener("input", (event) => filters.couponType = event.target.value);
+      el("scope").addEventListener("input", (event) => filters.scope = event.target.value);
+      el("issueMethod").addEventListener("input", (event) => filters.issueMethod = event.target.value);
+      el("couponStatus").addEventListener("input", (event) => filters.couponStatus = event.target.value);
+      el("dateRange").addEventListener("input", (event) => filters.dateRange = event.target.value);
+      el("searchBtn").addEventListener("click", renderRows);
+      el("resetBtn").addEventListener("click", () => {
+        Object.keys(filters).forEach((key) => filters[key] = "");
+        ["couponName", "couponType", "scope", "issueMethod", "couponStatus", "dateRange"].forEach((id) => el(id).value = "");
+        renderRows();
+      });
+      el("addCouponBtn").addEventListener("click", openCouponModal);
+      el("sendCouponBtn").addEventListener("click", openSendCouponModal);
+      el("systemRuleSendBtn").addEventListener("click", openSystemRuleModal);
+      el("addSystemRuleBtn").addEventListener("click", openSystemRuleModal);
+      el("couponModalClose").addEventListener("click", closeCouponModal);
+      el("couponModalCancel").addEventListener("click", closeCouponModal);
+      el("couponModalConfirm").addEventListener("click", () => {
+        closeCouponModal();
+        showToast("新增优惠券已提交");
+      });
+      el("couponModal").addEventListener("click", (event) => {
+        if (event.target === el("couponModal")) closeCouponModal();
+      });
+      el("modalScope").addEventListener("input", updateScopeFields);
+      el("sendCouponClose").addEventListener("click", closeSendCouponModal);
+      el("sendCouponCancel").addEventListener("click", closeSendCouponModal);
+      el("sendCouponConfirm").addEventListener("click", () => {
+        if (!el("sendReason").value.trim() || !el("singleUserId").value.trim() || !el("sendCount").value.trim()) {
+          showToast("请填写发放原因、单个用户ID和发放数量");
+          return;
+        }
+        closeSendCouponModal();
+        showToast("指定用户发送已提交");
+      });
+      el("sendCouponModal").addEventListener("click", (event) => {
+        if (event.target === el("sendCouponModal")) closeSendCouponModal();
+      });
+      el("systemRuleClose").addEventListener("click", closeSystemRuleModal);
+      el("systemRuleCancel").addEventListener("click", closeSystemRuleModal);
+      el("systemRuleConfirm").addEventListener("click", saveSystemRule);
+      el("systemRuleModal").addEventListener("click", (event) => {
+        if (event.target === el("systemRuleModal")) closeSystemRuleModal();
+      });
+      el("usageRecordClose").addEventListener("click", closeUsageRecordModal);
+      el("usageRecordConfirm").addEventListener("click", closeUsageRecordModal);
+      el("usageRecordModal").addEventListener("click", (event) => {
+        if (event.target === el("usageRecordModal")) closeUsageRecordModal();
+      });
+      el("issueDetailClose").addEventListener("click", closeIssueDetailModal);
+      el("issueDetailConfirm").addEventListener("click", closeIssueDetailModal);
+      el("issueDetailModal").addEventListener("click", (event) => {
+        if (event.target === el("issueDetailModal")) closeIssueDetailModal();
+      });
+      el("userFileInput").addEventListener("change", (event) => {
+        const file = event.target.files?.[0];
+        if (file) reviewUploadedUsers(file.name);
+      });
+      document.querySelectorAll(".tab-close").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          button.closest(".tab").remove();
+        });
+      });
+      bindSidebarAccordion();
+    }
+
+    renderStats();
+    renderRows();
+    renderIssueLogs();
+    renderSystemRules();
+    switchPageTab("stats");
+    switchStatTab("time");
+    bind();
+  </script>
+</body>
+</html>

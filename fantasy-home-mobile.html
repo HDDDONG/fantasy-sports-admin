@@ -1,0 +1,4326 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育前端 - 一级菜单首页</title>
+  <style>
+    :root {
+      --bg: #303030;
+      --canvas: #ffffff;
+      --phone: #101514;
+      --panel: #232624;
+      --panel-soft: #1b201f;
+      --card: #202321;
+      --line: rgba(255, 255, 255, 0.08);
+      --text: #f5f8f5;
+      --muted: #9aa29f;
+      --green: #19ef75;
+      --green-dark: #0bb857;
+      --pink: #ff2e71;
+      --gold: #ffbd28;
+      --blue: #30a7ff;
+      --shadow: 0 18px 46px rgba(0, 0, 0, 0.36);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--canvas);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: start center;
+      padding: 20px 12px;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .prototype-shell {
+      display: grid;
+      grid-template-columns: 178px minmax(0, 430px) 300px;
+      column-gap: 42px;
+      row-gap: 16px;
+      align-items: start;
+      width: min(100%, 1020px);
+    }
+
+    .quick-nav {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      padding-top: 0;
+    }
+
+    .quick-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .quick-page-btn {
+      display: flex;
+      align-items: center;
+      width: 178px;
+      min-height: 44px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #d9d9d9;
+      color: #111111;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .quick-page-btn::before {
+      content: none;
+    }
+
+    .quick-page-btn.active {
+      color: #111111;
+      border-color: transparent;
+      background: #bcbcbc;
+    }
+
+    .quick-subnav {
+      display: none;
+      gap: 6px;
+      padding-left: 18px;
+    }
+
+    .quick-group.open .quick-subnav {
+      display: grid;
+    }
+
+    .quick-sub-btn {
+      min-height: 34px;
+      padding: 0 10px;
+      background: #d9d9d9;
+      color: #111111;
+      font-size: 12px;
+      font-weight: 750;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .quick-sub-btn.active {
+      background: #bcbcbc;
+      color: #111111;
+    }
+
+    .quick-sub-btn.quick-sub-child {
+      margin-left: 14px;
+      font-size: 11px;
+    }
+
+    .doc-panel {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      min-height: min(900px, calc(100vh - 40px));
+      padding: 18px 16px;
+      border: 1px solid #e2e6eb;
+      background: #ffffff;
+      color: #202a3f;
+      box-shadow: 0 14px 34px rgba(22, 32, 46, 0.08);
+    }
+
+    .doc-panel h2,
+    .doc-panel h3,
+    .doc-panel p {
+      margin: 0;
+    }
+
+    .doc-panel h2 {
+      font-size: 18px;
+      font-weight: 900;
+      color: #1f2938;
+    }
+
+    .doc-panel h3 {
+      padding-top: 4px;
+      color: #1f2938;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .doc-panel p,
+    .doc-panel li {
+      color: #637083;
+      font-size: 12px;
+      line-height: 1.62;
+    }
+
+    .doc-panel ul {
+      display: grid;
+      gap: 5px;
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .phone {
+      position: relative;
+      width: min(430px, 100%);
+      height: min(900px, calc(100vh - 40px));
+      min-height: 720px;
+      overflow: hidden;
+      border: 0;
+      background: var(--phone);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 58px;
+      padding: 10px 14px 8px;
+      background: linear-gradient(180deg, #101a16 0%, #101514 100%);
+    }
+
+    .brand {
+      width: 58px;
+      min-width: 58px;
+      color: #fff;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 28px;
+      font-style: italic;
+      font-weight: 800;
+      line-height: 1;
+      text-shadow: 0 2px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .wallet {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 110px;
+      height: 38px;
+      padding: 4px 5px 4px 8px;
+      border-radius: 8px;
+      background: #2b302e;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .coin {
+      display: grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ffd05e, #eaa415);
+      color: #fff;
+      font-size: 17px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+    }
+
+    .add-money {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      margin-left: auto;
+      border-radius: 8px;
+      background: var(--green);
+      color: #0b1a12;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .icon-btn {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: 9px;
+      background: #2a2f2b;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .avatar {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: 50%;
+      background: #3a3f3d;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .main-tabs {
+      position: sticky;
+      top: 58px;
+      z-index: 18;
+      display: grid;
+      grid-template-columns: repeat(3, 86px);
+      justify-content: start;
+      min-height: 60px;
+      background: linear-gradient(180deg, #171a18, #151817);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn {
+      position: relative;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      background: transparent;
+      color: #666f6b;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .tab-btn .tab-icon {
+      display: grid;
+      width: 28px;
+      height: 24px;
+      place-items: center;
+      border-radius: 6px;
+      background: #2d3330;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tab-btn.active {
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .tab-btn.active .tab-icon {
+      background: #3b4540;
+    }
+
+    .deposit-strip {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      min-height: 58px;
+      padding: 8px;
+      background:
+        linear-gradient(115deg, transparent 0 24%, rgba(97, 34, 164, 0.7) 25% 100%),
+        linear-gradient(135deg, #37135b, #6e2ac8 70%, #2a112e);
+      color: #fff;
+      font-size: 12px;
+      font-style: italic;
+      font-weight: 1000;
+      line-height: 1.18;
+      text-align: center;
+      text-transform: uppercase;
+      text-shadow: 0 2px 0 #6a1fff;
+    }
+
+    .screen {
+      height: calc(100% - 118px);
+      overflow-y: auto;
+      padding: 14px 12px 94px;
+      scrollbar-width: none;
+    }
+
+    .screen.detail-mode {
+      height: calc(100% - 58px);
+      padding: 0;
+    }
+
+    .screen::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 190px;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #202523;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 2;
+      width: 58%;
+      padding: 34px 0 0 28px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 31px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      margin: 0 0 16px;
+      color: #ffe334;
+      font-size: 21px;
+      font-weight: 900;
+      line-height: 1.14;
+    }
+
+    .primary-btn {
+      min-width: 118px;
+      height: 38px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #22f7ff, #1595ff);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 1000;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    }
+
+    .dots {
+      position: absolute;
+      left: 50%;
+      bottom: 11px;
+      z-index: 3;
+      display: flex;
+      gap: 8px;
+      transform: translateX(-50%);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.48);
+    }
+
+    .dot.active {
+      width: 20px;
+      border-radius: 999px;
+      background: #fff;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 18px 4px 12px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .link-btn {
+      background: transparent;
+      color: var(--green);
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .match-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .match-card {
+      overflow: hidden;
+      border-radius: 7px;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.035);
+    }
+
+    .league-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: max-content;
+      max-width: calc(100% - 2px);
+      min-height: 34px;
+      padding: 7px 14px;
+      border-radius: 4px 0 0 0;
+      background: #edf1ee;
+      color: #9aa39f;
+      font-size: 14px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .league-row span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .teams-row {
+      display: grid;
+      grid-template-columns: 1fr 104px;
+      margin: 0 14px 8px;
+      border-radius: 7px;
+      background: #1b1d1c;
+    }
+
+    .teams {
+      display: grid;
+      gap: 13px;
+      padding: 13px 11px;
+      min-width: 0;
+    }
+
+    .team {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      color: #7f8784;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .team strong {
+      color: #f3f5f4;
+      font-size: 14px;
+      min-width: 56px;
+    }
+
+    .flag {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 22px;
+      border-radius: 5px;
+      background: #303634;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 1000;
+    }
+
+    .time-box {
+      display: grid;
+      align-content: center;
+      gap: 5px;
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+      color: #a9b0ad;
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .time-box strong {
+      color: var(--pink);
+      font-size: 14px;
+    }
+
+    .prize-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 16px 10px;
+      color: var(--green);
+      font-size: 15px;
+      font-weight: 1000;
+    }
+
+    .casino-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .game-card {
+      position: relative;
+      display: grid;
+      align-content: end;
+      min-height: 126px;
+      overflow: hidden;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #fff;
+      text-align: left;
+      background: var(--game-bg, #242927);
+      box-shadow: inset 0 0 22px rgba(255, 255, 255, 0.08);
+    }
+
+    .game-card.large {
+      grid-column: span 2;
+      min-height: 162px;
+    }
+
+    .game-card::before {
+      content: attr(data-symbol);
+      position: absolute;
+      top: 11px;
+      left: 14px;
+      display: grid;
+      width: 64px;
+      height: 42px;
+      place-items: center;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 1000;
+    }
+
+    .game-card strong {
+      position: relative;
+      z-index: 1;
+      display: block;
+      font-size: 24px;
+      line-height: 0.98;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-card span {
+      position: relative;
+      z-index: 1;
+      color: #ffd12b;
+      font-size: 17px;
+      font-weight: 1000;
+    }
+
+    .jackpot-banner {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      align-items: center;
+      min-height: 136px;
+      margin-top: 13px;
+      padding: 20px 17px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #202523;
+    }
+
+    .jackpot-banner::after {
+      content: "活动图占位";
+      display: grid;
+      width: 112px;
+      height: 88px;
+      place-items: center;
+      border-radius: 12px;
+      background: #303735;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 1000;
+    }
+
+    .jackpot-banner h3 {
+      margin: 0 0 3px;
+      font-size: 18px;
+    }
+
+    .jackpot-banner strong {
+      display: block;
+      color: #ffe342;
+      font-size: 27px;
+      line-height: 1.05;
+    }
+
+    .join-green {
+      width: 118px;
+      height: 40px;
+      margin-top: 11px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #28f49a, #0bbf68);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 1000;
+    }
+
+    .jackpot-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .winner {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      align-items: center;
+      min-height: 56px;
+      padding: 8px;
+      border-radius: 7px;
+      background: #1c201e;
+      min-width: 0;
+    }
+
+    .winner-thumb {
+      display: grid;
+      width: 44px;
+      height: 38px;
+      place-items: center;
+      border-radius: 6px;
+      background: #2c3330;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 1000;
+    }
+
+    .winner strong {
+      color: #ffd321;
+      font-size: 14px;
+    }
+
+    .winner span {
+      overflow: hidden;
+      color: #f6f6f6;
+      font-size: 10px;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .help-panel {
+      margin-top: 16px;
+      overflow: hidden;
+      border-radius: 0;
+      background: #242725;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .help-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 46px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: #d9ddda;
+      font-size: 15px;
+      font-weight: 900;
+      width: 100%;
+    }
+
+    .help-row:last-child {
+      border-bottom: 0;
+    }
+
+    .telegram {
+      display: grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      margin: 18px auto 0;
+      border-radius: 50%;
+      background: #25a7e8;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 22;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      min-height: 70px;
+      border-radius: 8px 8px 0 0;
+      background: #282a29;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .bottom-btn {
+      display: grid;
+      place-items: center;
+      gap: 1px;
+      background: transparent;
+      color: #aeb4b1;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .bottom-btn span {
+      display: grid;
+      width: 28px;
+      height: 24px;
+      place-items: center;
+      border-radius: 6px;
+      background: #535b58;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .bottom-btn.active span {
+      background: #303a35;
+    }
+
+    .bottom-btn.active {
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .floating-chat {
+      position: absolute;
+      right: 16px;
+      bottom: 152px;
+      z-index: 24;
+      display: grid;
+      width: 62px;
+      height: 62px;
+      place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #6dd4ff, #268deb);
+      border: 4px solid rgba(255, 255, 255, 0.42);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 1000;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+    }
+
+    .sheet {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 82px;
+      z-index: 30;
+      display: none;
+      border-radius: 12px;
+      background: #202422;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.54);
+    }
+
+    .sheet.open {
+      display: block;
+      animation: rise 160ms ease-out;
+    }
+
+    @keyframes rise {
+      from {
+        transform: translateY(14px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 8px;
+    }
+
+    .sheet-head strong {
+      font-size: 17px;
+    }
+
+    .close-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #303532;
+      color: #fff;
+      font-size: 20px;
+    }
+
+    .sheet-body {
+      padding: 6px 16px 16px;
+      color: #b8bfbb;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .amount-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .amount-grid button {
+      min-height: 42px;
+      border-radius: 8px;
+      background: #303532;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 86px;
+      z-index: 40;
+      max-width: calc(100% - 56px);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.74);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 10px);
+      transition: 160ms ease;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .detail-strip {
+      display: none;
+      margin: 0 14px 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(25, 239, 117, 0.08);
+      color: #bff7d5;
+      font-size: 12px;
+      line-height: 1.5;
+      border: 1px solid rgba(25, 239, 117, 0.18);
+    }
+
+    .match-card.open .detail-strip {
+      display: block;
+    }
+
+    .fantasy-page {
+      display: block;
+      margin: -14px -12px -94px;
+      min-height: calc(100% + 108px);
+      padding: 14px 0 92px;
+      background: #ffffff;
+      color: #202a3f;
+    }
+
+    .fantasy-banner {
+      height: 108px;
+      margin: 0 20px 8px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #202523;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .fantasy-content {
+      display: grid;
+      gap: 8px;
+      padding: 0 18px 18px;
+    }
+
+    .fantasy-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding: 3px;
+      border-radius: 5px;
+      background: #f0f3f7;
+    }
+
+    .fantasy-switch button {
+      min-height: 28px;
+      border-radius: 4px;
+      background: transparent;
+      color: #7d879b;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .fantasy-switch button.active {
+      background: #ffffff;
+      color: #25c75a;
+      font-weight: 800;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .fantasy-sport-switch {
+      margin-bottom: 0;
+    }
+
+    .fantasy-category-switch {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-height: 34px;
+      padding: 0;
+      border-radius: 0;
+      border-bottom: 1px solid #e2e7ee;
+      background: #ffffff;
+    }
+
+    .fantasy-category-switch button {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 0;
+      background: transparent;
+      color: #66758a;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: none;
+    }
+
+    .fantasy-category-switch button.active {
+      background: transparent;
+      color: #ff4a4a;
+      font-weight: 800;
+      box-shadow: none;
+    }
+
+    .fantasy-page-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .fantasy-home-extra {
+      display: grid;
+      gap: 18px;
+      margin-top: 10px;
+      padding-top: 8px;
+    }
+
+    .view-all-matches {
+      justify-self: center;
+      min-height: 34px;
+      padding: 0 18px;
+      border: 1px solid #d9e0e8;
+      border-radius: 5px;
+      background: #f8fafc;
+      color: #283241;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .fantasy-help-separator {
+      height: 8px;
+      margin: 0 -18px -2px;
+      background: #f2f4f6;
+    }
+
+    .fantasy-help {
+      display: grid;
+      gap: 10px;
+    }
+
+    .fantasy-help h3 {
+      margin: 0;
+      color: #2c3542;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .fantasy-help-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .fantasy-help-row {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) 16px;
+      gap: 8px;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 12px;
+      border: 1px solid #dfe6ee;
+      border-radius: 7px;
+      background: #ffffff;
+      color: #3f4a59;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: left;
+      box-shadow: 0 1px 3px rgba(21, 31, 48, 0.05);
+    }
+
+    .fantasy-help-row span:first-child {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: #303735;
+    }
+
+    .fantasy-card {
+      display: grid;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid #dfe6ef;
+      border-radius: 7px;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(21, 31, 48, 0.05);
+    }
+
+    .fantasy-league {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      background: transparent;
+      color: #66758a;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .fantasy-league span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fantasy-league::after {
+      content: "";
+      width: 14px;
+      height: 14px;
+      margin-left: auto;
+      border-radius: 4px;
+      background: #a7b0ba;
+      flex: 0 0 auto;
+    }
+
+    .solid-icon {
+      display: grid;
+      min-width: 24px;
+      width: 24px;
+      height: 20px;
+      place-items: center;
+      border-radius: 5px;
+      background: #727b83;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .fantasy-team-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 88px;
+      border-radius: 7px;
+      background: #f5f7fa;
+      overflow: hidden;
+    }
+
+    .fantasy-teams {
+      display: grid;
+      gap: 8px;
+      padding: 10px 8px;
+      min-width: 0;
+    }
+
+    .fantasy-team {
+      display: grid;
+      grid-template-columns: 24px minmax(50px, 54px) minmax(0, 1fr);
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      color: #697991;
+      font-size: 10.5px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .fantasy-team strong {
+      min-width: 0;
+      color: #1f2938;
+      font-size: 13px;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fantasy-team span:last-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fantasy-time {
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      border-left: 1px solid #dde4eb;
+      color: #697991;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .fantasy-time strong {
+      color: #ff2e71;
+      font-weight: 800;
+    }
+
+    .fantasy-prize {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #8a97a8;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .fantasy-detail {
+      display: none;
+      padding: 10px;
+      border-radius: 8px;
+      background: #eefbf2;
+      color: #217a42;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .fantasy-card.open .fantasy-detail {
+      display: block;
+    }
+
+    .fantasy-bottom {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 14px;
+      z-index: 22;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      min-height: 64px;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 -12px 26px rgba(19, 25, 36, 0.12);
+      overflow: hidden;
+    }
+
+    @media (max-width: 980px) {
+      .prototype-shell {
+        grid-template-columns: 178px minmax(0, 430px);
+        width: auto;
+      }
+
+      .doc-panel {
+        display: none;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .prototype-shell {
+        display: block;
+        width: 100%;
+      }
+
+      .quick-nav {
+        display: none;
+      }
+
+      .doc-panel {
+        display: none;
+      }
+    }
+
+    .my-matches-page {
+      display: block;
+      margin: -14px -12px -94px;
+      min-height: calc(100% + 108px);
+      padding-bottom: 92px;
+      background: #ffffff;
+      color: #202a3f;
+    }
+
+    .my-titlebar {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      background: #161b1d;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .my-tabs {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+      gap: 24px;
+      padding: 0 18px;
+      border-bottom: 1px solid #e1e6ee;
+      background: #ffffff;
+    }
+
+    .my-tabs button {
+      position: relative;
+      height: 40px;
+      background: transparent;
+      color: #66758a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .my-tabs button.active {
+      color: #ff4a4a;
+      font-weight: 800;
+    }
+
+    .my-tabs button.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: #ff4a4a;
+    }
+
+    .my-content {
+      display: grid;
+      gap: 8px;
+      padding: 14px 18px 18px;
+    }
+
+    .my-status-switch {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-height: 34px;
+      padding: 0;
+      border-radius: 0;
+      border-bottom: 1px solid #e2e7ee;
+      background: #ffffff;
+    }
+
+    .my-status-switch button {
+      min-height: 34px;
+      padding: 0 14px;
+      border-radius: 0;
+      background: transparent;
+      color: #66758a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .my-status-switch button.active {
+      background: transparent;
+      color: #ff4a4a;
+      font-weight: 800;
+      box-shadow: none;
+    }
+
+    .my-card {
+      position: relative;
+    }
+
+    .discount-badge {
+      position: absolute;
+      top: -7px;
+      right: 8px;
+      min-height: 20px;
+      padding: 3px 7px;
+      border-radius: 4px;
+      background: #f4d94e;
+      color: #2f3327;
+      font-size: 10px;
+      font-weight: 800;
+      z-index: 1;
+    }
+
+    .my-meta {
+      color: #66758a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .awards-page {
+      display: block;
+      margin: -14px -12px -94px;
+      min-height: calc(100% + 108px);
+      padding-bottom: 92px;
+      background: #f4f4f4;
+      color: #242a34;
+    }
+
+    .awards-hero {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      min-height: 82px;
+      padding: 14px 18px;
+      background: #ffffff;
+      border-bottom: 1px solid #edf0f3;
+    }
+
+    .awards-avatar,
+    .score-display,
+    .coupon-art {
+      display: grid;
+      place-items: center;
+      background: #222725;
+      color: #ffffff;
+      font-weight: 900;
+    }
+
+    .awards-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #dfe3e7;
+    }
+
+    .awards-user {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .awards-user strong {
+      overflow: hidden;
+      color: #4d5868;
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .awards-link {
+      color: #b33b45;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .awards-section {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+      padding: 16px 18px;
+      background: #ffffff;
+      border-top: 1px solid #edf0f3;
+      border-bottom: 1px solid #edf0f3;
+    }
+
+    .awards-section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .awards-section h3 {
+      margin: 0;
+      color: #303844;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .awards-section p {
+      margin: 2px 0 0;
+      color: #8d9aaa;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .awards-more {
+      background: transparent;
+      color: #4c5562;
+      font-size: 11px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .score-card {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      min-height: 74px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f3f5f8;
+    }
+
+    .score-display {
+      height: 54px;
+      border-radius: 7px;
+      font-size: 23px;
+      letter-spacing: 2px;
+      box-shadow: inset 0 0 0 2px #0e1110;
+    }
+
+    .reward-card {
+      width: 128px;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff4b8;
+      border: 1px solid #f3dfa1;
+    }
+
+    .coupon-art {
+      height: 92px;
+      margin: 10px;
+      border-radius: 8px;
+      background: #252b28;
+      font-size: 13px;
+    }
+
+    .reward-caption {
+      padding: 8px 10px 10px;
+      border-top: 1px dashed #c9b56f;
+      color: #6b6143;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .other-list {
+      display: grid;
+      overflow: hidden;
+      border: 1px solid #e0e5ea;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .other-row {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) 18px;
+      gap: 8px;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 12px;
+      background: #ffffff;
+      color: #555f6e;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .other-row + .other-row {
+      border-top: 1px solid #edf0f3;
+    }
+
+    .other-row span:first-child {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: #303735;
+    }
+
+    .points-page {
+      display: block;
+      margin: -14px -12px -94px;
+      min-height: calc(100% + 108px);
+      padding-bottom: 22px;
+      background: #ffffff;
+      color: #27303a;
+    }
+
+    .screen.detail-mode .points-page {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    .history-page {
+      display: block;
+      margin: -14px -12px -94px;
+      min-height: calc(100% + 108px);
+      background: #ffffff;
+      color: #27303a;
+    }
+
+    .screen.detail-mode .history-page {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    .contest-page {
+      display: block;
+      margin: -14px -12px -94px;
+      min-height: calc(100% + 108px);
+      background: #ffffff;
+      color: #253040;
+    }
+
+    .contest-detail-page {
+      display: block;
+      margin: -14px -12px -94px;
+      min-height: calc(100% + 108px);
+      background: #ffffff;
+      color: #253040;
+    }
+
+    .screen.detail-mode .contest-page,
+    .screen.detail-mode .contest-detail-page {
+      margin: 0;
+      min-height: 100%;
+      padding-bottom: 72px;
+    }
+
+    .screen.detail-mode:has(.contest-detail-page:not(.hidden)) {
+      overflow: hidden;
+    }
+
+    .screen.detail-mode .contest-detail-page {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      padding-bottom: 0;
+      overflow: hidden;
+    }
+
+    .points-titlebar {
+      position: sticky;
+      top: 0;
+      z-index: 12;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 18px;
+      background: #10161a;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .points-back {
+      width: 24px;
+      height: 28px;
+      background: transparent;
+      color: #ffffff;
+      font-size: 22px;
+      line-height: 1;
+      text-align: left;
+    }
+
+    .contest-matchbar {
+      position: sticky;
+      top: 0;
+      z-index: 14;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 54px;
+      padding: 0 18px;
+      background: linear-gradient(90deg, #3a090f, #111318 72%);
+      color: #ffffff;
+    }
+
+    .contest-matchbar strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .contest-matchbar span {
+      display: block;
+      margin-top: 2px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .contest-detail-page .contest-matchbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .contest-tabs {
+      position: sticky;
+      top: 54px;
+      z-index: 13;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      min-height: 42px;
+      border-bottom: 1px solid #e1e6ec;
+      background: #ffffff;
+    }
+
+    .contest-tabs button {
+      position: relative;
+      background: transparent;
+      color: #667184;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .contest-tabs button.active {
+      color: #ef3d4f;
+    }
+
+    .contest-tabs button.active::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 0;
+      height: 2px;
+      background: #ef3d4f;
+    }
+
+    .contest-filterbar {
+      position: sticky;
+      top: 96px;
+      z-index: 12;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 18px;
+      border-bottom: 1px solid #edf1f5;
+      background: #ffffff;
+    }
+
+    .contest-filterbar button {
+      min-height: 28px;
+      padding: 0 14px;
+      border: 1px solid #dce3ea;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #5c6878;
+      font-size: 11px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .contest-filterbar .filter-icon {
+      margin-left: auto;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-color: transparent;
+      border-radius: 4px;
+      background: transparent;
+      font-size: 0;
+    }
+
+    .contest-filterbar .filter-icon::before {
+      content: "";
+      display: block;
+      width: 14px;
+      height: 14px;
+      margin: 0 auto;
+      background: #3d464d;
+      clip-path: polygon(0 0, 100% 0, 62% 48%, 62% 100%, 38% 100%, 38% 48%);
+    }
+
+    .contest-content {
+      display: grid;
+      gap: 18px;
+      padding: 12px 18px 28px;
+      background: #ffffff;
+    }
+
+    .contest-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .contest-group-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .contest-group h3 {
+      margin: 0;
+      color: #2b333f;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .contest-group p {
+      margin: 2px 0 0;
+      color: #8b98a8;
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    .room-card {
+      position: relative;
+      display: grid;
+      gap: 0;
+      overflow: hidden;
+      padding: 0;
+      border: 1px solid #dfe6ee;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 3px 8px rgba(31, 43, 62, 0.08);
+    }
+
+    .room-card::before {
+      content: attr(data-prize-tip);
+      position: absolute;
+      left: 12px;
+      bottom: 30px;
+      z-index: 4;
+      display: none;
+      max-width: 205px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: #2679e8;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 750;
+      line-height: 1.25;
+      white-space: pre-line;
+      box-shadow: 0 2px 6px rgba(22, 54, 104, 0.2);
+    }
+
+    .room-card.prize-tip-open::before {
+      display: block;
+    }
+
+    .room-top,
+    .room-meta {
+      align-items: center;
+      gap: 10px;
+    }
+
+    .room-top {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 12px 8px;
+    }
+
+    .room-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #7b8797;
+      font-size: 10px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .room-type::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: #9aa7b5;
+      flex: 0 0 auto;
+    }
+
+    .room-card.guaranteed-card .room-type::before {
+      border-radius: 50%;
+      background: #14b86a;
+    }
+
+    .room-card .room-top > div::after {
+      content: "Prize pool is subject to change based on spots filled";
+      display: none;
+      position: absolute;
+      top: 34px;
+      left: 12px;
+      z-index: 2;
+      width: max-content;
+      max-width: 235px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: #2679e8;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 750;
+      line-height: 1.2;
+    }
+
+    .room-card.tip-open .room-top > div::after {
+      display: block;
+    }
+
+    .room-card.guaranteed-card .room-top > div::after {
+      content: "Guaranteed to take place regardless of spots filled";
+    }
+
+    .room-prize {
+      margin-top: 4px;
+      color: #1f2938;
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .join-price {
+      min-width: 64px;
+      min-height: 30px;
+      border-radius: 4px;
+      background: #079b45;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .room-progress {
+      display: grid;
+      gap: 5px;
+      padding: 0 12px 8px;
+    }
+
+    .room-progress-row {
+      display: flex;
+      justify-content: space-between;
+      color: #8a95a5;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .room-progress-row strong {
+      color: #ef3d4f;
+    }
+
+    .progress-line {
+      height: 2px;
+      width: 34%;
+      margin-left: auto;
+      border-radius: 99px;
+      background: #fee2e7;
+      overflow: hidden;
+    }
+
+    .room-card.guaranteed-card .progress-line {
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .room-card:not(.guaranteed-card) .room-progress {
+      position: absolute;
+      right: 12px;
+      bottom: 10px;
+      width: 118px;
+      padding: 0;
+    }
+
+    .room-card:not(.guaranteed-card) .room-progress-row {
+      gap: 10px;
+    }
+
+    .room-card:not(.guaranteed-card) .progress-line {
+      width: 100%;
+    }
+
+    .progress-line span {
+      display: block;
+      width: var(--fill, 40%);
+      height: 100%;
+      background: #ef3d4f;
+    }
+
+    .room-meta {
+      display: grid;
+      grid-template-columns: 58px 42px 42px minmax(0, 1fr);
+      column-gap: 8px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-top: 1px solid #eef2f6;
+      background: #f7f9fc;
+      color: #708095;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .room-card:not(.guaranteed-card) .room-meta {
+      padding-right: 138px;
+    }
+
+    .room-meta:has(strong) {
+      grid-template-columns: 58px 42px 42px minmax(0, 1fr);
+    }
+
+    .room-meta span,
+    .room-meta strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .room-meta span:first-child {
+      cursor: pointer;
+    }
+
+    .room-meta span:nth-child(2),
+    .room-meta span:nth-child(3) {
+      text-align: left;
+    }
+
+    .room-meta strong {
+      text-align: right;
+    }
+
+    .create-team-fab {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      z-index: 28;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 0 18px;
+      border-radius: 999px;
+      background: #182232;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 900;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 12px rgba(20, 28, 40, 0.35);
+    }
+
+    .contest-detail-card {
+      display: grid;
+      gap: 10px;
+      padding: 12px 18px 12px;
+      border-bottom: 1px solid #e5ebf2;
+      background: #ffffff;
+    }
+
+    .contest-detail-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .contest-detail-top > div:last-child {
+      text-align: right;
+    }
+
+    .contest-detail-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #677386;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .contest-detail-type::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #14b86a;
+    }
+
+    .contest-detail-label {
+      display: block;
+      color: #677386;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .contest-detail-prize {
+      margin-top: 4px;
+      color: #1f2938;
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .contest-detail-join {
+      min-height: 34px;
+      border-radius: 4px;
+      background: #11a646;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .contest-detail-progress {
+      display: grid;
+      gap: 6px;
+    }
+
+    .contest-detail-progress-row {
+      display: flex;
+      justify-content: space-between;
+      color: #7d899a;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .contest-detail-progress-row strong {
+      color: #ef3d4f;
+    }
+
+    .contest-detail-progress-line {
+      height: 3px;
+      border-radius: 99px;
+      background: #fde3e6;
+      overflow: hidden;
+    }
+
+    .contest-detail-progress-line span {
+      display: block;
+      width: var(--fill, 24%);
+      height: 100%;
+      border-radius: inherit;
+      background: #b91522;
+    }
+
+    .contest-detail-meta {
+      display: grid;
+      grid-template-columns: 64px 44px 44px minmax(0, 1fr);
+      gap: 8px;
+      min-height: 34px;
+      align-items: center;
+      padding: 0 18px;
+      border-bottom: 1px solid #edf2f6;
+      background: #f7f9fc;
+      color: #718096;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .contest-detail-meta strong {
+      text-align: right;
+    }
+
+    .contest-detail-tabs {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      min-height: 42px;
+      padding: 0 18px;
+      border-bottom: 1px solid #e5ebf2;
+      background: #ffffff;
+    }
+
+    .contest-detail-tabs button {
+      position: relative;
+      height: 42px;
+      background: transparent;
+      color: #667184;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .contest-detail-tabs button.active {
+      color: #ef3d4f;
+    }
+
+    .contest-detail-tabs button.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: #ef3d4f;
+    }
+
+    .breakup-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin: 12px 18px 8px;
+      padding: 3px;
+      border-radius: 6px;
+      background: #f0f3f7;
+    }
+
+    .breakup-switch button {
+      min-height: 28px;
+      border-radius: 5px;
+      background: transparent;
+      color: #667184;
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .breakup-switch button.active {
+      background: #ffffff;
+      color: #ef3d4f;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .winnings-table {
+      display: grid;
+      margin: 0 18px 10px;
+      overflow: hidden;
+      border-radius: 7px;
+      background: #ffffff;
+    }
+
+    .winnings-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      min-height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid #eef2f6;
+      color: #667386;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .winnings-row.head {
+      min-height: 26px;
+      color: #9aa6b4;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .winnings-row strong {
+      color: #364154;
+      text-align: right;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .winnings-note {
+      color: #39ad58;
+      text-align: right;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .winnings-footer-note {
+      margin: 0 18px 18px;
+      padding: 10px;
+      border-radius: 4px;
+      background: #f7fafc;
+      color: #7f8b9c;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .contest-detail-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-bottom: 16px;
+      scrollbar-width: none;
+    }
+
+    .contest-detail-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .contest-filter-sheet {
+      position: absolute;
+      inset: 0;
+      z-index: 38;
+      display: none;
+      align-items: end;
+      background: rgba(0, 0, 0, 0.52);
+    }
+
+    .contest-filter-sheet.open {
+      display: flex;
+    }
+
+    .contest-filter-panel {
+      width: 100%;
+      padding: 16px 18px 14px;
+      border-radius: 12px 12px 0 0;
+      background: #ffffff;
+    }
+
+    .contest-filter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      color: #1f2938;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .contest-filter-section {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .contest-filter-section strong {
+      color: #5c6878;
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .contest-filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .contest-filter-chips button {
+      min-height: 28px;
+      padding: 0 12px;
+      border: 1px solid #dce3ea;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #5d6878;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .contest-filter-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .contest-filter-actions button {
+      min-height: 34px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .contest-clear {
+      background: #f5f7fa;
+      color: #c0c8d2;
+      border: 1px solid #e1e7ef;
+    }
+
+    .contest-apply {
+      background: #10a345;
+      color: #ffffff;
+    }
+
+    .detail-sport-switch {
+      position: sticky;
+      top: 44px;
+      z-index: 12;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding: 8px 18px;
+      border-bottom: 1px solid #e4e8ed;
+      background: #ffffff;
+    }
+
+    .detail-sport-switch button {
+      min-height: 30px;
+      border: 1px solid #e2e7ee;
+      background: #eef2f6;
+      color: #748094;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .detail-sport-switch button:first-child {
+      border-radius: 7px 0 0 7px;
+    }
+
+    .detail-sport-switch button:last-child {
+      border-radius: 0 7px 7px 0;
+    }
+
+    .detail-sport-switch button.active {
+      background: #ffffff;
+      color: #19c85d;
+    }
+
+    .history-tabs {
+      position: sticky;
+      top: 91px;
+      z-index: 11;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      min-height: 48px;
+      border-bottom: 1px solid #e4e8ed;
+      background: #ffffff;
+    }
+
+    .history-tabs button {
+      position: relative;
+      background: transparent;
+      color: #7a8494;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .history-tabs button.active {
+      color: #19c85d;
+    }
+
+    .history-tabs button.active::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 0;
+      height: 1px;
+      background: #19c85d;
+    }
+
+    .history-list {
+      display: grid;
+      background: #ffffff;
+    }
+
+    .history-date {
+      padding: 10px 18px;
+      background: #f2f2f2;
+      color: #303844;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1.7fr) minmax(78px, 0.8fr) minmax(78px, 0.8fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 82px;
+      padding: 10px 18px;
+      border-bottom: 1px solid #eef1f4;
+    }
+
+    .history-status {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 50%;
+      color: #69756f;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .history-status.settled {
+      background: #dbf5df;
+    }
+
+    .history-status.rollback {
+      background: #f7e4d8;
+    }
+
+    .history-status.unsettled {
+      background: #e4ebf8;
+    }
+
+    .history-match {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .history-match strong {
+      color: #151b24;
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .history-match span {
+      color: #7890ac;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .history-money {
+      display: grid;
+      gap: 8px;
+      color: #606a78;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .history-money strong {
+      color: #2c3543;
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .history-end {
+      padding: 14px 0 20px;
+      color: #a6a6a6;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .points-tabs {
+      position: sticky;
+      top: 91px;
+      z-index: 11;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 18px 8px;
+      border-bottom: 1px solid #e4e8ed;
+      background: #ffffff;
+      box-shadow: 0 2px 0 rgba(228, 232, 237, 0.45);
+      scrollbar-width: none;
+    }
+
+    .points-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .points-tabs button {
+      flex: 0 0 auto;
+      min-height: 26px;
+      padding: 0 12px;
+      border: 1px solid #dce3ea;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #6b7786;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .points-tabs button.active {
+      border-color: #8d9aaa;
+      color: #344252;
+      background: #f4f6f8;
+    }
+
+    .points-content {
+      display: grid;
+      gap: 0;
+      padding: 12px 18px 20px;
+    }
+
+    .points-section {
+      display: grid;
+      gap: 10px;
+      padding: 0 0 14px;
+      border-bottom: 1px solid #e2e7ec;
+    }
+
+    .points-section + .points-section {
+      padding-top: 14px;
+    }
+
+    .points-section h3,
+    .points-section h4 {
+      margin: 0;
+      color: #2f3742;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .points-section p {
+      margin: 0;
+      color: #7a8491;
+      font-size: 12px;
+      font-weight: 550;
+      line-height: 1.55;
+    }
+
+    .points-section ul {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding-left: 18px;
+      color: #7a8491;
+      font-size: 12px;
+      font-weight: 550;
+      line-height: 1.55;
+    }
+
+    .process-card {
+      padding: 16px 10px 12px;
+      border: 1px solid #dfe6ee;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .process-flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      position: relative;
+      gap: 8px;
+    }
+
+    .process-flow::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 12%;
+      right: 12%;
+      border-top: 1px dashed #7cc48b;
+    }
+
+    .process-step {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      color: #323a45;
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .process-step span {
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border: 2px solid #75bc80;
+      border-radius: 50%;
+      background: #f2fff4;
+      color: #3f9f4d;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    @media (max-width: 390px) {
+      body {
+        padding: 0;
+      }
+
+      .prototype-shell {
+        display: block;
+        width: 100%;
+      }
+
+      .quick-nav {
+        display: none;
+      }
+
+      .doc-panel {
+        display: none;
+      }
+
+      .phone {
+        height: 100vh;
+        min-height: 100vh;
+        border: 0;
+      }
+
+      .brand {
+        width: 54px;
+        min-width: 54px;
+        font-size: 27px;
+      }
+
+      .wallet {
+        min-width: 96px;
+      }
+
+      .hero-copy {
+        width: 62%;
+        padding-left: 22px;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+      }
+
+      .hero p {
+        font-size: 19px;
+      }
+
+      .teams-row {
+        grid-template-columns: 1fr 94px;
+      }
+
+      .fantasy-team-panel {
+        grid-template-columns: 1fr 92px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="prototype-shell">
+    <aside class="quick-nav" aria-label="页面快捷菜单">
+      <div class="quick-group" data-quick-group="home">
+        <button class="quick-page-btn active" type="button" data-quick-page="home">Home</button>
+        <div class="quick-subnav" aria-label="Home 二级菜单">
+          <button class="quick-sub-btn" type="button" data-quick-page="contest">Contest Room</button>
+          <button class="quick-sub-btn quick-sub-child" type="button" data-quick-page="contestDetail">Contest Detail</button>
+        </div>
+      </div>
+      <div class="quick-group" data-quick-group="matches">
+        <button class="quick-page-btn" type="button" data-quick-page="matches">My Matches</button>
+      </div>
+      <div class="quick-group" data-quick-group="awards">
+        <button class="quick-page-btn" type="button" data-quick-page="awards">Awards</button>
+        <div class="quick-subnav" aria-label="Awards 二级菜单">
+          <button class="quick-sub-btn" type="button" data-quick-page="history">Game History</button>
+          <button class="quick-sub-btn" type="button" data-quick-page="points">Points System</button>
+        </div>
+      </div>
+    </aside>
+
+  <main class="phone" aria-label="梦幻体育一级菜单首页">
+    <header class="topbar" id="appTopbar">
+      <div class="brand" aria-label="Six">Six</div>
+      <div class="top-actions">
+        <div class="wallet" role="button" tabindex="0" data-action="deposit" aria-label="钱包余额">
+          <span class="coin">₹</span>
+          <span id="balance">0</span>
+          <button class="add-money" type="button" data-action="deposit" aria-label="充值">+</button>
+        </div>
+        <button class="icon-btn" type="button" data-action="gift" aria-label="礼包"></button>
+        <button class="avatar" type="button" data-action="profile" aria-label="个人中心"></button>
+      </div>
+    </header>
+
+    <nav class="main-tabs" id="appMainTabs" aria-label="一级频道">
+      <button class="tab-btn" type="button" data-tab="explore"><span class="tab-icon"></span><span>Explore</span></button>
+      <button class="tab-btn active" type="button" data-tab="fantasy"><span class="tab-icon"></span><span>Fantasy</span></button>
+      <button class="tab-btn" type="button" data-tab="casino"><span class="tab-icon"></span><span>Casino</span></button>
+    </nav>
+
+    <section class="screen">
+      <div class="hero hidden" id="hero">
+      </div>
+
+      <section id="fantasyBlock" class="hidden">
+        <div class="section-head">
+          <h2>Fantasy</h2>
+          <button class="link-btn" type="button" data-action="viewFantasy">View all</button>
+        </div>
+        <div class="match-list" id="matchList">
+          <article class="match-card">
+            <button class="league-row" type="button" data-action="match">
+              <span>赛 T20 · MUM T20</span>
+              <b>›</b>
+            </button>
+            <div class="teams-row">
+              <div class="teams">
+                <div class="team"><span class="flag"></span><strong>SBMF</strong><span>SOBO Mumbai Falcons</span></div>
+                <div class="team"><span class="flag"></span><strong>ATM</strong><span>Aakash Tigers MWS</span></div>
+              </div>
+              <div class="time-box"><strong>4h 48m</strong><span>04:30 PM</span></div>
+            </div>
+            <div class="prize-row"><span class="flag"></span> ₹ 8.3 Lakhs</div>
+            <div class="detail-strip">当前只做首页展开态：后续比赛详情、建队和报名页需要补充完整交互需求。</div>
+          </article>
+
+          <article class="match-card">
+            <button class="league-row" type="button" data-action="match">
+              <span>赛 Women T20 · ICC Womens T20 World Cup Warm-up...</span>
+              <b>›</b>
+            </button>
+            <div class="teams-row">
+              <div class="teams">
+                <div class="team"><span class="flag"></span><strong>SCO-W</strong><span>Scotland Women</span></div>
+                <div class="team"><span class="flag"></span><strong>PAK-W</strong><span>Pakistan Women</span></div>
+              </div>
+              <div class="time-box"><strong>5h 18m</strong><span>05:00 PM</span></div>
+            </div>
+            <div class="prize-row"><span class="flag"></span> ₹ 8.3 Lakhs</div>
+            <div class="detail-strip">当前只做首页展开态：后续比赛详情、建队和报名页需要补充完整交互需求。</div>
+          </article>
+
+          <article class="match-card">
+            <button class="league-row" type="button" data-action="match">
+              <span>赛 Women T20 · ICC Womens T20 World Cup Warm-up...</span>
+              <b>›</b>
+            </button>
+            <div class="teams-row">
+              <div class="teams">
+                <div class="team"><span class="flag"></span><strong>IRE-W</strong><span>Ireland Women</span></div>
+                <div class="team"><span class="flag"></span><strong>BAN-W</strong><span>Bangladesh Women</span></div>
+              </div>
+              <div class="time-box"><strong>5h 18m</strong><span>05:00 PM</span></div>
+            </div>
+            <div class="prize-row"><span class="flag"></span> ₹ 8.0 Lakhs</div>
+            <div class="detail-strip">当前只做首页展开态：后续比赛详情、建队和报名页需要补充完整交互需求。</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="casinoBlock" class="hidden">
+        <div class="casino-grid">
+          <button class="game-card large" type="button" style="--game-bg: #202523;" data-symbol="游戏占位" data-action="game"><strong>Aviator</strong><span>Spribe</span></button>
+          <button class="game-card" type="button" style="--game-bg: #252b28;" data-symbol="游戏占位" data-action="game"><strong>Money Coming</strong><span>JILI</span></button>
+          <button class="game-card" type="button" style="--game-bg: #2a302d;" data-symbol="游戏占位" data-action="game"><strong>Fortune Gems 2</strong><span>JILI</span></button>
+          <button class="game-card" type="button" style="--game-bg: #303633;" data-symbol="游戏占位" data-action="game"><strong>Super Ace</strong><span>JILI</span></button>
+          <button class="game-card" type="button" style="--game-bg: #343a37;" data-symbol="游戏占位" data-action="game"><strong>Lightning Storm</strong><span>Evolution</span></button>
+          <button class="game-card" type="button" style="--game-bg: #3a403d;" data-symbol="游戏占位" data-action="game"><strong>Auto Roulette</strong><span>Evolution</span></button>
+        </div>
+
+        <div class="jackpot-banner">
+          <div>
+            <h3>COLORFUL BALLS, BIG WINS</h3>
+            <strong>₹10,00,00</strong>
+            <button class="join-green" type="button" data-action="join">JOIN NOW</button>
+          </div>
+        </div>
+
+        <div class="section-head">
+          <h2>Recent Jackpot</h2>
+        </div>
+        <div class="jackpot-list">
+          <div class="winner"><span class="winner-thumb">中奖图</span><div><strong>1476 INR</strong><span>nv**ea</span></div></div>
+          <div class="winner"><span class="winner-thumb">中奖图</span><div><strong>2706 INR</strong><span>wp**af</span></div></div>
+          <div class="winner"><span class="winner-thumb">中奖图</span><div><strong>2013 INR</strong><span>gu**0i</span></div></div>
+        </div>
+      </section>
+
+      <section id="fantasyPage" class="fantasy-page">
+        <div class="fantasy-banner">推广banner占位</div>
+        <div class="fantasy-content">
+          <div class="fantasy-switch fantasy-sport-switch" aria-label="运动类型">
+            <button class="active" type="button" data-sport-filter="cricket">Cricket</button>
+            <button type="button" data-sport-filter="football">Football</button>
+          </div>
+
+          <div class="fantasy-category-switch" aria-label="赛事分类">
+            <button class="active" type="button" data-fantasy-filter="recommended">Recommended</button>
+            <button type="button" data-fantasy-filter="soon">Starting Soon</button>
+            <button type="button" data-fantasy-filter="popular">Popular</button>
+          </div>
+
+          <div class="fantasy-page-list hidden" id="fantasySoonList">
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>T20 · MUM T20</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>SBMF</strong><span>SOBO Mumbai Falcons</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>ATM</strong><span>Aakash Tigers MWS</span></div>
+                </div>
+                <div class="fantasy-time"><strong>2h:44m</strong><span>4:30 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>Coming Soon</div>
+              <div class="fantasy-detail">赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>T20 · ICC WT20 World Cup Warm-up Matches, 2026</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>SCO-W</strong><span>Scotland Women</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>PAK-W</strong><span>Pakistan Women</span></div>
+                </div>
+                <div class="fantasy-time"><strong>1h : 29m</strong><span>5:00 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>₹10.66 Lakhs+</div>
+              <div class="fantasy-detail">赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>T20 · ICC WT20 World Cup Warm-up Matches, 2026</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>IRE-W</strong><span>Ireland Women</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>BAN-W</strong><span>Bangladesh Women</span></div>
+                </div>
+                <div class="fantasy-time"><strong>1h : 29m</strong><span>5:00 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>₹10.66 Lakhs+</div>
+              <div class="fantasy-detail">赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+          </div>
+
+          <div class="fantasy-page-list" id="fantasyRecommendedList">
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>T20 · MUM T20</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>AA</strong><span>AICS Andheri</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>MSCMR</strong><span>MSC Maratha Royals</span></div>
+                </div>
+                <div class="fantasy-time"><strong>Tomorrow</strong><span>9:30 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>₹8.03 Lakhs</div>
+              <div class="fantasy-detail">赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>Women T20 · ICC Womens T20 World Cup Warm...</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>WI-W</strong><span>West Indies Women</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>AUS-W</strong><span>Australia Women</span></div>
+                </div>
+                <div class="fantasy-time"><strong>Tomorrow</strong><span>10:00 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>₹8.03 Lakhs</div>
+              <div class="fantasy-detail">赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>T20 · MUM T20</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>TBA</strong><span>TBA</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>TBA</strong><span>TBA</span></div>
+                </div>
+                <div class="fantasy-time"><strong>Jun 11</strong><span>4:30 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>₹8.03 Lakhs</div>
+              <div class="fantasy-detail">赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>T20 · MUM T20</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>TBA</strong><span>TBA</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>TBA</strong><span>TBA</span></div>
+                </div>
+                <div class="fantasy-time"><strong>Jun 11</strong><span>9:30 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>₹8.03 Lakhs</div>
+              <div class="fantasy-detail">赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+          </div>
+
+          <div class="fantasy-page-list hidden" id="fantasyPopularList">
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>T20 · T20 Mumbai, 2026</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>SBMF</strong><span>SoBo Mumbai Falcons</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>ATMWS</strong><span>Aakash Tigers Mumbai Western Suburbs</span></div>
+                </div>
+                <div class="fantasy-time"><strong>58m : 5s</strong><span>4:30 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>Coming Soon</div>
+              <div class="fantasy-detail">热门赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+          </div>
+
+          <div class="fantasy-page-list hidden" id="footballSoonList">
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>Premier League · Round 18</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>ARS</strong><span>Arsenal</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>CHE</strong><span>Chelsea</span></div>
+                </div>
+                <div class="fantasy-time"><strong>2h:10m</strong><span>8:00 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>Coming Soon</div>
+              <div class="fantasy-detail">足球比赛详情、阵容创建和报名页未提供，当前只保留展开态。</div>
+            </article>
+
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>La Liga · Matchday 22</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>RMA</strong><span>Real Madrid</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>FCB</strong><span>Barcelona</span></div>
+                </div>
+                <div class="fantasy-time"><strong>4h:20m</strong><span>10:10 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>Coming Soon</div>
+              <div class="fantasy-detail">足球比赛详情、阵容创建和报名页未提供，当前只保留展开态。</div>
+            </article>
+          </div>
+
+          <div class="fantasy-page-list hidden" id="footballRecommendedList">
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>Serie A · Recommended</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>INT</strong><span>Inter Milan</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>MIL</strong><span>AC Milan</span></div>
+                </div>
+                <div class="fantasy-time"><strong>Tomorrow</strong><span>9:00 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>₹8.8 Lakhs</div>
+              <div class="fantasy-detail">足球比赛详情、阵容创建和报名页未提供，当前只保留展开态。</div>
+            </article>
+          </div>
+
+          <div class="fantasy-page-list hidden" id="footballPopularList">
+            <article class="fantasy-card">
+              <button class="fantasy-league" type="button" data-action="fantasyMatch"><span class="solid-icon"></span><span>Premier League · Popular</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>ARS</strong><span>Arsenal</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>CHE</strong><span>Chelsea</span></div>
+                </div>
+                <div class="fantasy-time"><strong>58m : 5s</strong><span>8:00 PM</span></div>
+              </div>
+              <div class="fantasy-prize"><span class="solid-icon"></span>Coming Soon</div>
+              <div class="fantasy-detail">足球热门赛事详情、创建队伍、报名房间页面未提供，当前只保留展开态。</div>
+            </article>
+          </div>
+
+          <div class="fantasy-home-extra">
+            <button class="view-all-matches" type="button" data-action="viewAllMatches">VIEW ALL MATCHES ›</button>
+            <div class="fantasy-help-separator" aria-hidden="true"></div>
+            <section class="fantasy-help" aria-label="Fantasy Help">
+              <h3>Fantasy Help</h3>
+              <div class="fantasy-help-list">
+                <button class="fantasy-help-row" type="button" data-action="howToPlay"><span></span><strong>How to Play</strong><b>›</b></button>
+                <button class="fantasy-help-row" type="button" data-action="pointsSystem"><span></span><strong>Points System</strong><b>›</b></button>
+                <button class="fantasy-help-row" type="button" data-action="support"><span></span><strong>Help and Support</strong><b>›</b></button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section id="contestPage" class="contest-page hidden">
+        <div class="contest-matchbar">
+          <button class="points-back" type="button" data-action="contestBack" aria-label="返回">‹</button>
+          <div><strong>SA-W v NZ-W</strong><span>4h 45m left</span></div>
+        </div>
+        <div class="contest-tabs" aria-label="玩法房间标签">
+          <button class="active" type="button" data-action="contestTab">Contests</button>
+          <button type="button" data-action="contestTab">My Contests</button>
+          <button type="button" data-action="contestTab">Teams</button>
+          <button type="button" data-action="contestTab">Gurus</button>
+          <button type="button" data-action="contestTab">Stats</button>
+        </div>
+        <div class="contest-filterbar">
+          <button type="button" data-action="contestChip">Entry</button>
+          <button type="button" data-action="contestChip">Spots</button>
+          <button type="button" data-action="contestChip">Prize Pool</button>
+          <button type="button" data-action="contestChip">% Winners</button>
+          <button class="filter-icon" type="button" data-action="contestFilter" aria-label="筛选"></button>
+        </div>
+
+        <div class="contest-content">
+          <section class="contest-group">
+            <div class="contest-group-head"><div><h3>Discounted Entry</h3><p>Upto ₹10 can be utilised for the contests below</p></div><button class="awards-more" type="button" data-action="contestViewAll">View All ›</button></div>
+            <article class="room-card guaranteed-card"><div class="room-top"><div><span class="room-type">Guaranteed plus Prize Pool</span><div class="room-prize">₹10.58 Lakhs</div></div><button class="join-price" type="button" data-action="joinContest">₹40</button></div><div class="room-progress"><div class="room-progress-row"><strong>23,542 Left</strong><span>27,000 spots</span></div><div class="progress-line"><span style="--fill:42%"></span></div></div><div class="room-meta"><span>₹1.50 L</span><span>52%</span><span>M 20</span><strong>₹31.74 Lakhs⌄</strong></div></article>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Flexible Prize Pool</span><div class="room-prize">₹86,500</div></div><button class="join-price" type="button" data-action="joinContest">₹915</button></div><div class="room-progress"><div class="room-progress-row"><strong>104 Left</strong><span>104 spots</span></div><div class="progress-line"><span style="--fill:65%"></span></div></div><div class="room-meta"><span>₹34,500</span><span>19%</span><span>M 20</span></div></article>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Flexible Prize Pool</span><div class="room-prize">₹68,500</div></div><button class="join-price" type="button" data-action="joinContest">₹715</button></div><div class="room-progress"><div class="room-progress-row"><strong>104 Left</strong><span>105 spots</span></div><div class="progress-line"><span style="--fill:62%"></span></div></div><div class="room-meta"><span>₹27,000</span><span>19%</span><span>M 20</span></div></article>
+          </section>
+
+          <section class="contest-group">
+            <div class="contest-group-head"><h3>Specially For You</h3></div>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Prize Pool</span><div class="room-prize">₹27</div></div><button class="join-price" type="button" data-action="joinContest">₹15</button></div><div class="room-progress"><div class="room-progress-row"><strong>1 Left</strong><span>2 spots</span></div><div class="progress-line"><span style="--fill:50%"></span></div></div><div class="room-meta"><span>₹27</span><span>50%</span><span>S</span></div></article>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Flexible Prize Pool</span><div class="room-prize">₹5,360</div></div><button class="join-price" type="button" data-action="joinContest">₹20</button></div><div class="room-progress"><div class="room-progress-row"><strong>275 Left</strong><span>300 spots</span></div><div class="progress-line"><span style="--fill:80%"></span></div></div><div class="room-meta"><span>₹160</span><span>46%</span><span>M 20</span></div></article>
+          </section>
+
+          <section class="contest-group">
+            <div class="contest-group-head"><h3>Trending Now</h3></div>
+            <article class="room-card guaranteed-card"><div class="room-top"><div><span class="room-type">Guaranteed Prize Pool</span><div class="room-prize">₹92,000</div></div><button class="join-price" type="button" data-action="joinContest">₹5</button></div><div class="room-progress"><div class="room-progress-row"><strong>12,504 Left</strong><span>23,000 spots</span></div><div class="progress-line"><span style="--fill:48%"></span></div></div><div class="room-meta"><span>₹16,000</span><span>48%</span><span>M 20</span></div></article>
+            <article class="room-card guaranteed-card"><div class="room-top"><div><span class="room-type">Guaranteed Prize Pool</span><div class="room-prize">₹1.97 Lakhs</div></div><button class="join-price" type="button" data-action="joinContest">₹19</button></div><div class="room-progress"><div class="room-progress-row"><strong>12,154 Left</strong><span>13,000 spots</span></div><div class="progress-line"><span style="--fill:54%"></span></div></div><div class="room-meta"><span>₹34,000</span><span>48%</span><span>M 20</span></div></article>
+            <article class="room-card guaranteed-card"><div class="room-top"><div><span class="room-type">Guaranteed Prize Pool</span><div class="room-prize">₹62,400</div></div><button class="join-price" type="button" data-action="joinContest">₹39</button></div><div class="room-progress"><div class="room-progress-row"><strong>1,941 Left</strong><span>2,000 spots</span></div><div class="progress-line"><span style="--fill:37%"></span></div></div><div class="room-meta"><span>₹10,000</span><span>48%</span><span>M 10</span></div></article>
+          </section>
+
+          <section class="contest-group">
+            <div class="contest-group-head"><h3>Winner Rush</h3><button class="awards-more" type="button" data-action="contestViewAll">View All ›</button></div>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Flexible Prize Pool</span><div class="room-prize">₹4,780</div></div><button class="join-price" type="button" data-action="joinContest">₹19</button></div><div class="room-progress"><div class="room-progress-row"><strong>216 Left</strong><span>280 spots</span></div><div class="progress-line"><span style="--fill:76%"></span></div></div><div class="room-meta"><span>₹180</span><span>63%</span><span>M 20</span></div></article>
+          </section>
+
+          <section class="contest-group">
+            <div class="contest-group-head"><h3>High Rewards</h3></div>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Flexible Prize Pool</span><div class="room-prize">₹2,810</div></div><button class="join-price" type="button" data-action="joinContest">₹25</button></div><div class="room-progress"><div class="room-progress-row"><strong>8 Left</strong><span>125 spots</span></div><div class="progress-line"><span style="--fill:8%"></span></div></div><div class="room-meta"><span>₹1,000</span><span>20%</span><span>M 20</span></div></article>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Flexible Prize Pool</span><div class="room-prize">₹360</div></div><button class="join-price" type="button" data-action="joinContest">₹19</button></div><div class="room-progress"><div class="room-progress-row"><strong>16 Left</strong><span>21 spots</span></div><div class="progress-line"><span style="--fill:16%"></span></div></div><div class="room-meta"><span>₹120</span><span>23%</span><span>M 10</span></div></article>
+          </section>
+
+          <section class="contest-group">
+            <div class="contest-group-head"><h3>Winner Take All</h3></div>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Prize Pool</span><div class="room-prize">₹95</div></div><button class="join-price" type="button" data-action="joinContest">₹35</button></div><div class="room-progress"><div class="room-progress-row"><strong>1 Left</strong><span>3 spots</span></div><div class="progress-line"><span style="--fill:33%"></span></div></div><div class="room-meta"><span>₹95</span><span>33%</span><span>S</span></div></article>
+          </section>
+
+          <section class="contest-group">
+            <div class="contest-group-head"><h3>8X or Nothing</h3></div>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Flexible Prize Pool</span><div class="room-prize">₹4,400</div></div><button class="join-price" type="button" data-action="joinContest">₹25</button></div><div class="room-progress"><div class="room-progress-row"><strong>173 Left</strong><span>197 spots</span></div><div class="progress-line"><span style="--fill:66%"></span></div></div><div class="room-meta"><span>₹200</span><span>11%</span><span>M 20</span></div></article>
+          </section>
+
+          <section class="contest-group">
+            <div class="contest-group-head"><h3>4X or Nothing</h3></div>
+            <article class="room-card"><div class="room-top"><div><span class="room-type">Flexible Prize Pool</span><div class="room-prize">₹4,700</div></div><button class="join-price" type="button" data-action="joinContest">₹25</button></div><div class="room-progress"><div class="room-progress-row"><strong>189 Left</strong><span>210 spots</span></div><div class="progress-line"><span style="--fill:64%"></span></div></div><div class="room-meta"><span>₹100</span><span>22%</span><span>M 20</span></div></article>
+          </section>
+
+          <section class="contest-group">
+            <div class="contest-group-head"><h3>Practice Contests</h3><button class="awards-more" type="button" data-action="contestViewAll">View All ›</button></div>
+            <article class="room-card guaranteed-card"><div class="room-top"><div><span class="room-type">Guaranteed</span><div class="room-prize">Practice Contest</div></div><button class="join-price" type="button" data-action="joinContest">JOIN</button></div><div class="room-progress"><div class="room-progress-row"><strong>3 Left</strong><span>11 spots</span></div><div class="progress-line"><span style="--fill:30%"></span></div></div><div class="room-meta"><span>Glory awaits!</span><span>S</span></div></article>
+          </section>
+        </div>
+        <button class="create-team-fab" type="button" data-action="createTeam">⊕ CREATE TEAM</button>
+      </section>
+
+      <section id="contestDetailPage" class="contest-detail-page hidden">
+        <div class="contest-matchbar">
+          <button class="points-back" type="button" data-action="contestDetailBack" aria-label="返回">‹</button>
+          <div><strong>SA-W v NZ-W</strong><span>3h 54m left</span></div>
+        </div>
+
+        <div class="contest-detail-card">
+          <div class="contest-detail-top">
+            <div>
+              <span class="contest-detail-type">Guaranteed plus Prize Pool</span>
+              <div class="contest-detail-prize">₹10.58 Lakhs</div>
+            </div>
+            <div>
+              <span class="contest-detail-label">Max Prize Pool</span>
+              <div class="contest-detail-prize">₹31.74 Lakhs</div>
+            </div>
+          </div>
+          <div class="contest-detail-progress">
+            <div class="contest-detail-progress-row"><strong>22,073 Left</strong><span>27,000 spots</span></div>
+            <div class="contest-detail-progress-line"><span style="--fill:23%"></span></div>
+          </div>
+          <button class="contest-detail-join" type="button" data-action="joinContest">JOIN ₹40</button>
+        </div>
+
+        <div class="contest-detail-meta">
+          <span>₹1.50 L</span>
+          <span>52%</span>
+          <span>M 20</span>
+          <strong>₹31.74 Lakhs⌄</strong>
+        </div>
+
+        <div class="contest-detail-tabs" aria-label="Contest Detail 标签">
+          <button class="active" type="button" data-action="detailTab">Winnings</button>
+          <button type="button" data-action="detailTab">Leaderboard</button>
+        </div>
+
+        <div class="contest-detail-scroll">
+          <div class="breakup-switch" aria-label="奖金拆分">
+            <button class="active" type="button" data-action="breakupTab" data-breakup="guaranteed">Guaranteed Breakup</button>
+            <button type="button" data-action="breakupTab" data-breakup="maximum">Maximum Breakup</button>
+          </div>
+
+          <div class="winnings-table" id="winningsTable">
+            <div class="winnings-row head"><span>Rank</span><span>Winnings</span></div>
+            <div class="winnings-row"><span>#1</span><div><strong>₹1.50 Lakhs</strong><div class="winnings-note">1st prize will increase when the total spots increase ↑</div></div></div>
+            <div class="winnings-row"><span>#2</span><strong>₹70,000</strong></div>
+            <div class="winnings-row"><span>#3</span><strong>₹35,000</strong></div>
+            <div class="winnings-row"><span>#4</span><strong>₹15,000</strong></div>
+            <div class="winnings-row"><span>#5</span><strong>₹10,000</strong></div>
+            <div class="winnings-row"><span>#6</span><strong>₹5,000</strong></div>
+            <div class="winnings-row"><span>#7</span><strong>₹3,000</strong></div>
+            <div class="winnings-row"><span>#8</span><strong>₹1,500</strong></div>
+            <div class="winnings-row"><span>#9</span><strong>₹1,000</strong></div>
+            <div class="winnings-row"><span>#10</span><strong>₹800</strong></div>
+            <div class="winnings-row"><span>#11 - 15</span><strong>₹700</strong></div>
+            <div class="winnings-row"><span>#16 - 21</span><strong>₹600</strong></div>
+            <div class="winnings-row"><span>#22 - 28</span><strong>₹500</strong></div>
+            <div class="winnings-row"><span>#29 - 36</span><strong>₹400</strong></div>
+            <div class="winnings-row"><span>#37 - 45</span><strong>₹300</strong></div>
+            <div class="winnings-row"><span>#46 - 55</span><strong>₹200</strong></div>
+            <div class="winnings-row"><span>#56 - 75</span><strong>₹150</strong></div>
+            <div class="winnings-row"><span>#76 - 255</span><strong>₹100</strong></div>
+            <div class="winnings-row"><span>#256 - 4,845</span><strong>₹60</strong></div>
+            <div class="winnings-row"><span>#4,846 - 14,065</span><strong>₹49</strong></div>
+          </div>
+          <div class="winnings-footer-note">Winners will increase when total spots increase ↑</div>
+        </div>
+      </section>
+
+      <section id="myMatchesPage" class="my-matches-page hidden">
+        <div class="my-titlebar">My Matches</div>
+        <div class="my-tabs" aria-label="My Matches 类型">
+          <button class="active" type="button" data-my-kind="fantasy">Fantasy</button>
+          <button type="button" data-my-kind="predictions">Predictions</button>
+        </div>
+        <div class="my-content">
+          <div class="fantasy-switch my-sport-switch" aria-label="My Matches 运动类型">
+            <button class="active" type="button" data-my-sport="cricket">Cricket</button>
+            <button type="button" data-my-sport="football">Football</button>
+          </div>
+          <div class="my-status-switch" aria-label="My Matches 状态">
+            <button class="active" type="button" data-my-status="upcoming">Upcoming</button>
+            <button type="button" data-my-status="live">Live</button>
+            <button type="button" data-my-status="completed">Completed</button>
+          </div>
+          <div class="fantasy-page-list" id="myCricketUpcomingList">
+            <article class="fantasy-card my-card">
+              <span class="discount-badge">20% off*</span>
+              <button class="fantasy-league" type="button" data-action="myMatch"><span class="solid-icon"></span><span>T20 · T20 Mumbai, 2026</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>SBMF</strong><span>SoBo Mumbai Falcons</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>ATMWS</strong><span>Aakash Tigers Mumbai Western Suburbs</span></div>
+                </div>
+                <div class="fantasy-time"><strong>54m : 55s</strong><span>4:30 PM</span></div>
+              </div>
+              <div class="my-meta">1 Team · 1 Contest</div>
+              <div class="fantasy-detail">My Matches 详情页未提供，当前只保留展开态。</div>
+            </article>
+          </div>
+          <div class="fantasy-page-list hidden" id="myFootballUpcomingList">
+            <article class="fantasy-card my-card">
+              <span class="discount-badge">20% off*</span>
+              <button class="fantasy-league" type="button" data-action="myMatch"><span class="solid-icon"></span><span>Premier League · Round 18</span><b>›</b></button>
+              <div class="fantasy-team-panel">
+                <div class="fantasy-teams">
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>ARS</strong><span>Arsenal</span></div>
+                  <div class="fantasy-team"><span class="solid-icon"></span><strong>CHE</strong><span>Chelsea</span></div>
+                </div>
+                <div class="fantasy-time"><strong>54m : 55s</strong><span>8:00 PM</span></div>
+              </div>
+              <div class="my-meta">1 Team · 1 Contest</div>
+              <div class="fantasy-detail">足球 My Matches 详情页未提供，当前只保留展开态。</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="awardsPage" class="awards-page hidden">
+        <div class="my-titlebar">Rewards</div>
+        <div class="awards-hero">
+          <span class="awards-avatar"></span>
+          <div class="awards-user">
+            <strong>User905128 (D5RQP)</strong>
+            <span class="awards-link">View Profile ›</span>
+          </div>
+        </div>
+
+        <section class="awards-section">
+          <h3>Your Skill Score</h3>
+          <div class="score-card">
+            <div class="score-display">634</div>
+            <span class="awards-link">How is it calculated? ›</span>
+          </div>
+        </section>
+
+        <section class="awards-section">
+          <div class="awards-section-head">
+            <div>
+              <h3>My Rewards</h3>
+              <p>Use for entry fee discounts</p>
+            </div>
+            <button class="awards-more" type="button" data-action="awardsMore">View More ›</button>
+          </div>
+          <article class="reward-card">
+            <div class="coupon-art">20% OFF</div>
+            <div class="reward-caption">Crazy Week: 20% OFF<br>Exp. 9h:58m</div>
+          </article>
+        </section>
+
+        <section class="awards-section">
+          <h3>Other</h3>
+          <div class="other-list">
+            <button class="other-row" type="button" data-action="gameHistory"><span></span><strong>Game History</strong><b>›</b></button>
+            <button class="other-row" type="button" data-action="howToPlay"><span></span><strong>How to Play</strong><b>›</b></button>
+            <button class="other-row" type="button" data-action="pointsSystem"><span></span><strong>Points System</strong><b>›</b></button>
+            <button class="other-row" type="button" data-action="awardsOther"><span></span><strong>Help and Support</strong><b>›</b></button>
+          </div>
+        </section>
+      </section>
+
+      <section id="historyPage" class="history-page hidden">
+        <div class="points-titlebar">
+          <button class="points-back" type="button" data-action="historyBack" aria-label="返回">‹</button>
+          <strong>Game History</strong>
+        </div>
+        <div class="detail-sport-switch" aria-label="Game History 运动类型">
+          <button class="active" type="button" data-action="detailSport" data-detail-scope="history" data-detail-sport="cricket">Cricket</button>
+          <button type="button" data-action="detailSport" data-detail-scope="history" data-detail-sport="football">Football</button>
+        </div>
+        <div class="history-tabs" aria-label="游戏记录状态">
+          <button class="active" type="button" data-action="historyTab" data-history-filter="all">All</button>
+          <button type="button" data-action="historyTab" data-history-filter="settled">Settled</button>
+          <button type="button" data-action="historyTab" data-history-filter="unsettled">Unsettled</button>
+          <button type="button" data-action="historyTab" data-history-filter="rollback">Rollback</button>
+        </div>
+
+        <div class="history-list" id="historyList"></div>
+      </section>
+
+      <section id="pointsPage" class="points-page hidden">
+        <div class="points-titlebar">
+          <button class="points-back" type="button" data-action="pointsBack" aria-label="返回">‹</button>
+          <strong>POINT SYSTEM</strong>
+        </div>
+        <div class="detail-sport-switch" aria-label="Point System 运动类型">
+          <button class="active" type="button" data-action="detailSport" data-detail-scope="points" data-detail-sport="cricket">Cricket</button>
+          <button type="button" data-action="detailSport" data-detail-scope="points" data-detail-sport="football">Football</button>
+        </div>
+        <div class="points-tabs" aria-label="玩法类型">
+          <button class="active" type="button" data-action="pointsTab" data-points-tab="how">How To Play</button>
+          <button type="button" data-action="pointsTab" data-points-tab="t20">T20</button>
+          <button type="button" data-action="pointsTab" data-points-tab="od">OD</button>
+          <button type="button" data-action="pointsTab" data-points-tab="test">Test</button>
+          <button type="button" data-action="pointsTab" data-points-tab="t10">T10</button>
+          <button type="button" data-action="pointsTab" data-points-tab="sixes">Hong Kong Sixes</button>
+          <button type="button" data-action="pointsTab" data-points-tab="more">›</button>
+        </div>
+
+        <div class="points-content">
+          <section class="points-section">
+            <h3>1. Process preview</h3>
+            <div class="process-card">
+              <div class="process-flow">
+                <div class="process-step"><span>1</span>Select Match</div>
+                <div class="process-step"><span>2</span>Create Your Team</div>
+                <div class="process-step"><span>3</span>Join Contests</div>
+                <div class="process-step"><span>4</span>Follow Match</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="points-section">
+            <h3>2. Select A Match</h3>
+            <ul>
+              <li>The APP will bring games across many different sports. Cricket contest may be categorized as domestic, international, men's, women's, T20, ODI, Test or franchise on the main headline.</li>
+            </ul>
+          </section>
+
+          <section class="points-section">
+            <h3>3. Create Your Team</h3>
+            <ul>
+              <li>Use your knowledge of sports to pick a team within a budget of 100 credits who you think will score the most points for the selected match.</li>
+              <li>You can create up to 40 teams and join contests with up to 20 teams. Make every team count!</li>
+            </ul>
+          </section>
+
+          <section class="points-section">
+            <h4>What are credits?</h4>
+            <ul>
+              <li>Credits are the cost of a player. In-form and star players typically cost more credits, while inexperienced or non-regular players cost less.</li>
+            </ul>
+          </section>
+
+          <section class="points-section">
+            <h4>What are Fantasy Points?</h4>
+            <ul>
+              <li>Fantasy Points are earned by real-life players on the basis of their performances in a match.</li>
+              <li>For example, players earn points for scoring runs, taking wickets, scoring goals, making assists, and similar actions for other sports.</li>
+              <li>You can check out the Fantasy Points System under each sport for more details.</li>
+            </ul>
+          </section>
+
+          <section class="points-section">
+            <h4>Can I edit my team after I create it?</h4>
+            <ul>
+              <li>You can edit your team as many times as you like before the match deadline. Go to My Teams on the match page to check all the teams you have created.</li>
+            </ul>
+          </section>
+
+          <section class="points-section">
+            <h3>4. Join Contests</h3>
+            <ul>
+              <li>We have many different contest formats for you to join. Choose between free and paid contests, or even create a new private contest just for you and your friends.</li>
+            </ul>
+          </section>
+
+          <section class="points-section">
+            <h3>5. Follow the match</h3>
+            <ul>
+              <li>Once a match is live, you can follow your contests leaderboards to see how you're performing against your competition.</li>
+              <li>You can even chat with them in real-time through our Contest Chat feature.</li>
+            </ul>
+          </section>
+
+          <section class="points-section">
+            <h4>Withdrawing your winnings</h4>
+            <ul>
+              <li>After a match ends, if you're in the winning zone for a contest, your contest winnings are transferred to your account.</li>
+              <li>Use them to join more contests, or withdraw it and celebrate your success!</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="help-panel hidden" id="helpBlock">
+        <button class="help-row" type="button" data-action="help"><span>Help Center</span><span>›</span></button>
+        <button class="help-row" type="button" data-action="support"><span>Live Support</span><span>›</span></button>
+      </section>
+      <button class="telegram hidden" type="button" data-action="telegram" aria-label="Telegram"></button>
+    </section>
+
+    <button class="floating-chat hidden" id="floatingChat" type="button" data-action="support" aria-label="在线客服"></button>
+
+    <nav class="bottom-nav hidden" id="mainBottomNav" aria-label="底部菜单">
+      <button class="bottom-btn" type="button" data-bottom="vip"><span></span>VIP</button>
+      <button class="bottom-btn" type="button" data-bottom="affiliate"><span></span>Affiliate</button>
+      <button class="bottom-btn" type="button" data-bottom="jackpot"><span></span>Jackpot</button>
+      <button class="bottom-btn" type="button" data-bottom="promos"><span></span>Promos</button>
+    </nav>
+
+    <nav class="fantasy-bottom" id="fantasyBottomNav" aria-label="Fantasy 底部菜单">
+      <button class="bottom-btn active" type="button" data-fantasy-bottom="home"><span></span>Home</button>
+      <button class="bottom-btn" type="button" data-fantasy-bottom="matches"><span></span>My Matches</button>
+      <button class="bottom-btn" type="button" data-fantasy-bottom="awards"><span></span>Awards</button>
+    </nav>
+
+    <aside class="sheet" id="sheet" aria-live="polite">
+      <div class="sheet-head">
+        <strong id="sheetTitle">充值</strong>
+        <button class="close-btn" type="button" data-action="closeSheet" aria-label="关闭">×</button>
+      </div>
+      <div class="sheet-body" id="sheetBody"></div>
+    </aside>
+
+    <div class="contest-filter-sheet" id="contestFilterSheet">
+      <div class="contest-filter-panel">
+        <div class="contest-filter-head"><button type="button" data-action="closeContestFilter">×</button><strong>Filter</strong><span></span></div>
+        <div class="contest-filter-section">
+          <strong>Entry Fee</strong>
+          <div class="contest-filter-chips"><button>₹1 - ₹50</button><button>₹51 - ₹100</button><button>₹101 - ₹500</button><button>₹501 - ₹1,000</button><button>₹1,001 & above</button></div>
+        </div>
+        <div class="contest-filter-section">
+          <strong>Prize Pool</strong>
+          <div class="contest-filter-chips"><button>₹1 - ₹10,000</button><button>₹10,001 - ₹50,000</button><button>₹50,001 - ₹1 Lakh</button><button>₹1 Lakh & above</button></div>
+        </div>
+        <div class="contest-filter-section">
+          <strong>Contest Spots</strong>
+          <div class="contest-filter-chips"><button>2</button><button>3 - 10</button><button>11 - 100</button><button>101 - 1,000</button><button>1,001 & above</button></div>
+        </div>
+        <div class="contest-filter-actions"><button class="contest-clear" type="button" data-action="closeContestFilter">CLEAR</button><button class="contest-apply" type="button" data-action="closeContestFilter">APPLY</button></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">已操作</div>
+  </main>
+
+    <aside class="doc-panel" aria-label="产品说明文档">
+      <div data-doc-page="home">
+        <h2>Home 页面产品文档</h2>
+
+        <h3>交互说明</h3>
+        <p><strong>进入页面交互：</strong></p>
+        <ul>
+          <li>点击顶部 Fantasy icon 进入 Home 页面。</li>
+          <li>点击底部 Home 进入 Home 页面。</li>
+        </ul>
+        <p><strong>本页面交互：</strong></p>
+        <ul>
+          <li>可切换 Cricket 和 Football 页签，切换到对应页签后展示对应运动类型的比赛卡片列表。</li>
+          <li>Cricket 和 Football 列表中可切换 Recommended、Starting Soon、Popular，切换后展示对应状态的比赛卡片列表。</li>
+          <li>点击比赛卡片进入 Contest Room 页面。</li>
+          <li>点击 VIEW ALL MATCHES，全部比赛列表页待确认。</li>
+          <li>点击 How to Play 或 Points System 进入 Points System 页面。</li>
+          <li>点击 Help and Support，帮助与客服页面待确认。</li>
+        </ul>
+
+        <h3>字段说明</h3>
+        <ul>
+          <li>T20 · MUM T20：赛事简称/赛事名称。</li>
+          <li>Women T20 · ICC Womens T20 World Cup Warm-up：女子赛事简称/赛事名称。</li>
+          <li>SBMF、ATM、SCO-W、PAK-W：队伍简称。</li>
+          <li>SOBO Mumbai Falcons、Aakash Tigers MWS、Scotland Women、Pakistan Women：队伍名称。</li>
+          <li>Tomorrow、Jun 11、2h:44m：开赛日期或开赛倒计时。</li>
+          <li>4:30 PM、5:00 PM、9:30 PM：开赛时间。</li>
+          <li>₹8.03 Lakhs、Coming Soon：奖金金额或当前赛事状态。</li>
+          <li>VIEW ALL MATCHES：查看全部比赛入口。</li>
+          <li>Fantasy Help：梦幻体育帮助入口区域。</li>
+          <li>How to Play、Points System、Help and Support：帮助功能入口。</li>
+        </ul>
+      </div>
+
+      <div class="hidden" data-doc-page="matches">
+        <h2>My Matches 页面产品文档</h2>
+
+        <h3>交互说明</h3>
+        <p><strong>进入页面交互：</strong></p>
+        <ul>
+          <li>点击底部 My Matches 进入 My Matches 页面。</li>
+        </ul>
+        <p><strong>本页面交互：</strong></p>
+        <ul>
+          <li>可切换 Cricket 和 Football 页签，切换后展示对应运动类型的我的比赛列表。</li>
+          <li>可切换 Fantasy 和 Predictions 页签；Predictions 内容规则待确认。</li>
+          <li>可切换 Upcoming、Live、Completed 页签；Live 和 Completed 的列表或空状态规则待确认。</li>
+          <li>点击我的比赛卡片可展开当前占位详情；我的比赛详情页待确认。</li>
+        </ul>
+
+        <h3>字段说明</h3>
+        <ul>
+          <li>20% off*：优惠标签。</li>
+          <li>T20 · T20 Mumbai, 2026：赛事简称/赛事名称/赛季年份。</li>
+          <li>Premier League · Round 18：足球赛事名称/轮次。</li>
+          <li>SBMF、ATMWS、ARS、CHE：队伍简称。</li>
+          <li>SoBo Mumbai Falcons、Aakash Tigers Mumbai Western Suburbs、Arsenal、Chelsea：队伍名称。</li>
+          <li>54m : 55s：开赛倒计时。</li>
+          <li>4:30 PM、8:00 PM：开赛时间。</li>
+          <li>1 Team：用户已创建/参与的队伍数量。</li>
+          <li>1 Contest：用户已报名的 contest 数量。</li>
+        </ul>
+      </div>
+
+      <div class="hidden" data-doc-page="contest">
+        <h2>Contest Room 页面产品文档</h2>
+
+        <h3>交互说明</h3>
+        <p><strong>进入页面交互：</strong></p>
+        <ul>
+          <li>在 Home 页面点击任意赛事卡片进入本页面。</li>
+        </ul>
+        <p><strong>本页面交互：</strong></p>
+        <ul>
+          <li>点击顶部返回按钮，返回 Home 页面。</li>
+          <li>可切换 Contests、My Contests、Teams、Gurus、Stats 页签；当前仅 Contests 有列表结构。</li>
+          <li>可点击 Entry、Spots、Prize Pool、% Winners 做筛选条件选中态。</li>
+          <li>点击右侧 Filter 图标从底部展开筛选面板。</li>
+          <li>点击卡片中的奖金池类型文字，可展开/收起该类型说明气泡。</li>
+          <li>点击卡片底部第一个金额字段，可浮出首奖计算说明。</li>
+          <li>点击房间卡片白色主体区域，进入 Contest Detail 页面。</li>
+          <li>点击报名价格或 CREATE TEAM 进入创建队伍/报名流程；后续流程待确认。</li>
+        </ul>
+
+        <h3>字段说明</h3>
+        <ul>
+          <li>SA-W v NZ-W：当前比赛双方简称。</li>
+          <li>4h 45m left：比赛截止/开赛倒计时。</li>
+          <li>Contests：玩法房间列表页签。</li>
+          <li>Discounted Entry、Trending Now、Winner Rush：房间分组标题。</li>
+          <li>Prize Pool：奖金池类型。</li>
+          <li>Guaranteed plus Prize Pool：兜底奖池类型，进度条贯穿整张卡片。</li>
+          <li>Flexible Prize Pool：浮动奖池类型，进度条仅展示在右侧席位区域。</li>
+          <li>₹10.58 Lakhs、₹86,500：奖金池金额。</li>
+          <li>₹40、₹915：报名价格。</li>
+          <li>23,542 Left：剩余席位。</li>
+          <li>27,000 spots：总席位数。</li>
+          <li>₹1.50 L、₹34,500：首奖金额。</li>
+          <li>52%、19%：中奖比例，用于倒推中奖队伍数。</li>
+          <li>CREATE TEAM：创建队伍入口。</li>
+        </ul>
+      </div>
+
+      <div class="hidden" data-doc-page="contestDetail">
+        <h2>Contest Detail 页面产品文档</h2>
+
+        <h3>交互说明</h3>
+        <p><strong>进入页面交互：</strong></p>
+        <ul>
+          <li>在 Contest Room 页面点击房间卡片白色主体区域进入本页面。</li>
+        </ul>
+        <p><strong>本页面交互：</strong></p>
+        <ul>
+          <li>点击顶部返回按钮，返回 Contest Room 页面。</li>
+          <li>点击 JOIN 按钮进入报名/创建队伍流程；后续流程待确认。</li>
+          <li>可切换 Winnings 和 Leaderboard 页签；当前仅 Winnings 有页面结构。</li>
+          <li>可切换 Guaranteed Breakup 和 Maximum Breakup，切换后展示对应奖金拆分列表。</li>
+        </ul>
+
+        <h3>字段说明</h3>
+        <ul>
+          <li>SA-W v NZ-W：当前比赛双方简称。</li>
+          <li>3h 54m left：比赛截止/开赛倒计时。</li>
+          <li>Guaranteed plus Prize Pool：房间奖金池类型。</li>
+          <li>₹10.58 Lakhs：当前奖金池金额。</li>
+          <li>Max Prize Pool、₹31.74 Lakhs：最大奖金池金额。</li>
+          <li>22,213 Left：剩余席位。</li>
+          <li>27,000 spots：总席位数。</li>
+          <li>JOIN ₹40：报名入口及报名金额。</li>
+          <li>₹1.50 L、52%、M 20：首奖金额、中奖比例、最多队伍数。</li>
+          <li>Rank、Winnings：排名和对应奖金。</li>
+          <li>Maximum Breakup：最大报名情况下的奖金拆分。</li>
+        </ul>
+      </div>
+
+      <div class="hidden" data-doc-page="awards">
+        <h2>Awards 页面产品文档</h2>
+
+        <h3>交互说明</h3>
+        <p><strong>进入页面交互：</strong></p>
+        <ul>
+          <li>点击底部 Awards 进入 Awards 页面。</li>
+        </ul>
+        <p><strong>本页面交互：</strong></p>
+        <ul>
+          <li>点击 View Profile 可进入个人资料页；个人资料页结构待确认。</li>
+          <li>点击 How is it calculated? 可查看 Skill Score 计算说明；说明弹窗或页面待确认。</li>
+          <li>点击 View More 可查看更多奖励；奖励列表页待确认。</li>
+          <li>点击 Game History 进入游戏历史页面。</li>
+          <li>点击 How to Play 进入积分规则页面，并默认选中 How To Play 页签。</li>
+          <li>点击 Points System 进入积分规则页面。</li>
+          <li>Help and Support 页面结构待确认。</li>
+        </ul>
+
+        <h3>字段说明</h3>
+        <ul>
+          <li>Rewards：页面标题。</li>
+          <li>User905128：用户昵称/用户名。</li>
+          <li>D5RQP：用户邀请码或用户识别码。</li>
+          <li>Your Skill Score：用户技能分模块标题。</li>
+          <li>634：用户当前 Skill Score 分值。</li>
+          <li>My Rewards：我的奖励模块标题。</li>
+          <li>20% OFF：奖励券折扣信息。</li>
+          <li>Crazy Week: 20% OFF：奖励名称和折扣内容。</li>
+          <li>Exp. 9h:58m：奖励券过期倒计时。</li>
+          <li>Other：其他功能入口模块标题。</li>
+        </ul>
+      </div>
+
+      <div class="hidden" data-doc-page="points">
+        <h2>Point System 页面产品文档</h2>
+
+        <h3>交互说明</h3>
+        <p><strong>进入页面交互：</strong></p>
+        <ul>
+          <li>在 Awards 页面点击 Other 模块中的 Points System 进入本页面。</li>
+        </ul>
+        <p><strong>本页面交互：</strong></p>
+        <ul>
+          <li>点击顶部返回按钮，返回 Awards 页面。</li>
+          <li>可切换 Cricket 和 Football 页签，切换后展示对应运动类型的规则入口。</li>
+          <li>可切换 How To Play、T20、OD、Test、T10、Hong Kong Sixes 标签；当前仅展示选中态，其他标签内容待确认。</li>
+          <li>页面内容可上下滚动查看完整玩法说明。</li>
+        </ul>
+
+        <h3>字段说明</h3>
+        <ul>
+          <li>POINT SYSTEM：页面标题。</li>
+          <li>Cricket、Football：运动类型页签。</li>
+          <li>How To Play、T20、OD、Test、T10、Hong Kong Sixes：玩法/赛事规则分类标签。</li>
+          <li>Process preview：流程预览模块标题。</li>
+          <li>Select Match：选择比赛步骤。</li>
+          <li>Create Your Team：创建队伍步骤。</li>
+          <li>Join Contests：加入 contest 步骤。</li>
+          <li>Follow Match：关注比赛步骤。</li>
+          <li>Credits：球员成本字段，用于说明组队预算消耗。</li>
+          <li>Fantasy Points：梦幻积分字段，用于说明球员表现对应得分。</li>
+        </ul>
+      </div>
+
+      <div class="hidden" data-doc-page="history">
+        <h2>Game History 页面产品文档</h2>
+
+        <h3>交互说明</h3>
+        <p><strong>进入页面交互：</strong></p>
+        <ul>
+          <li>在 Awards 页面点击 Other 模块中的 Game History 进入本页面。</li>
+        </ul>
+        <p><strong>本页面交互：</strong></p>
+        <ul>
+          <li>点击顶部返回按钮，返回 Awards 页面。</li>
+          <li>可切换 Cricket 和 Football 页签，切换后展示对应运动类型的游戏记录。</li>
+          <li>可切换 All、Settled、Unsettled、Rollback 标签，切换后筛选对应状态的记录列表。</li>
+          <li>页面内容可上下滚动查看历史记录。</li>
+        </ul>
+
+        <h3>字段说明</h3>
+        <ul>
+          <li>Game History：页面标题。</li>
+          <li>Cricket、Football：运动类型页签。</li>
+          <li>All、Settled、Unsettled、Rollback：记录状态筛选标签。</li>
+          <li>June 8, 2026：记录日期分组。</li>
+          <li>S：Settled 状态标识。</li>
+          <li>R：Rollback 状态标识。</li>
+          <li>MSC Maratha Royals vs Triumph Knights MNE：比赛双方名称。</li>
+          <li>16:30 · Settled：比赛时间和结算状态。</li>
+          <li>Entry Fee：报名费用。</li>
+          <li>Rewards：奖励金额。</li>
+          <li>Rollback：退回金额。</li>
+          <li>No more：列表已无更多数据提示。</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const slides = [
+      {
+        title: "JOIN NOW",
+        copy: "ACCESS EXCLUSIVE REWARDS",
+        bg: "#202523"
+      },
+      {
+        title: "FIRST BONUS",
+        copy: "DEPOSIT AND PLAY",
+        bg: "#252b28"
+      },
+      {
+        title: "BIG MATCHES",
+        copy: "WIN UP TO ₹8.3 LAKHS",
+        bg: "#2a302d"
+      },
+      {
+        title: "JACKPOT",
+        copy: "COLORFUL BALLS, BIG WINS",
+        bg: "#303633"
+      }
+    ];
+
+    const state = {
+      tab: "fantasy",
+      slide: 0,
+      balance: 0,
+      sport: "cricket",
+      fantasyFilter: "recommended",
+      mySport: "cricket",
+      historyFilter: "all",
+      historySport: "cricket",
+      pointsSport: "cricket"
+    };
+
+    const historyRecords = [
+      { sport: "cricket", date: "June 8, 2026", status: "settled", match: "MSC Maratha Royals vs Triumph Knights MNE", time: "16:30", entry: "₹9.00", resultLabel: "Rewards", result: "₹0.00" },
+      { sport: "cricket", date: "June 8, 2026", status: "settled", match: "MSC Maratha Royals vs Triumph Knights MNE", time: "16:30", entry: "₹10.00", resultLabel: "Rewards", result: "₹0.00" },
+      { sport: "cricket", date: "June 8, 2026", status: "unsettled", match: "Bandra Blasters vs Eagle Thane Strikers", time: "19:00", entry: "₹12.00", resultLabel: "Pending", result: "—" },
+      { sport: "cricket", date: "June 7, 2026", status: "rollback", match: "Triumph Knights MNE vs Arcs Andheri", time: "21:30", entry: "₹10.00", resultLabel: "Rollback", result: "₹10.00" },
+      { sport: "cricket", date: "June 7, 2026", status: "settled", match: "Aakash Tigers MWS vs SOBO Mumbai Falcons", time: "16:30", entry: "₹9.00", resultLabel: "Rewards", result: "₹24.00" },
+      { sport: "cricket", date: "June 6, 2026", status: "unsettled", match: "West Indies Women vs Australia Women", time: "22:00", entry: "₹15.00", resultLabel: "Pending", result: "—" },
+      { sport: "cricket", date: "June 6, 2026", status: "settled", match: "Scotland Women vs Pakistan Women", time: "17:00", entry: "₹10.00", resultLabel: "Rewards", result: "₹0.00" },
+      { sport: "cricket", date: "June 5, 2026", status: "settled", match: "Eagle Thane Strikers vs Arcs Andheri", time: "16:30", entry: "₹10.00", resultLabel: "Rewards", result: "₹0.00" },
+      { sport: "cricket", date: "June 5, 2026", status: "settled", match: "Eagle Thane Strikers vs Arcs Andheri", time: "16:30", entry: "₹9.00", resultLabel: "Rewards", result: "₹0.00" },
+      { sport: "cricket", date: "June 5, 2026", status: "rollback", match: "Pakistan Women vs Bangladesh Women", time: "20:00", entry: "₹8.00", resultLabel: "Rollback", result: "₹8.00" },
+      { sport: "cricket", date: "June 4, 2026", status: "rollback", match: "MSC Maratha Royals vs SOBO Mumbai Falcons", time: "16:30", entry: "₹10.00", resultLabel: "Rollback", result: "₹10.00" },
+      { sport: "cricket", date: "June 4, 2026", status: "settled", match: "MSC Maratha Royals vs SOBO Mumbai Falcons", time: "16:30", entry: "₹9.00", resultLabel: "Rewards", result: "₹0.00" },
+      { sport: "football", date: "June 4, 2026", status: "unsettled", match: "Arsenal vs Chelsea", time: "20:00", entry: "₹15.00", resultLabel: "Pending", result: "—" },
+      { sport: "football", date: "June 4, 2026", status: "settled", match: "Real Madrid vs Barcelona", time: "22:10", entry: "₹20.00", resultLabel: "Rewards", result: "₹75.00" },
+      { sport: "football", date: "June 3, 2026", status: "rollback", match: "Inter Milan vs AC Milan", time: "21:00", entry: "₹12.00", resultLabel: "Rollback", result: "₹12.00" },
+      { sport: "football", date: "June 3, 2026", status: "settled", match: "Manchester City vs Liverpool", time: "19:30", entry: "₹18.00", resultLabel: "Rewards", result: "₹0.00" },
+      { sport: "football", date: "June 2, 2026", status: "unsettled", match: "Real Madrid vs Barcelona", time: "22:10", entry: "₹20.00", resultLabel: "Pending", result: "—" },
+      { sport: "football", date: "June 2, 2026", status: "settled", match: "Paris SG vs Marseille", time: "18:45", entry: "₹9.00", resultLabel: "Rewards", result: "₹36.00" },
+      { sport: "football", date: "June 1, 2026", status: "rollback", match: "Bayern Munich vs Dortmund", time: "21:30", entry: "₹10.00", resultLabel: "Rollback", result: "₹10.00" },
+      { sport: "football", date: "June 1, 2026", status: "settled", match: "Atletico Madrid vs Sevilla", time: "16:30", entry: "₹10.00", resultLabel: "Rewards", result: "₹0.00" }
+    ];
+
+    const qs = (selector) => document.querySelector(selector);
+    const qsa = (selector) => Array.from(document.querySelectorAll(selector));
+    const toast = qs("#toast");
+    const sheet = qs("#sheet");
+    let toastTimer = null;
+
+    function showToast(text) {
+      clearTimeout(toastTimer);
+      toast.textContent = text;
+      toast.classList.add("show");
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function openSheet(title, body) {
+      qs("#sheetTitle").textContent = title;
+      qs("#sheetBody").innerHTML = body;
+      sheet.classList.add("open");
+    }
+
+    function closeSheet() {
+      sheet.classList.remove("open");
+    }
+
+    function renderHistoryList(filter = state.historyFilter, sport = state.historySport) {
+      state.historyFilter = filter;
+      state.historySport = sport;
+      qsa("[data-history-filter]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.historyFilter === filter);
+      });
+      qsa("[data-detail-scope='history']").forEach((button) => {
+        button.classList.toggle("active", button.dataset.detailSport === sport);
+      });
+
+      const list = qs("#historyList");
+      const records = historyRecords.filter((record) => record.sport === sport && (filter === "all" || record.status === filter));
+      const statusText = { settled: "Settled", unsettled: "Unsettled", rollback: "Rollback" };
+      const statusLetter = { settled: "S", unsettled: "U", rollback: "R" };
+      let currentDate = "";
+
+      list.innerHTML = records.map((record) => {
+        const dateMarkup = record.date === currentDate ? "" : `<div class="history-date">${record.date}</div>`;
+        currentDate = record.date;
+        return `
+          ${dateMarkup}
+          <article class="history-row">
+            <span class="history-status ${record.status}">${statusLetter[record.status]}</span>
+            <div class="history-match"><strong>${record.match}</strong><span>${record.time} · ${statusText[record.status]}</span></div>
+            <div class="history-money"><span>Entry Fee</span><strong>${record.entry}</strong></div>
+            <div class="history-money"><span>${record.resultLabel}</span><strong>${record.result}</strong></div>
+          </article>
+        `;
+      }).join("") + `<div class="history-end">No more</div>`;
+    }
+
+    function setDetailSport(scope, sport) {
+      if (scope === "history") {
+        renderHistoryList(state.historyFilter, sport);
+        qs(".screen").scrollTop = 0;
+        return;
+      }
+      if (scope === "points") {
+        state.pointsSport = sport;
+        qsa("[data-detail-scope='points']").forEach((button) => {
+          button.classList.toggle("active", button.dataset.detailSport === sport);
+        });
+      }
+    }
+
+    function renderSlide(index) {
+      state.slide = index;
+      const slide = slides[index];
+      qs("#hero").style.background = slide.bg;
+      const heroTitle = qs("#heroTitle");
+      const heroCopy = qs("#heroCopy");
+      if (heroTitle) heroTitle.textContent = slide.title;
+      if (heroCopy) heroCopy.textContent = slide.copy;
+      qsa(".dot").forEach((dot) => dot.classList.toggle("active", Number(dot.dataset.slide) === index));
+    }
+
+    function setTab(tab) {
+      setFrameMode("main");
+      state.tab = tab;
+      qsa(".tab-btn").forEach((button) => button.classList.toggle("active", button.dataset.tab === tab));
+      const isFantasyPage = tab === "fantasy";
+      qs("#hero").classList.toggle("hidden", tab !== "explore");
+      qs("#fantasyBlock").classList.toggle("hidden", tab !== "explore");
+      qs("#casinoBlock").classList.toggle("hidden", tab !== "casino");
+      qs("#fantasyPage").classList.toggle("hidden", !isFantasyPage);
+      qs("#contestPage").classList.add("hidden");
+      qs("#contestDetailPage").classList.add("hidden");
+      qs("#myMatchesPage").classList.add("hidden");
+      qs("#awardsPage").classList.add("hidden");
+      qs("#historyPage").classList.add("hidden");
+      qs("#pointsPage").classList.add("hidden");
+      qs("#helpBlock").classList.toggle("hidden", isFantasyPage);
+      qs(".telegram").classList.toggle("hidden", isFantasyPage);
+      qs("#floatingChat").classList.toggle("hidden", isFantasyPage);
+      qs("#mainBottomNav").classList.toggle("hidden", isFantasyPage);
+      qs("#fantasyBottomNav").classList.toggle("hidden", !isFantasyPage);
+      if (isFantasyPage) {
+        qsa("[data-fantasy-bottom]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.fantasyBottom === "home");
+        });
+        setQuickPageActive("home");
+        setDocPage("home");
+      }
+      qs(".screen").scrollTop = 0;
+      if (tab === "fantasy") showToast("已进入 Fantasy 页面");
+      if (tab === "casino") showToast("已切换到 Casino 游戏");
+      if (tab === "explore") showToast("已回到 Explore 首页");
+    }
+
+    function setQuickPageActive(view) {
+      qsa("[data-quick-page]").forEach((button) => {
+        const page = button.dataset.quickPage;
+        button.classList.toggle("active", page === view || ((view === "contest" || view === "contestDetail") && page === "home") || ((view === "points" || view === "history") && page === "awards"));
+      });
+      qsa("[data-quick-group]").forEach((group) => {
+        group.classList.toggle("open", group.dataset.quickGroup === view || ((view === "contest" || view === "contestDetail") && group.dataset.quickGroup === "home") || ((view === "points" || view === "history") && group.dataset.quickGroup === "awards"));
+      });
+    }
+
+    function setDocPage(page) {
+      qsa("[data-doc-page]").forEach((panel) => {
+        panel.classList.toggle("hidden", panel.dataset.docPage !== page);
+      });
+    }
+
+    function setFrameMode(mode) {
+      const isDetail = mode === "detail";
+      qs("#appTopbar").classList.remove("hidden");
+      qs("#appMainTabs").classList.toggle("hidden", isDetail);
+      qs(".screen").classList.toggle("detail-mode", isDetail);
+    }
+
+    function setMyKind(kind) {
+      qsa("[data-my-kind]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.myKind === kind);
+      });
+      if (kind !== "fantasy") showToast("Predictions 内容待确认");
+    }
+
+    function setMyStatus(status) {
+      qsa("[data-my-status]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.myStatus === status);
+      });
+      if (status !== "upcoming") {
+        const label = qs(`[data-my-status="${status}"]`)?.textContent.trim() || status;
+        showToast(`${label} 内容待确认`);
+      }
+    }
+
+    function setFantasyDock(view) {
+      setFrameMode("main");
+      qs("#contestFilterSheet").classList.remove("open");
+      qsa("[data-fantasy-bottom]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.fantasyBottom === view);
+      });
+      if (view === "home") {
+        setQuickPageActive("home");
+        setDocPage("home");
+        qs("#fantasyPage").classList.remove("hidden");
+        qs("#contestPage").classList.add("hidden");
+        qs("#contestDetailPage").classList.add("hidden");
+        qs("#myMatchesPage").classList.add("hidden");
+        qs("#awardsPage").classList.add("hidden");
+        qs("#historyPage").classList.add("hidden");
+        qs("#pointsPage").classList.add("hidden");
+        qs("#fantasyBottomNav").classList.remove("hidden");
+        qs(".screen").scrollTop = 0;
+        return;
+      }
+      if (view === "matches") {
+        setQuickPageActive("matches");
+        setDocPage("matches");
+        qs("#fantasyPage").classList.add("hidden");
+        qs("#contestPage").classList.add("hidden");
+        qs("#contestDetailPage").classList.add("hidden");
+        qs("#myMatchesPage").classList.remove("hidden");
+        qs("#awardsPage").classList.add("hidden");
+        qs("#historyPage").classList.add("hidden");
+        qs("#pointsPage").classList.add("hidden");
+        qs("#fantasyBottomNav").classList.remove("hidden");
+        setMyKind(qs("[data-my-kind].active")?.dataset.myKind || "fantasy");
+        setMyStatus(qs("[data-my-status].active")?.dataset.myStatus || "upcoming");
+        qs(".screen").scrollTop = 0;
+        return;
+      }
+      if (view === "awards") {
+        setQuickPageActive("awards");
+        setDocPage("awards");
+        qs("#fantasyPage").classList.add("hidden");
+        qs("#contestPage").classList.add("hidden");
+        qs("#contestDetailPage").classList.add("hidden");
+        qs("#myMatchesPage").classList.add("hidden");
+        qs("#awardsPage").classList.remove("hidden");
+        qs("#historyPage").classList.add("hidden");
+        qs("#pointsPage").classList.add("hidden");
+        qs("#fantasyBottomNav").classList.remove("hidden");
+        qs(".screen").scrollTop = 0;
+        return;
+      }
+    }
+
+    function openContestRoom() {
+      setFrameMode("detail");
+      setQuickPageActive("contest");
+      setDocPage("contest");
+      qs("#contestFilterSheet").classList.remove("open");
+      qs("#fantasyPage").classList.add("hidden");
+      qs("#contestPage").classList.remove("hidden");
+      qs("#contestDetailPage").classList.add("hidden");
+      qs("#myMatchesPage").classList.add("hidden");
+      qs("#awardsPage").classList.add("hidden");
+      qs("#historyPage").classList.add("hidden");
+      qs("#pointsPage").classList.add("hidden");
+      qs("#fantasyBottomNav").classList.add("hidden");
+      qsa("[data-action='breakupTab']").forEach((button) => button.classList.toggle("active", button.dataset.breakup === "guaranteed"));
+      renderBreakup("guaranteed");
+      qs(".screen").scrollTop = 0;
+    }
+
+    function openContestDetail() {
+      setFrameMode("detail");
+      setQuickPageActive("contestDetail");
+      setDocPage("contestDetail");
+      qs("#contestFilterSheet").classList.remove("open");
+      qs("#fantasyPage").classList.add("hidden");
+      qs("#contestPage").classList.add("hidden");
+      qs("#contestDetailPage").classList.remove("hidden");
+      qs("#myMatchesPage").classList.add("hidden");
+      qs("#awardsPage").classList.add("hidden");
+      qs("#historyPage").classList.add("hidden");
+      qs("#pointsPage").classList.add("hidden");
+      qs("#fantasyBottomNav").classList.add("hidden");
+      qs(".screen").scrollTop = 0;
+    }
+
+    function openGameHistory() {
+      setFrameMode("detail");
+      setQuickPageActive("history");
+      setDocPage("history");
+      qsa("[data-fantasy-bottom]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.fantasyBottom === "awards");
+      });
+      qs("#fantasyPage").classList.add("hidden");
+      qs("#contestPage").classList.add("hidden");
+      qs("#contestDetailPage").classList.add("hidden");
+      qs("#myMatchesPage").classList.add("hidden");
+      qs("#awardsPage").classList.add("hidden");
+      qs("#historyPage").classList.remove("hidden");
+      qs("#pointsPage").classList.add("hidden");
+      qs("#fantasyBottomNav").classList.add("hidden");
+      renderHistoryList(state.historyFilter, state.historySport);
+      qs(".screen").scrollTop = 0;
+    }
+
+    function selectPointsTab(tab = "how") {
+      qsa("[data-points-tab]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.pointsTab === tab);
+      });
+    }
+
+    function openPointsSystem(tab = "how") {
+      setFrameMode("detail");
+      setQuickPageActive("points");
+      setDocPage("points");
+      qsa("[data-fantasy-bottom]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.fantasyBottom === "awards");
+      });
+      qs("#fantasyPage").classList.add("hidden");
+      qs("#contestPage").classList.add("hidden");
+      qs("#contestDetailPage").classList.add("hidden");
+      qs("#myMatchesPage").classList.add("hidden");
+      qs("#awardsPage").classList.add("hidden");
+      qs("#historyPage").classList.add("hidden");
+      qs("#pointsPage").classList.remove("hidden");
+      qs("#fantasyBottomNav").classList.add("hidden");
+      setDetailSport("points", state.pointsSport);
+      selectPointsTab(tab);
+      qs(".screen").scrollTop = 0;
+    }
+
+    function setFantasyFilter(filter) {
+      state.fantasyFilter = filter;
+      qsa("[data-fantasy-filter]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.fantasyFilter === filter);
+      });
+      renderFantasyLists();
+      showToast(filter === "soon" ? "Starting Soon" : filter === "popular" ? "Popular" : "Recommended");
+    }
+
+    function setSportFilter(sport) {
+      state.sport = sport;
+      qsa("[data-sport-filter]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.sportFilter === sport);
+      });
+      renderFantasyLists();
+      qs(".screen").scrollTop = 0;
+      showToast(sport === "cricket" ? "Cricket" : "Football");
+    }
+
+    function setMySport(sport) {
+      state.mySport = sport;
+      qsa("[data-my-sport]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.mySport === sport);
+      });
+      qs("#myCricketUpcomingList").classList.toggle("hidden", sport !== "cricket");
+      qs("#myFootballUpcomingList").classList.toggle("hidden", sport !== "football");
+      showToast(sport === "cricket" ? "Cricket" : "Football");
+    }
+
+    function renderFantasyLists() {
+      const suffixMap = { soon: "Soon", recommended: "Recommended", popular: "Popular" };
+      const activeId = `${state.sport === "cricket" ? "fantasy" : "football"}${suffixMap[state.fantasyFilter]}List`;
+      ["fantasySoonList", "fantasyRecommendedList", "fantasyPopularList", "footballSoonList", "footballRecommendedList", "footballPopularList"].forEach((id) => {
+        qs(`#${id}`).classList.toggle("hidden", id !== activeId);
+      });
+    }
+
+    function depositSheet() {
+      openSheet("Deposit", `
+        <p>当前需求只给到首页入口，这里保留充值承接样式，用于确认后续充值页或支付弹窗。</p>
+        <div class="amount-grid">
+          <button type="button" data-amount="100">₹100</button>
+          <button type="button" data-amount="500">₹500</button>
+          <button type="button" data-amount="1000">₹1000</button>
+        </div>
+      `);
+    }
+
+    function profileSheet() {
+      openSheet("Profile", `
+        <p>个人中心入口已保留。后续若需要展示账户、安全、KYC、退出登录，需要补充页面结构。</p>
+      `);
+    }
+
+    function supportSheet() {
+      openSheet("Live Support", `
+        <p>客服入口展开为底部面板。后续可接在线聊天、Telegram、FAQ 或工单系统。</p>
+      `);
+    }
+
+    function normalizePrizeText(text) {
+      const value = text.trim();
+      const number = Number(value.replace(/[₹,\s]/g, "").replace(/L/i, ""));
+      if (!Number.isFinite(number)) return value;
+      if (/L/i.test(value)) {
+        return `₹${Math.round(number * 100000).toLocaleString("en-IN")}`;
+      }
+      return value;
+    }
+
+    function buildPrizeTip(card, firstPrizeText) {
+      const percentText = card.querySelector(".room-meta span:nth-child(2)")?.textContent || "";
+      const spotsText = card.querySelector(".room-progress-row span")?.textContent || "";
+      const percent = Number(percentText.replace("%", ""));
+      const spots = Number(spotsText.replace(/[^\d]/g, ""));
+      const winners = Number.isFinite(percent) && Number.isFinite(spots) ? Math.round(spots * percent / 100) : null;
+      return `First Prize = ${normalizePrizeText(firstPrizeText)}\n${winners ? winners.toLocaleString("en-IN") : "--"} teams win the contest`;
+    }
+
+    const breakupRows = {
+      guaranteed: [
+        ["#1", "₹1.50 Lakhs", "1st prize will increase when the total spots increase ↑"],
+        ["#2", "₹70,000"],
+        ["#3", "₹35,000"],
+        ["#4", "₹15,000"],
+        ["#5", "₹10,000"],
+        ["#6", "₹5,000"],
+        ["#7", "₹3,000"],
+        ["#8", "₹1,500"],
+        ["#9", "₹1,000"],
+        ["#10", "₹800"],
+        ["#11 - 15", "₹700"],
+        ["#16 - 21", "₹600"],
+        ["#22 - 28", "₹500"],
+        ["#29 - 36", "₹400"],
+        ["#37 - 45", "₹300"],
+        ["#46 - 55", "₹200"],
+        ["#56 - 75", "₹150"],
+        ["#76 - 255", "₹100"],
+        ["#256 - 4,845", "₹60"],
+        ["#4,846 - 14,065", "₹49"]
+      ],
+      maximum: [
+        ["#1", "₹5.73 Lakhs"],
+        ["#2", "₹70,000"],
+        ["#3", "₹35,000"],
+        ["#4", "₹15,000"],
+        ["#5", "₹10,000"],
+        ["#6", "₹5,000"],
+        ["#7", "₹3,000"],
+        ["#8", "₹1,500"],
+        ["#9", "₹1,000"],
+        ["#10", "₹800"],
+        ["#11 - 15", "₹700"],
+        ["#16 - 21", "₹600"],
+        ["#22 - 28", "₹500"],
+        ["#29 - 36", "₹400"],
+        ["#37 - 45", "₹300"],
+        ["#46 - 55", "₹200"],
+        ["#56 - 75", "₹150"],
+        ["#76 - 255", "₹100"],
+        ["#256 - 4,845", "₹60"],
+        ["#4,846 - 48,611", "₹49"]
+      ]
+    };
+
+    function renderBreakup(mode = "guaranteed") {
+      const table = qs("#winningsTable");
+      if (!table) return;
+      const rows = breakupRows[mode] || breakupRows.guaranteed;
+      table.innerHTML = `<div class="winnings-row head"><span>Rank</span><span>Winnings</span></div>${rows.map(([rank, amount, note]) => {
+        const prize = note ? `<div><strong>${amount}</strong><div class="winnings-note">${note}</div></div>` : `<strong>${amount}</strong>`;
+        return `<div class="winnings-row"><span>${rank}</span>${prize}</div>`;
+      }).join("")}`;
+      qs(".contest-detail-scroll").scrollTop = 0;
+    }
+
+    document.addEventListener("click", (event) => {
+      const tabButton = event.target.closest("[data-tab]");
+      const actionButton = event.target.closest("[data-action]");
+      const slideButton = event.target.closest("[data-slide]");
+      const bottomButton = event.target.closest("[data-bottom]");
+      const fantasyBottomButton = event.target.closest("[data-fantasy-bottom]");
+      const fantasyFilterButton = event.target.closest("[data-fantasy-filter]");
+      const sportFilterButton = event.target.closest("[data-sport-filter]");
+      const mySportButton = event.target.closest("[data-my-sport]");
+      const myKindButton = event.target.closest("[data-my-kind]");
+      const myStatusButton = event.target.closest("[data-my-status]");
+      const detailSportButton = event.target.closest("[data-detail-sport]");
+      const quickPageButton = event.target.closest("[data-quick-page]");
+      const amountButton = event.target.closest("[data-amount]");
+      const roomTypeButton = event.target.closest(".contest-page .room-type");
+      const roomPrizeMeta = event.target.closest(".contest-page .room-meta span:first-child");
+      const contestRoomWhiteArea = event.target.closest("#contestPage .room-top, #contestPage .room-progress");
+      const homeFantasyCard = event.target.closest("#fantasyPage .fantasy-card");
+      const homeMatchCard = event.target.closest("#matchList .match-card");
+
+      if (tabButton) {
+        setTab(tabButton.dataset.tab);
+        return;
+      }
+
+      if (slideButton) {
+        renderSlide(Number(slideButton.dataset.slide));
+        return;
+      }
+
+      if (fantasyFilterButton) {
+        setFantasyFilter(fantasyFilterButton.dataset.fantasyFilter);
+        return;
+      }
+
+      if (sportFilterButton) {
+        setSportFilter(sportFilterButton.dataset.sportFilter);
+        return;
+      }
+
+      if (mySportButton) {
+        setMySport(mySportButton.dataset.mySport);
+        return;
+      }
+
+      if (myKindButton) {
+        setMyKind(myKindButton.dataset.myKind);
+        return;
+      }
+
+      if (myStatusButton) {
+        setMyStatus(myStatusButton.dataset.myStatus);
+        return;
+      }
+
+      if (detailSportButton) {
+        setDetailSport(detailSportButton.dataset.detailScope, detailSportButton.dataset.detailSport);
+        return;
+      }
+
+      if (quickPageButton) {
+        setTab("fantasy");
+        if (quickPageButton.dataset.quickPage === "history") {
+          openGameHistory();
+          return;
+        }
+        if (quickPageButton.dataset.quickPage === "contest") {
+          openContestRoom();
+          return;
+        }
+        if (quickPageButton.dataset.quickPage === "contestDetail") {
+          openContestDetail();
+          return;
+        }
+        if (quickPageButton.dataset.quickPage === "points") {
+          openPointsSystem();
+          return;
+        }
+        setFantasyDock(quickPageButton.dataset.quickPage);
+        return;
+      }
+
+      if (bottomButton) {
+        qsa(".bottom-btn").forEach((button) => button.classList.toggle("active", button === bottomButton));
+        const label = bottomButton.textContent.trim();
+        showToast(`${label} 入口已选中，后续页面待确认`);
+        return;
+      }
+
+      if (fantasyBottomButton) {
+        setFantasyDock(fantasyBottomButton.dataset.fantasyBottom);
+        return;
+      }
+
+      if (amountButton) {
+        state.balance += Number(amountButton.dataset.amount);
+        qs("#balance").textContent = state.balance;
+        closeSheet();
+        showToast(`已模拟充值 ₹${amountButton.dataset.amount}`);
+        return;
+      }
+
+      if (roomTypeButton) {
+        roomTypeButton.closest(".room-card").classList.toggle("tip-open");
+        return;
+      }
+
+      if (roomPrizeMeta) {
+        const card = roomPrizeMeta.closest(".room-card");
+        card.dataset.prizeTip = buildPrizeTip(card, roomPrizeMeta.textContent);
+        qsa(".room-card.prize-tip-open").forEach((item) => {
+          if (item !== card) item.classList.remove("prize-tip-open");
+        });
+        card.classList.toggle("prize-tip-open");
+        return;
+      }
+
+      if (contestRoomWhiteArea && !event.target.closest("button, .room-type")) {
+        openContestDetail();
+        return;
+      }
+
+      if (homeFantasyCard || homeMatchCard) {
+        openContestRoom();
+        return;
+      }
+
+      if (!actionButton) return;
+
+      const action = actionButton.dataset.action;
+      if (action === "deposit") depositSheet();
+      if (action === "gift") showToast("礼包入口已保留，奖励弹窗内容待确认");
+      if (action === "profile") profileSheet();
+      if (action === "join") showToast("Join Now 已点击，注册/活动页待确认");
+      if (action === "viewFantasy") {
+        setTab("fantasy");
+      }
+      if (action === "viewAllMatches") {
+        showToast("全部比赛列表页待确认");
+      }
+      if (action === "match") {
+        openContestRoom();
+      }
+      if (action === "fantasyMatch") {
+        openContestRoom();
+      }
+      if (action === "myMatch") {
+        actionButton.closest(".fantasy-card").classList.toggle("open");
+      }
+      if (action === "game") {
+        showToast(`${actionButton.querySelector("strong").textContent} 游戏详情待确认`);
+      }
+      if (action === "awardsMore") {
+        showToast("奖励列表页待确认");
+      }
+      if (action === "contestBack") {
+        setFantasyDock("home");
+      }
+      if (action === "contestDetailBack") {
+        openContestRoom();
+      }
+      if (action === "contestTab") {
+        qsa("[data-action='contestTab']").forEach((button) => button.classList.toggle("active", button === actionButton));
+        if (actionButton.textContent.trim() !== "Contests") showToast(`${actionButton.textContent.trim()} 内容待确认`);
+      }
+      if (action === "detailTab") {
+        qsa("[data-action='detailTab']").forEach((button) => button.classList.toggle("active", button === actionButton));
+        if (actionButton.textContent.trim() !== "Winnings") showToast("Leaderboard 内容待确认");
+      }
+      if (action === "breakupTab") {
+        qsa("[data-action='breakupTab']").forEach((button) => button.classList.toggle("active", button === actionButton));
+        renderBreakup(actionButton.dataset.breakup || "guaranteed");
+      }
+      if (action === "contestChip") {
+        actionButton.classList.toggle("active");
+      }
+      if (action === "contestFilter") {
+        qs("#contestFilterSheet").classList.add("open");
+      }
+      if (action === "closeContestFilter") {
+        qs("#contestFilterSheet").classList.remove("open");
+      }
+      if (action === "joinContest" || action === "createTeam") {
+        showToast("创建队伍/报名流程待确认");
+      }
+      if (action === "contestViewAll") {
+        showToast("全部 Contest 列表待确认");
+      }
+      if (action === "gameHistory") {
+        openGameHistory();
+      }
+      if (action === "historyBack") {
+        setFantasyDock("awards");
+      }
+      if (action === "historyTab") {
+        renderHistoryList(actionButton.dataset.historyFilter);
+        qs(".screen").scrollTop = 0;
+      }
+      if (action === "pointsSystem") {
+        openPointsSystem("how");
+      }
+      if (action === "howToPlay") {
+        openPointsSystem("how");
+      }
+      if (action === "pointsBack") {
+        setFantasyDock("awards");
+      }
+      if (action === "pointsTab") {
+        selectPointsTab(actionButton.dataset.pointsTab);
+        if (actionButton.textContent.trim() !== "How To Play") showToast("该规则内容待确认");
+      }
+      if (action === "awardsOther") {
+        showToast(`${actionButton.querySelector("strong").textContent} 页面待确认`);
+      }
+      if (action === "help") {
+        openSheet("Help Center", "<p>帮助中心入口已保留。FAQ 分类、搜索和详情页需要后续需求确认。</p>");
+      }
+      if (action === "support") supportSheet();
+      if (action === "telegram") showToast("Telegram 入口已点击，外链地址待确认");
+      if (action === "closeSheet") closeSheet();
+    });
+
+    setInterval(() => {
+      renderSlide((state.slide + 1) % slides.length);
+    }, 4200);
+  </script>
+</body>
+</html>

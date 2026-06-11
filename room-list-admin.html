@@ -35,7 +35,7 @@
     .menu-title::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(47,141,245,.16); }
     .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
     .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
-    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 128px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
+    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 180px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
     .menu-section.collapsed .submenu { max-height: 0; opacity: 0; padding-top: 0; transform: translateY(-6px); pointer-events: none; }
     .submenu-item { height: 34px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; color: #b9c8d5; text-decoration: none; font-size: 13px; }
     .submenu-item.active { color: #fff; background: var(--blue); box-shadow: 0 6px 14px rgba(47,141,245,.22); }
@@ -169,6 +169,7 @@
         </button>
         <div class="submenu">
           <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item" href="coupon-config-admin.html">优惠券配置</a>
           <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
           <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
         </div>
