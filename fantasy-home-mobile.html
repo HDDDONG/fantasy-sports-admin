@@ -1384,8 +1384,7 @@
     }
 
     .awards-avatar,
-    .score-display,
-    .coupon-art {
+    .score-display {
       display: grid;
       place-items: center;
       background: #222725;
@@ -1479,27 +1478,172 @@
     }
 
     .reward-card {
-      width: 128px;
+      position: relative;
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      width: 118px;
+      min-height: 112px;
       overflow: hidden;
       border-radius: 8px;
       background: #fff4b8;
       border: 1px solid #f3dfa1;
+      text-align: left;
+      padding: 12px 10px;
     }
 
-    .coupon-art {
-      height: 92px;
-      margin: 10px;
-      border-radius: 8px;
-      background: #252b28;
-      font-size: 13px;
+    .coupon-card-name {
+      min-height: 34px;
+      color: #353c45;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1.35;
     }
 
-    .reward-caption {
-      padding: 8px 10px 10px;
+    .coupon-card-type {
+      color: #6b6143;
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .coupon-card-expire {
+      margin-top: auto;
+      padding-top: 8px;
       border-top: 1px dashed #c9b56f;
       color: #6b6143;
       font-size: 10px;
       font-weight: 800;
+    }
+
+    .coupon-shelf {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .coupon-shelf::-webkit-scrollbar {
+      display: none;
+    }
+
+    .coupon-detail-sheet {
+      position: absolute;
+      inset: 0;
+      z-index: 36;
+      display: none;
+      align-items: end;
+      background: rgba(13, 18, 24, 0.42);
+    }
+
+    .coupon-detail-sheet.open {
+      display: flex;
+    }
+
+    .coupon-detail-panel {
+      display: grid;
+      gap: 12px;
+      width: 100%;
+      max-height: 74%;
+      overflow-y: auto;
+      padding: 14px 18px 18px;
+      border-radius: 16px 16px 0 0;
+      background: #ffffff;
+      color: #26313d;
+    }
+
+    .coupon-detail-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .coupon-detail-head strong {
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .coupon-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #eef2f6;
+      color: #3d4652;
+      font-size: 18px;
+    }
+
+    .coupon-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .coupon-list-card {
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid #e1e7ef;
+      border-radius: 8px;
+      background: #fffdf1;
+    }
+
+    .coupon-list-card.locked,
+    .coupon-list-card.expired,
+    .coupon-list-card.returned {
+      background: #f5f6f8;
+    }
+
+    .coupon-list-value {
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      background: #252b28;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .coupon-list-body {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .coupon-list-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      color: #303844;
+    }
+
+    .coupon-list-title span:last-child {
+      color: #1ca653;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .coupon-list-card.locked .coupon-list-title span:last-child {
+      color: #2f78c4;
+    }
+
+    .coupon-list-card.expired .coupon-list-title span:last-child {
+      color: #8f98a5;
+    }
+
+    .coupon-list-card.returned .coupon-list-title span:last-child {
+      color: #b67b1d;
+    }
+
+    .coupon-list-body p {
+      margin: 0;
+      color: #748194;
+      font-size: 10px;
+      font-weight: 650;
+      line-height: 1.45;
     }
 
     .other-list {
@@ -3198,10 +3342,23 @@
             </div>
             <button class="awards-more" type="button" data-action="awardsMore">View More ›</button>
           </div>
-          <article class="reward-card">
-            <div class="coupon-art">20% OFF</div>
-            <div class="reward-caption">Crazy Week: 20% OFF<br>Exp. 9h:58m</div>
-          </article>
+          <div class="coupon-shelf">
+            <article class="reward-card">
+              <div class="coupon-card-name">Crazy Week: 20% OFF</div>
+              <div class="coupon-card-type">折扣券</div>
+              <div class="coupon-card-expire">Exp. 9h:58m</div>
+            </article>
+            <article class="reward-card">
+              <div class="coupon-card-name">New User First Entry</div>
+              <div class="coupon-card-type">满减券</div>
+              <div class="coupon-card-expire">Exp. 2d:04h</div>
+            </article>
+            <article class="reward-card">
+              <div class="coupon-card-name">Limited Seats Reward</div>
+              <div class="coupon-card-type">报名费券</div>
+              <div class="coupon-card-expire">Exp. 6d:12h</div>
+            </article>
+          </div>
         </section>
 
         <section class="awards-section">
@@ -3378,6 +3535,57 @@
       </div>
     </div>
 
+    <div class="coupon-detail-sheet" id="couponDetailSheet">
+      <div class="coupon-detail-panel">
+        <div class="coupon-detail-head">
+          <strong>My Rewards</strong>
+          <button class="coupon-close" type="button" data-action="closeCouponSheet" aria-label="关闭">×</button>
+        </div>
+        <div class="coupon-list">
+          <article class="coupon-list-card">
+            <div class="coupon-list-value">20% OFF</div>
+            <div class="coupon-list-body">
+              <div class="coupon-list-title"><span>Crazy Week: 20% OFF</span><span>未使用</span></div>
+              <p>折扣券，最高优惠 ₹10；满 ₹1 可用；全部房间可用。</p>
+              <p>报名时系统自动比较实际减免金额，优先使用最优优惠券。</p>
+              <p>有效期：剩余 9h:58m</p>
+            </div>
+          </article>
+          <article class="coupon-list-card">
+            <div class="coupon-list-value">₹10 OFF</div>
+            <div class="coupon-list-body">
+              <div class="coupon-list-title"><span>New User First Entry</span><span>未使用</span></div>
+              <p>满减券，满 ₹20 抵扣 ₹10；适用于指定玩法房间。</p>
+              <p>有效期：剩余 2d:04h</p>
+            </div>
+          </article>
+          <article class="coupon-list-card locked">
+            <div class="coupon-list-value">₹15 OFF</div>
+            <div class="coupon-list-body">
+              <div class="coupon-list-title"><span>Big Pool Entry</span><span>已锁定</span></div>
+              <p>报名支付流程中已被系统占用，等待报名结果确认。</p>
+              <p>若报名失败或比赛取消，优惠券按规则回退。</p>
+            </div>
+          </article>
+          <article class="coupon-list-card">
+            <div class="coupon-list-value">₹8 OFF</div>
+            <div class="coupon-list-body">
+              <div class="coupon-list-title"><span>Limited Seats Reward</span><span>未使用</span></div>
+              <p>报名费券；已回退后前端恢复为未使用，可在有效期内继续使用。</p>
+              <p>有效期：剩余 6d:12h</p>
+            </div>
+          </article>
+          <article class="coupon-list-card expired">
+            <div class="coupon-list-value">₹3 OFF</div>
+            <div class="coupon-list-body">
+              <div class="coupon-list-title"><span>Practice Contest Coupon</span><span>已过期</span></div>
+              <p>超过有效期，不可继续用于报名抵扣。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast">已操作</div>
   </main>
 
@@ -3529,7 +3737,13 @@
         <ul>
           <li>点击 View Profile 可进入个人资料页；个人资料页结构待确认。</li>
           <li>点击 How is it calculated? 可查看 Skill Score 计算说明；说明弹窗或页面待确认。</li>
-          <li>点击 View More 可查看更多奖励；奖励列表页待确认。</li>
+          <li>点击 View More 打开 My Rewards 优惠券列表弹层。</li>
+          <li>My Rewards 外部区域仅展示最新 3 张可展示优惠券；超过 3 张时，用户通过 View More 查看全部优惠券。</li>
+          <li>优惠券列表展示后台配置为“展示”的用户券；后台配置为“不展示”的券不在前台露出。</li>
+          <li>用户报名时默认由系统自动使用最优优惠券，不需要用户手动选择。</li>
+          <li>最优券按实际减免金额优先；实际减免金额相同时，按报名费券、满减券、折扣券优先级使用。</li>
+          <li>优惠券进入报名支付流程时变为已锁定；报名成功后变为已使用；报名失败、比赛取消或房间下架时按规则回退。</li>
+          <li>已回退的优惠券在前端状态展示为未使用，可在有效期内继续参与系统自动抵扣。</li>
           <li>点击 Game History 进入游戏历史页面。</li>
           <li>点击 How to Play 进入积分规则页面，并默认选中 How To Play 页签。</li>
           <li>点击 Points System 进入积分规则页面。</li>
@@ -3544,9 +3758,19 @@
           <li>Your Skill Score：用户技能分模块标题。</li>
           <li>634：用户当前 Skill Score 分值。</li>
           <li>My Rewards：我的奖励模块标题。</li>
-          <li>20% OFF：奖励券折扣信息。</li>
-          <li>Crazy Week: 20% OFF：奖励名称和折扣内容。</li>
-          <li>Exp. 9h:58m：奖励券过期倒计时。</li>
+          <li>Crazy Week: 20% OFF、New User First Entry、Limited Seats Reward：优惠券名称。</li>
+          <li>折扣券、满减券、报名费券：优惠券类型；外部卡片仅展示类型名称，不展示金额、门槛、适用范围。</li>
+          <li>折扣券：按报名费比例减免，并受最高优惠金额限制。</li>
+          <li>满减券：满足最低报名费后抵扣固定金额。</li>
+          <li>报名费券：针对报名费直接抵扣或减免。</li>
+          <li>未使用：用户已获得但尚未报名核销的优惠券；后台已回退状态在前端也展示为未使用。</li>
+          <li>已锁定：用户进入报名支付流程时优惠券被系统占用，等待报名结果确认。</li>
+          <li>已使用：报名成功后优惠券完成核销。</li>
+          <li>已过期：超过有效期且不可继续使用。</li>
+          <li>已回退：后台记录状态，比赛未开始、比赛取消、房间下架等场景导致优惠券退回；前端不单独展示该状态。</li>
+          <li>满 ₹1 可用、满 ₹20 可用：最低报名费门槛。</li>
+          <li>全部房间、玩法房间、指定房间：优惠券适用范围。</li>
+          <li>Exp. 9h:58m、Exp. 2d:04h、Exp. 6d:12h、有效期：优惠券过期倒计时或有效期说明。</li>
           <li>Other：其他功能入口模块标题。</li>
         </ul>
       </div>
@@ -3757,6 +3981,7 @@
 
     function setTab(tab) {
       setFrameMode("main");
+      qs("#couponDetailSheet").classList.remove("open");
       state.tab = tab;
       qsa(".tab-btn").forEach((button) => button.classList.toggle("active", button.dataset.tab === tab));
       const isFantasyPage = tab === "fantasy";
@@ -3831,6 +4056,7 @@
     function setFantasyDock(view) {
       setFrameMode("main");
       qs("#contestFilterSheet").classList.remove("open");
+      qs("#couponDetailSheet").classList.remove("open");
       qsa("[data-fantasy-bottom]").forEach((button) => {
         button.classList.toggle("active", button.dataset.fantasyBottom === view);
       });
@@ -4249,7 +4475,10 @@
         showToast(`${actionButton.querySelector("strong").textContent} 游戏详情待确认`);
       }
       if (action === "awardsMore") {
-        showToast("奖励列表页待确认");
+        qs("#couponDetailSheet").classList.add("open");
+      }
+      if (action === "closeCouponSheet") {
+        qs("#couponDetailSheet").classList.remove("open");
       }
       if (action === "contestBack") {
         setFantasyDock("home");
@@ -4316,6 +4545,12 @@
       if (action === "support") supportSheet();
       if (action === "telegram") showToast("Telegram 入口已点击，外链地址待确认");
       if (action === "closeSheet") closeSheet();
+    });
+
+    qs("#couponDetailSheet").addEventListener("click", (event) => {
+      if (event.target === qs("#couponDetailSheet")) {
+        qs("#couponDetailSheet").classList.remove("open");
+      }
     });
 
     setInterval(() => {
