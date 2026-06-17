@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>梦幻体育后台中台 - 球员管理</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #fff;
+      --text: #26313d;
+      --muted: #7a8795;
+      --line: #e2e8f0;
+      --line-strong: #cdd7e3;
+      --blue: #2f8df5;
+      --green: #67bd51;
+      --orange: #f3a946;
+      --red: #d65a5a;
+      --shadow: 0 6px 18px rgba(32, 45, 59, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+    button, input, select { font: inherit; }
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: #172331; color: #dbe6ef; border-right: 1px solid #0f1823; padding: 16px 12px; }
+    .brand { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 12px; }
+    .brand-text strong { display: block; font-size: 14px; line-height: 18px; color: #fff; }
+    .brand-text span { display: block; color: #93a5b6; font-size: 12px; line-height: 16px; }
+    .menu-section { display: grid; gap: 4px; margin-bottom: 8px; }
+    .menu-title { height: 38px; border-radius: 8px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 0 10px; color: #f4f8fb; background: #203244; font-weight: 800; font-size: 14px; border: 0; width: 100%; cursor: pointer; text-align: left; }
+    .menu-title::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(47,141,245,.16); }
+    .menu-arrow { color: #9fb1c0; transition: transform .22s ease; font-size: 12px; }
+    .menu-section.collapsed .menu-arrow { transform: rotate(-90deg); }
+    .submenu { display: grid; gap: 3px; padding: 4px 0 0 22px; max-height: 220px; opacity: 1; overflow: hidden; transform: translateY(0); transition: max-height .24s ease, opacity .18s ease, transform .22s ease, padding-top .22s ease; }
+    .menu-section.collapsed .submenu { max-height: 0; opacity: 0; padding-top: 0; transform: translateY(-6px); pointer-events: none; }
+    .submenu-item { height: 34px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; color: #b9c8d5; text-decoration: none; font-size: 13px; }
+    .submenu-item.active { color: #fff; background: var(--blue); box-shadow: 0 6px 14px rgba(47,141,245,.22); }
+
+    .shell { min-width: 0; min-height: 100vh; padding: 14px 18px 24px; background: linear-gradient(#f9fbfd 0, #f9fbfd 72px, transparent 72px), var(--bg); }
+    .frame { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    .topbar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fbfdff; }
+    .crumbs { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .menu-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #4f5c68; font-weight: 800; font-size: 18px; }
+    .tabs { height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 16px; border-bottom: 1px solid var(--line); background: #fff; overflow-x: auto; }
+    .tab { height: 24px; border-radius: 13px; border: 1px solid var(--line); background: #fff; padding: 0 8px 0 12px; color: #657386; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; flex: 0 0 auto; }
+    .tab-link { color: inherit; text-decoration: none; line-height: 22px; }
+    .tab-close { width: 16px; height: 16px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; display: inline-grid; place-items: center; padding: 0; font-size: 12px; line-height: 16px; }
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .page-switch { height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #fff; }
+    .switch-btn { height: 32px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #4e5969; padding: 0 14px; font-size: 13px; font-weight: 800; cursor: pointer; }
+    .switch-btn.active { background: #e8f3ff; color: var(--blue); border-color: #add6ff; }
+    .panel-hidden { display: none !important; }
+    .filter-band { padding: 10px 18px; border-bottom: 1px solid var(--line); background: #fbfcfe; }
+    .filters { display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap; white-space: nowrap; overflow: visible; padding-bottom: 2px; }
+    .label { color: #5b6775; font-weight: 700; font-size: 11px; text-align: right; white-space: nowrap; }
+    .filter-item { display: grid; grid-template-columns: auto 170px; align-items: center; gap: 8px; min-width: max-content; }
+    .filter-item.date { grid-template-columns: auto 220px; }
+    .filter-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+    .field { height: 30px; border: 1px solid var(--line-strong); background: #fff; border-radius: 7px; padding: 0 10px; min-width: 0; color: var(--text); outline: none; font-size: 12px; }
+    .field::placeholder { color: #b3beca; font-size: 12px; }
+    .field:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 141, 245, .12); }
+    .btn { height: 30px; border: 1px solid var(--line-strong); background: #fff; color: var(--text); border-radius: 7px; padding: 0 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-size: 12px; }
+    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: 0 5px 12px rgba(47, 141, 245, .2); }
+    .toolbar { padding: 14px 18px 12px; background: #fff; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+    .pill-btn { height: 30px; border: 1px solid transparent; border-radius: 8px; padding: 0 14px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .pill-btn.blue { background: #eaf4ff; color: var(--blue); border-color: #c7e0ff; }
+    .pill-btn.green { background: #edf9e9; color: var(--green); border-color: #cfeec7; }
+    .pill-btn.gray { background: #eef2f6; color: #64748b; border-color: #d8e0ea; }
+    .table-wrap { max-width: 100%; padding: 0 18px 18px; background: #fff; overflow: auto; max-height: calc(100vh - 286px); }
+    table { width: 100%; border-collapse: collapse; min-width: 1840px; font-size: 12px; }
+    th, td { border: 1px solid var(--line); padding: 9px 10px; text-align: center; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #566374; font-weight: 800; }
+    tbody tr:hover td { background: #fbfdff; }
+    .muted { color: var(--muted); }
+    .player-name { text-align: left; max-width: 170px; overflow: hidden; text-overflow: ellipsis; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-weight: 900; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(32,45,59,.16); }
+    .avatar.empty { background: #d8e0ea; color: #64748b; border-color: #eef2f6; }
+    .avatar.a { background: linear-gradient(135deg, #2f8df5, #67bd51); }
+    .avatar.b { background: linear-gradient(135deg, #f3a946, #d65a5a); }
+    .avatar.c { background: linear-gradient(135deg, #7c6ff6, #2f8df5); }
+    .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; height: 24px; padding: 0 8px; border-radius: 6px; font-size: 12px; border: 1px solid transparent; font-weight: 800; }
+    .tag.green { color: #0c6b3f; background: #c9f2da; border-color: #7ed8a2; }
+    .tag.gray { color: #52606c; background: #e7ecf1; border-color: #cbd5df; }
+    .tag.blue { color: #1557b0; background: #cfe6ff; border-color: #7eb9ff; }
+    .tag.orange { color: #9c5c0d; background: #ffe6bd; border-color: #f5c070; }
+    .tag.red { color: #9f1d1d; background: #ffd7d7; border-color: #ff9c9c; }
+    .op { border: 0; background: transparent; padding: 0 7px; font-weight: 800; cursor: pointer; }
+    .op.edit { color: var(--blue); }
+    .op.avatar-op { color: #17a673; }
+    .op.toggle { color: var(--orange); }
+    .op.delete { color: var(--red); }
+    .summary { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: #fbfcfe; }
+    .pager-left, .pager-center, .pager-right { display: flex; align-items: center; gap: 8px; }
+    .page-size, .goto-input { height: 30px; border: 1px solid var(--line); background: #fff; border-radius: 8px; color: #657386; font-size: 12px; text-align: center; }
+    .page-size { width: 96px; padding: 0 10px; text-align: left; }
+    .goto-input { width: 52px; }
+    .page-btn { min-width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc; color: #657386; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 10px rgba(47,141,245,.22); }
+    .page-btn.ghost { color: #a8b3bf; background: #f3f6fa; }
+    .page-ellipsis { color: #657386; font-weight: 800; padding: 0 2px; }
+    .upload-layout { padding: 18px; background: #fff; display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 18px; border-bottom: 1px solid var(--line); }
+    .upload-card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: #fbfdff; display: grid; gap: 14px; align-content: start; }
+    .upload-card h3 { margin: 0; font-size: 15px; }
+    .upload-box { border: 1px dashed #b8c6d6; border-radius: 10px; min-height: 124px; display: grid; place-items: center; gap: 6px; padding: 14px; color: #7a8795; background: #fff; cursor: pointer; text-align: center; }
+    .upload-box strong { color: var(--blue); font-size: 13px; }
+    .upload-box input { display: none; }
+    .modal-mask { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(29, 33, 41, .52); padding: 24px; }
+    .modal-mask.show { display: flex; }
+    .player-modal { width: min(660px, calc(100vw - 48px)); max-height: calc(100vh - 64px); overflow: auto; background: #fff; border-radius: 12px; box-shadow: 0 18px 48px rgba(29, 33, 41, .22); }
+    .modal-head { height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 0; font-size: 18px; font-weight: 700; color: var(--text); }
+    .modal-close { width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #9aa6b2; cursor: pointer; font-size: 24px; line-height: 1; }
+    .modal-body { padding: 18px 22px 8px; display: grid; gap: 16px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; align-items: end; }
+    .modal-field { display: grid; gap: 8px; }
+    .modal-field label { color: #4e5969; font-size: 13px; font-weight: 700; }
+    .required { color: #f53f3f; margin-right: 3px; }
+    .modal-input { height: 34px; width: 100%; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0 12px; color: var(--text); outline: none; background: #fff; }
+    .modal-input::placeholder { color: #b8c2cc; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 12px; padding: 18px 22px 20px; border-top: 1px solid var(--line); }
+    .requirement-panel { margin: 14px 18px 18px; padding: 14px 16px; background: #fbfdff; border: 1px solid var(--line); border-radius: 10px; color: #4e5969; font-size: 12px; line-height: 1.7; }
+    .requirement-panel h4 { margin: 0 0 10px; color: #1d2630; font-size: 14px; }
+    .requirement-grid { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: flex-start; gap: 16px 64px; }
+    .requirement-grid > div { flex: 0 1 280px; }
+    .requirement-grid strong { display: block; color: #344050; margin-bottom: 4px; font-size: 12px; }
+    .requirement-grid p { margin: 0; }
+    .requirement-grid ul { margin: 0; padding-left: 16px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #192533; color: #fff; padding: 12px 14px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0; transform: translateY(70px); transition: all .18s ease; font-size: 13px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .upload-layout, .modal-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="arco-overrides.css?v=player-management">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">FS</div>
+        <div class="brand-text">
+          <strong>梦幻体育中台</strong>
+          <span>Fantasy Sports</span>
+        </div>
+      </div>
+      <nav class="menu-section" id="matchMenu">
+        <button class="menu-title" type="button"><span>赛事管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="match-list-admin.html">赛事列表</a>
+          <a class="submenu-item" href="match-recommend-admin.html">赛事推荐</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="roomMenu">
+        <button class="menu-title" type="button"><span>房间管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="room-list-admin.html">房间列表</a>
+          <a class="submenu-item" href="room-template-admin.html">模板管理</a>
+          <a class="submenu-item" href="room-play-type-admin.html">玩法类型</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="operationMenu">
+        <button class="menu-title" type="button"><span>运营管理</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="banner-config-admin.html">BANNER配置</a>
+          <a class="submenu-item" href="coupon-config-admin.html">优惠券配置</a>
+          <a class="submenu-item" href="recommended-team-admin.html">推荐队伍</a>
+          <a class="submenu-item active" href="player-management-admin.html">球员管理</a>
+          <a class="submenu-item" href="robot-management-admin.html">机器人管理</a>
+        </div>
+      </nav>
+      <nav class="menu-section" id="orderMenu">
+        <button class="menu-title" type="button"><span>赛事注单</span><span class="menu-arrow">⌄</span></button>
+        <div class="submenu">
+          <a class="submenu-item" href="bet-order-list-admin.html">注单列表</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="shell">
+      <section class="frame">
+        <header class="topbar">
+          <div class="crumbs"><span class="menu-icon">≡</span><strong>首页</strong><span>/</span><span>运营管理</span><span>/</span><span>球员管理</span></div>
+        </header>
+
+        <nav class="tabs">
+          <span class="tab"><a class="tab-link" href="match-list-admin.html">首页</a></span>
+          <span class="tab"><a class="tab-link" href="banner-config-admin.html">BANNER配置</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="coupon-config-admin.html">优惠券配置</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="recommended-team-admin.html">推荐队伍</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab active"><a class="tab-link" href="player-management-admin.html">球员管理</a><button class="tab-close" type="button">×</button></span>
+          <span class="tab"><a class="tab-link" href="robot-management-admin.html">机器人管理</a><button class="tab-close" type="button">×</button></span>
+        </nav>
+
+        <div class="page-switch">
+          <button class="switch-btn active" type="button" data-page-tab="list">球员列表</button>
+          <button class="switch-btn" type="button" data-page-tab="upload">球员上传</button>
+        </div>
+
+        <section class="filter-band" data-panel="list">
+          <div class="filters">
+            <label class="filter-item"><span class="label">运动类型</span><select class="field" id="sportFilter"><option value="">请选择运动类型</option><option value="cricket">板球</option><option value="football">足球</option></select></label>
+            <label class="filter-item"><span class="label">球员ID</span><input class="field" id="playerIdFilter" placeholder="请输入球员ID"></label>
+            <label class="filter-item"><span class="label">球员名称</span><input class="field" id="playerNameFilter" placeholder="请输入球员名称"></label>
+            <label class="filter-item"><span class="label">队伍名称</span><input class="field" id="teamNameFilter" placeholder="请输入队伍名称"></label>
+            <label class="filter-item"><span class="label">位置</span><select class="field" id="positionFilter"><option value="">请选择位置</option><option value="bat">BAT</option><option value="bowl">BOWL</option><option value="ar">AR</option><option value="wk">WK</option><option value="gk">GK</option><option value="df">DF</option><option value="mf">MF</option><option value="fw">FW</option></select></label>
+            <label class="filter-item"><span class="label">状态</span><select class="field" id="statusFilter"><option value="">请选择状态</option><option value="enabled">启用</option><option value="disabled">停用</option></select></label>
+            <div class="filter-actions"><button class="btn primary" id="searchBtn">搜索</button><button class="btn" id="resetBtn">重置</button></div>
+          </div>
+        </section>
+
+        <section class="table-wrap" data-panel="list">
+          <table>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>头像</th>
+                <th>球员ID</th>
+                <th>球员名称</th>
+                <th>运动类型</th>
+                <th>队伍ID</th>
+                <th>队伍名称</th>
+                <th>位置</th>
+                <th>国籍</th>
+                <th>是否首发</th>
+                <th>赛季积分</th>
+                <th>被选择次数</th>
+                <th>状态</th>
+                <th>更新时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="playerRows"></tbody>
+          </table>
+        </section>
+
+        <section class="upload-layout panel-hidden" data-panel="upload">
+          <div class="upload-card">
+            <h3>头像批量上传</h3>
+            <label class="upload-box">
+              <input id="avatarFile" type="file" accept=".zip,.png,.jpg,.jpeg,.webp">
+              <strong>上传头像文件</strong>
+              <span>支持 zip 或 png / jpg / jpeg / webp 图片，文件名建议使用球员ID命名</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="filter-band panel-hidden" data-panel="upload">
+          <div class="filters">
+            <label class="filter-item"><span class="label">匹配结果</span><select class="field" id="uploadMatchFilter"><option value="">请选择匹配结果</option><option value="匹配成功">匹配成功</option><option value="未匹配">未匹配</option></select></label>
+            <label class="filter-item"><span class="label">上传时间</span><input class="field" id="uploadTimeFilter" placeholder="上传开始 - 上传结束"></label>
+            <div class="filter-actions"><button class="btn primary" id="uploadSearchBtn">搜索</button><button class="btn" id="uploadResetBtn">重置</button></div>
+          </div>
+        </section>
+
+        <section class="table-wrap panel-hidden" data-panel="upload">
+          <table style="min-width: 1320px">
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>球员ID</th>
+                <th>球员名称</th>
+                <th>运动类型</th>
+                <th>队伍名称</th>
+                <th>位置</th>
+                <th>头像文件</th>
+                <th>上传时间</th>
+                <th>匹配结果</th>
+              </tr>
+            </thead>
+            <tbody id="reviewRows"></tbody>
+          </table>
+        </section>
+
+        <section class="summary">
+          <div class="pager-left"><span id="countText">共 20 条数据</span><select class="page-size"><option>20条/页</option></select></div>
+          <div class="pager-center"><button class="page-btn ghost">‹</button><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">4</button><button class="page-btn">5</button><span class="page-ellipsis">...</span><button class="page-btn">136</button><button class="page-btn ghost">›</button></div>
+          <div class="pager-right"><span>前往</span><input class="goto-input" value="1"><span>页</span></div>
+        </section>
+
+        <section class="requirement-panel" id="requirementPanel">
+          <h4 id="requirementTitle">球员列表需求</h4>
+          <div class="requirement-grid" id="requirementContent"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="playerModal" aria-hidden="true">
+    <section class="player-modal">
+      <header class="modal-head"><h3 id="playerModalTitle">新增球员</h3><button class="modal-close" id="closePlayerModal" type="button">×</button></header>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <label class="modal-field"><span><span class="required">*</span>球员ID</span><input class="modal-input" id="modalPlayerId" placeholder="请输入球员ID"></label>
+          <label class="modal-field"><span><span class="required">*</span>球员名称</span><input class="modal-input" id="modalPlayerName" placeholder="请输入球员名称"></label>
+          <label class="modal-field"><span>英文名</span><input class="modal-input" id="modalEnglishName" placeholder="请输入英文名"></label>
+          <label class="modal-field"><span><span class="required">*</span>运动类型</span><select class="modal-input" id="modalSport"><option value="cricket">板球</option><option value="football">足球</option></select></label>
+          <label class="modal-field"><span><span class="required">*</span>队伍名称</span><input class="modal-input" id="modalTeam" placeholder="请输入队伍名称"></label>
+          <label class="modal-field"><span><span class="required">*</span>位置</span><select class="modal-input" id="modalPosition"><option value="bat">BAT</option><option value="bowl">BOWL</option><option value="ar">AR</option><option value="wk">WK</option><option value="gk">GK</option><option value="df">DF</option><option value="mf">MF</option><option value="fw">FW</option></select></label>
+          <label class="modal-field"><span>头像地址</span><input class="modal-input" id="modalAvatar" placeholder="请输入头像URL或上传后回填"></label>
+          <label class="modal-field"><span>状态</span><select class="modal-input" id="modalStatus"><option value="enabled">启用</option><option value="disabled">停用</option></select></label>
+        </div>
+      </div>
+      <footer class="modal-foot"><button class="btn" id="cancelPlayerModal" type="button">取消</button><button class="btn primary" id="savePlayerModal" type="button">确定</button></footer>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const players = [
+      ["P1001", "Ayush Jethwa", "Ayush Jethwa", "cricket", "T001", "Arcs Andheri", "ar", "India", "是", 128.5, 42, "enabled", "feed", "has", "2026-06-16 10:22:00"],
+      ["P1002", "Prasad Pawar", "Prasad Pawar", "cricket", "T001", "Arcs Andheri", "wk", "India", "是", 96.0, 35, "enabled", "feed", "has", "2026-06-16 10:21:00"],
+      ["P1003", "Siddid Tiwari", "Siddid Tiwari", "cricket", "T001", "Arcs Andheri", "bat", "India", "否", 73.2, 28, "disabled", "manual", "missing", "2026-06-15 18:10:00"],
+      ["P1004", "Ajay Mishra", "Ajay Mishra", "cricket", "T001", "Arcs Andheri", "ar", "India", "是", 112.4, 51, "enabled", "feed", "has", "2026-06-16 09:48:00"],
+      ["P1005", "Musheer Khan", "Musheer Khan", "cricket", "T001", "Arcs Andheri", "ar", "India", "是", 147.0, 61, "enabled", "feed", "has", "2026-06-16 09:42:00"],
+      ["P1006", "Shaun Rodrigues", "Shaun Rodrigues", "cricket", "T002", "Eagle Thane Strikers", "bat", "India", "否", 88.5, 33, "enabled", "manual", "missing", "2026-06-15 16:20:00"],
+      ["P1007", "Shashwat Jagtap", "Shashwat Jagtap", "cricket", "T002", "Eagle Thane Strikers", "bat", "India", "是", 155.8, 69, "enabled", "feed", "has", "2026-06-16 08:55:00"],
+      ["P1008", "Rishi Shah", "Rishi Shah", "cricket", "T001", "Arcs Andheri", "ar", "India", "否", 61.4, 19, "disabled", "manual", "missing", "2026-06-14 20:12:00"],
+      ["P1009", "Kartik Mishra", "Kartik Mishra", "cricket", "T002", "Eagle Thane Strikers", "bowl", "India", "是", 103.5, 37, "enabled", "feed", "has", "2026-06-16 08:12:00"],
+      ["P1010", "Himanshu Singh", "Himanshu Singh", "cricket", "T001", "Arcs Andheri", "bowl", "India", "否", 78.0, 21, "enabled", "feed", "has", "2026-06-15 12:11:00"],
+      ["P1011", "Prasoon Singh", "Prasoon Singh", "cricket", "T001", "Arcs Andheri", "ar", "India", "是", 134.6, 44, "enabled", "feed", "missing", "2026-06-15 10:35:00"],
+      ["P1012", "Amartya Raje", "Amartya Raje", "cricket", "T002", "Eagle Thane Strikers", "ar", "India", "是", 119.7, 39, "enabled", "manual", "has", "2026-06-16 07:15:00"],
+      ["P1013", "Shivam Dube", "Shivam Dube", "cricket", "T002", "Eagle Thane Strikers", "bat", "India", "是", 205.4, 82, "enabled", "feed", "has", "2026-06-16 06:50:00"],
+      ["P1014", "Deepak Shetty", "Deepak Shetty", "cricket", "T002", "Eagle Thane Strikers", "bowl", "India", "否", 66.9, 17, "enabled", "feed", "missing", "2026-06-14 17:05:00"],
+      ["P1015", "Sairaj Patil", "Sairaj Patil", "cricket", "T002", "Eagle Thane Strikers", "wk", "India", "是", 97.6, 31, "disabled", "manual", "has", "2026-06-13 13:30:00"],
+      ["P1016", "Noah Green", "Noah Green", "football", "F001", "London City", "fw", "England", "是", 82.3, 25, "enabled", "feed", "has", "2026-06-16 11:02:00"],
+      ["P1017", "Ethan White", "Ethan White", "football", "F001", "London City", "mf", "England", "是", 76.8, 22, "enabled", "feed", "missing", "2026-06-15 19:32:00"],
+      ["P1018", "Liam Brooks", "Liam Brooks", "football", "F002", "North United", "df", "England", "否", 51.5, 12, "enabled", "manual", "has", "2026-06-15 18:40:00"],
+      ["P1019", "Mason Clark", "Mason Clark", "football", "F002", "North United", "gk", "England", "是", 64.0, 18, "enabled", "feed", "has", "2026-06-16 09:10:00"],
+      ["P1020", "Oliver Reed", "Oliver Reed", "football", "F002", "North United", "fw", "England", "否", 58.2, 11, "disabled", "manual", "missing", "2026-06-14 09:30:00"]
+    ].map((row, index) => ({
+      index: index + 1,
+      playerId: row[0],
+      name: row[1],
+      englishName: row[2],
+      sport: row[3],
+      teamId: row[4],
+      team: row[5],
+      position: row[6],
+      country: row[7],
+      starter: row[8],
+      points: row[9],
+      selected: row[10],
+      status: row[11],
+      source: row[12],
+      avatarStatus: row[13],
+      updatedAt: row[14]
+    }));
+
+    const sportText = { cricket: "板球", football: "足球" };
+    const positionText = { bat: "BAT", bowl: "BOWL", ar: "AR", wk: "WK", gk: "GK", df: "DF", mf: "MF", fw: "FW" };
+    const positionClass = { bat: "blue", bowl: "orange", ar: "green", wk: "gray", gk: "blue", df: "gray", mf: "green", fw: "orange" };
+    const statusText = { enabled: "启用", disabled: "停用" };
+    const el = (id) => document.getElementById(id);
+    let currentTab = "list";
+    const filters = { sport: "", playerId: "", name: "", team: "", position: "", status: "" };
+    const uploadFilters = { match: "", time: "" };
+    let reviewRows = [
+      { playerId: "P1003", name: "Siddid Tiwari", sport: "板球", team: "Arcs Andheri", position: "BAT", avatar: "P1003.webp", uploadTime: "2026-06-17 14:20:00", match: "匹配成功" },
+      { playerId: "P1011", name: "Prasoon Singh", sport: "板球", team: "Arcs Andheri", position: "AR", avatar: "P1011.png", uploadTime: "2026-06-16 18:10:00", match: "匹配成功" },
+      { playerId: "P1014", name: "Deepak Shetty", sport: "板球", team: "Eagle Thane Strikers", position: "BOWL", avatar: "P1014.jpg", uploadTime: "2026-06-17 15:42:00", match: "匹配成功" },
+      { playerId: "P9999", name: "-", sport: "-", team: "-", position: "-", avatar: "P9999.png", uploadTime: "2026-06-17 15:30:00", match: "未匹配" }
+    ];
+
+    function showToast(text) {
+      const toast = el("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function filteredPlayers() {
+      return players.filter((item) => {
+        const sport = !filters.sport || item.sport === filters.sport;
+        const id = !filters.playerId || item.playerId.toLowerCase().includes(filters.playerId.toLowerCase());
+        const name = !filters.name || item.name.toLowerCase().includes(filters.name.toLowerCase()) || item.englishName.toLowerCase().includes(filters.name.toLowerCase());
+        const team = !filters.team || item.team.toLowerCase().includes(filters.team.toLowerCase());
+        const position = !filters.position || item.position === filters.position;
+        const status = !filters.status || item.status === filters.status;
+        return sport && id && name && team && position && status;
+      });
+    }
+
+    function inUploadTimeRange(item) {
+      const query = uploadFilters.time.trim();
+      if (!query) return true;
+      const dates = query.match(/\d{4}-\d{2}-\d{2}/g) || [];
+      const uploadDate = item.uploadTime.slice(0, 10);
+      if (dates.length >= 2) return uploadDate >= dates[0] && uploadDate <= dates[1];
+      if (dates.length === 1) return uploadDate === dates[0];
+      return item.uploadTime.includes(query);
+    }
+
+    function filteredReviewRows() {
+      return reviewRows
+        .filter((item) => {
+          const match = !uploadFilters.match || item.match === uploadFilters.match;
+          return match && inUploadTimeRange(item);
+        })
+        .sort((a, b) => b.uploadTime.localeCompare(a.uploadTime));
+    }
+
+    function avatarNode(item, index) {
+      const initial = item.avatarStatus === "has" ? item.name.slice(0, 1).toUpperCase() : "缺";
+      const cls = item.avatarStatus === "has" ? ["a", "b", "c"][index % 3] : "empty";
+      return `<span class="avatar ${cls}">${initial}</span>`;
+    }
+
+    function renderPlayers() {
+      const rows = filteredPlayers();
+      el("playerRows").innerHTML = rows.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${avatarNode(item, index)}</td>
+          <td>${item.playerId}</td>
+          <td class="player-name" title="${item.name}">${item.name}</td>
+          <td><span class="tag ${item.sport === "cricket" ? "green" : "blue"}">${sportText[item.sport]}</span></td>
+          <td>${item.teamId}</td>
+          <td class="player-name" title="${item.team}">${item.team}</td>
+          <td><span class="tag ${positionClass[item.position]}">${positionText[item.position]}</span></td>
+          <td>${item.country}</td>
+          <td><span class="tag ${item.starter === "是" ? "green" : "gray"}">${item.starter}</span></td>
+          <td>${item.points.toFixed(2)}</td>
+          <td>${item.selected}</td>
+          <td><span class="tag ${item.status === "enabled" ? "green" : "gray"}">${statusText[item.status]}</span></td>
+          <td>${item.updatedAt}</td>
+          <td><button class="op edit" data-edit="${item.playerId}">编辑</button><button class="op avatar-op" data-avatar="${item.playerId}">头像</button><button class="op edit">详情</button><button class="op toggle">${item.status === "enabled" ? "停用" : "启用"}</button></td>
+        </tr>
+      `).join("") || `<tr><td colspan="15">暂无球员数据</td></tr>`;
+      document.querySelectorAll("[data-edit]").forEach((button) => button.addEventListener("click", () => openPlayerModal(button.dataset.edit)));
+      document.querySelectorAll("[data-avatar]").forEach((button) => button.addEventListener("click", () => showToast("头像上传弹窗已打开")));
+      document.querySelectorAll("#playerRows .op:not([data-edit]):not([data-avatar])").forEach((button) => button.addEventListener("click", () => showToast(button.textContent.trim() + " 已提交")));
+      updateSummary();
+    }
+
+    function renderReview() {
+      const rows = filteredReviewRows();
+      el("reviewRows").innerHTML = rows.map((item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.playerId}</td>
+          <td>${item.name}</td>
+          <td>${item.sport}</td>
+          <td>${item.team}</td>
+          <td>${item.position}</td>
+          <td>${item.avatar}</td>
+          <td>${item.uploadTime}</td>
+          <td><span class="tag ${item.match === "匹配成功" ? "green" : "orange"}">${item.match}</span></td>
+        </tr>
+      `).join("") || `<tr><td colspan="9">暂无头像匹配数据</td></tr>`;
+      updateSummary();
+    }
+
+    function setRequirement(tab) {
+      const content = {
+        list: {
+          title: "球员列表需求",
+          html: `<div><strong>功能说明</strong><p>维护全平台球员基础资料、头像、位置、队伍归属和启停状态。</p></div><div><strong>页面交互</strong><ul><li>点击搜索按当前筛选条件刷新球员列表。</li><li>点击重置清空筛选条件。</li><li>点击头像进入头像上传或替换。</li><li>点击编辑维护球员资料。</li><li>点击停用/启用切换球员可用状态。</li></ul></div><div><strong>筛选规则</strong><ul><li>球员ID支持精确或模糊查询。</li><li>球员名称匹配球员展示名称。</li><li>运动类型枚举：板球、足球。</li><li>状态枚举：启用、停用。</li></ul></div><div><strong>字段说明</strong><ul><li>头像：展示球员头像，缺少头像时显示占位。</li><li>位置：板球包含 BAT、BOWL、AR、WK；足球包含 GK、DF、MF、FW。</li><li>赛季积分/被选择次数：用于运营观察球员热度。</li></ul></div>`
+        },
+        upload: {
+          title: "球员上传需求",
+          html: `<div><strong>功能说明</strong><p>仅用于批量上传或替换球员头像，系统按头像文件名匹配球员。</p></div><div><strong>页面交互</strong><ul><li>点击上传头像文件选择 zip 或图片。</li><li>上传文件后生成头像匹配结果。</li><li>点击搜索按匹配结果和上传时间刷新匹配列表。</li><li>点击重置清空上传页筛选条件。</li></ul></div><div><strong>筛选规则</strong><ul><li>匹配结果枚举：匹配成功、未匹配。</li><li>上传时间支持按日期筛选，默认按上传时间倒序展示，新上传的在第一行。</li><li>头像文件支持 zip、png、jpg、jpeg、webp。</li><li>头像文件建议以球员ID命名，用于自动匹配球员。</li></ul></div><div><strong>字段说明</strong><ul><li>头像文件：本次上传的图片文件名。</li><li>上传时间：头像文件上传或导入解析时间。</li><li>匹配结果：匹配成功表示已匹配到球员，未匹配表示未找到对应球员ID。</li></ul></div>`
+        }
+      }[tab];
+      el("requirementTitle").textContent = content.title;
+      el("requirementContent").innerHTML = content.html;
+    }
+
+    function updateSummary() {
+      const count = currentTab === "list" ? filteredPlayers().length : filteredReviewRows().length;
+      const name = currentTab === "list" ? "球员" : "头像匹配";
+      el("countText").textContent = `${name}共 ${count} 条数据`;
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll("[data-page-tab]").forEach((button) => button.classList.toggle("active", button.dataset.pageTab === tab));
+      document.querySelectorAll("[data-panel]").forEach((node) => node.classList.toggle("panel-hidden", node.dataset.panel !== tab));
+      setRequirement(tab);
+      if (tab === "upload") renderReview();
+      updateSummary();
+    }
+
+    function openPlayerModal(playerId) {
+      const player = players.find((item) => item.playerId === playerId);
+      el("playerModalTitle").textContent = player ? "编辑球员" : "新增球员";
+      el("modalPlayerId").value = player?.playerId || "";
+      el("modalPlayerName").value = player?.name || "";
+      el("modalEnglishName").value = player?.englishName || "";
+      el("modalSport").value = player?.sport || "cricket";
+      el("modalTeam").value = player?.team || "";
+      el("modalPosition").value = player?.position || "bat";
+      el("modalAvatar").value = player?.avatarStatus === "has" ? `https://cdn.example.com/players/${player.playerId}.png` : "";
+      el("modalStatus").value = player?.status || "enabled";
+      el("playerModal").classList.add("show");
+      el("playerModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closePlayerModal() {
+      el("playerModal").classList.remove("show");
+      el("playerModal").setAttribute("aria-hidden", "true");
+    }
+
+    function bindMenu() {
+      const sections = Array.from(document.querySelectorAll(".menu-section"));
+      sections.forEach((section) => {
+        if (!section.querySelector(".submenu-item.active")) section.classList.add("collapsed");
+        section.querySelector(".menu-title").addEventListener("click", () => {
+          sections.forEach((other) => { if (other !== section) other.classList.add("collapsed"); });
+          section.classList.toggle("collapsed");
+        });
+      });
+      const activeSection = document.querySelector(".submenu-item.active")?.closest(".menu-section");
+      activeSection?.classList.remove("collapsed");
+    }
+
+    document.querySelectorAll("[data-page-tab]").forEach((button) => button.addEventListener("click", () => switchTab(button.dataset.pageTab)));
+    el("searchBtn").addEventListener("click", () => {
+      filters.sport = el("sportFilter").value;
+      filters.playerId = el("playerIdFilter").value;
+      filters.name = el("playerNameFilter").value;
+      filters.team = el("teamNameFilter").value;
+      filters.position = el("positionFilter").value;
+      filters.status = el("statusFilter").value;
+      renderPlayers();
+      showToast("筛选已刷新");
+    });
+    el("resetBtn").addEventListener("click", () => {
+      ["sportFilter", "playerIdFilter", "playerNameFilter", "teamNameFilter", "positionFilter", "statusFilter"].forEach((id) => { el(id).value = ""; });
+      Object.keys(filters).forEach((key) => { filters[key] = ""; });
+      renderPlayers();
+    });
+    el("uploadSearchBtn").addEventListener("click", () => {
+      uploadFilters.match = el("uploadMatchFilter").value;
+      uploadFilters.time = el("uploadTimeFilter").value;
+      renderReview();
+      showToast("头像匹配筛选已刷新");
+    });
+    el("uploadResetBtn").addEventListener("click", () => {
+      el("uploadMatchFilter").value = "";
+      el("uploadTimeFilter").value = "";
+      uploadFilters.match = "";
+      uploadFilters.time = "";
+      renderReview();
+    });
+    el("closePlayerModal").addEventListener("click", closePlayerModal);
+    el("cancelPlayerModal").addEventListener("click", closePlayerModal);
+    el("savePlayerModal").addEventListener("click", () => { closePlayerModal(); showToast("球员资料已保存"); });
+    document.querySelectorAll(".tab-close").forEach((button) => button.addEventListener("click", (event) => { event.preventDefault(); button.closest(".tab").remove(); }));
+
+    bindMenu();
+    renderPlayers();
+    renderReview();
+    setRequirement("list");
+  </script>
+</body>
+</html>

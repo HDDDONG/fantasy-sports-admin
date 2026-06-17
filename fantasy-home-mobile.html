@@ -2371,6 +2371,259 @@
       display: none;
     }
 
+    .commentary-page {
+      min-height: 100%;
+      background: #ffffff;
+    }
+
+    .commentary-hero {
+      display: grid;
+      gap: 14px;
+      padding: 16px 18px 18px;
+      background: linear-gradient(135deg, rgba(91, 16, 28, 0.9), rgba(9, 12, 18, 0.98) 52%, #0a0d13);
+      color: #ffffff;
+    }
+
+    .commentary-matchbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 34px;
+    }
+
+    .commentary-matchbar .points-back {
+      color: #ffffff;
+    }
+
+    .commentary-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font-size: 16px;
+      font-weight: 950;
+    }
+
+    .commentary-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 26px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(37, 132, 58, 0.55);
+      color: #5fe273;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .commentary-status::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #39d15a;
+    }
+
+    .score-card-dark {
+      display: grid;
+      gap: 12px;
+      padding: 22px 18px 16px;
+      border: 1px solid rgba(154, 166, 186, 0.55);
+      border-radius: 26px;
+      background: rgba(37, 41, 57, 0.85);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .score-teams {
+      display: grid;
+      grid-template-columns: 1fr 70px 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .score-side {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 950;
+    }
+
+    .score-side:last-child {
+      grid-template-columns: minmax(0, 1fr) 48px;
+      text-align: right;
+    }
+
+    .team-badge,
+    .player-avatar {
+      display: block;
+      background: #d8dde3;
+      flex: 0 0 auto;
+    }
+
+    .team-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+    }
+
+    .score-center-mark {
+      width: 64px;
+      height: 56px;
+      border-radius: 20px;
+      background: #2b3038;
+      opacity: 0.9;
+    }
+
+    .score-result {
+      color: #c9ced8;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 750;
+    }
+
+    .score-toggle {
+      justify-self: center;
+      min-height: 34px;
+      margin-top: -8px;
+      padding: 0 28px;
+      border: 1px solid rgba(154, 166, 186, 0.6);
+      border-radius: 0 0 18px 18px;
+      background: #1a202b;
+      color: #d8dde6;
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .commentary-tabs {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1.1fr 0.9fr;
+      min-height: 54px;
+      border-bottom: 1px solid #e5e9ef;
+      background: #ffffff;
+    }
+
+    .commentary-tabs button {
+      position: relative;
+      background: transparent;
+      color: #6c6f75;
+      font-size: 15px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .commentary-tabs button.active {
+      color: #b43b3d;
+      font-weight: 900;
+    }
+
+    .commentary-tabs button.active::after {
+      content: "";
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 0;
+      height: 3px;
+      background: #c64044;
+    }
+
+    .commentary-feed {
+      display: grid;
+      gap: 0;
+      padding: 0 16px 30px;
+      background: #ffffff;
+    }
+
+    .commentary-item {
+      display: grid;
+      grid-template-columns: 70px minmax(0, 1fr);
+      gap: 18px;
+      min-height: 132px;
+    }
+
+    .commentary-time {
+      position: relative;
+      padding-top: 26px;
+      color: #15191f;
+      font-size: 18px;
+      font-weight: 850;
+      text-align: center;
+    }
+
+    .commentary-time::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      transform: translateX(-50%);
+    }
+
+    .commentary-time::after {
+      content: "";
+      position: absolute;
+      top: 28px;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      background: #f0f1f3;
+      transform: translateX(-50%);
+    }
+
+    .commentary-item:last-child .commentary-time::after {
+      display: none;
+    }
+
+    .commentary-body {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      min-width: 0;
+      padding-top: 24px;
+    }
+
+    .commentary-body h3 {
+      margin: 0;
+      color: #22272e;
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .player-points {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: 8px;
+      background: #f0f0f0;
+      color: #343941;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .player-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      background: #d7d7d7;
+    }
+
+    .player-points strong {
+      color: #22272e;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
     .contest-filter-sheet {
       position: absolute;
       inset: 0;
@@ -2803,6 +3056,7 @@
         <button class="quick-page-btn active" type="button" data-quick-page="home">Home</button>
         <div class="quick-subnav" aria-label="Home 二级菜单">
           <button class="quick-sub-btn" type="button" data-quick-page="contest">Contest Room</button>
+          <button class="quick-sub-btn quick-sub-child" type="button" data-quick-page="commentary">Commentary</button>
           <button class="quick-sub-btn quick-sub-child" type="button" data-quick-page="contestDetail">Contest Detail</button>
         </div>
       </div>
@@ -3267,6 +3521,67 @@
         </div>
       </section>
 
+      <section id="commentaryPage" class="commentary-page hidden">
+        <div class="commentary-hero">
+          <div class="commentary-matchbar">
+            <button class="points-back" type="button" data-action="commentaryBack" aria-label="返回">‹</button>
+            <div class="commentary-title"><span>SPN v CPV</span><span class="commentary-status">COMPLETED</span></div>
+          </div>
+          <div class="score-card-dark">
+            <div class="score-teams">
+              <div class="score-side"><span class="team-badge"></span><div>SPN<br>0</div></div>
+              <span class="score-center-mark"></span>
+              <div class="score-side"><div>CPV<br>0</div><span class="team-badge"></span></div>
+            </div>
+            <div class="score-result">SPN drew with CPV 0-0</div>
+          </div>
+          <button class="score-toggle" type="button" data-action="scorecardToggle">Scorecard⌄</button>
+        </div>
+
+        <div class="commentary-tabs" aria-label="赛中解说标签">
+          <button type="button" data-action="commentaryTab">My Contests (1)</button>
+          <button type="button" data-action="commentaryTab">Teams (1)</button>
+          <button class="active" type="button" data-action="commentaryTab">Commentary</button>
+          <button type="button" data-action="commentaryTab">Winners</button>
+        </div>
+
+        <div class="commentary-feed">
+          <article class="commentary-item">
+            <div class="commentary-time">90+5</div>
+            <div class="commentary-body">
+              <h3>Fabian Ruiz - Tackle Won (+4 pts)</h3>
+              <div class="player-points"><span class="player-avatar"></span><span>Fabian Ruiz</span><strong>+4 pts</strong></div>
+            </div>
+          </article>
+          <article class="commentary-item">
+            <div class="commentary-time">90+5</div>
+            <div class="commentary-body">
+              <h3>Jovane Cabral - Tackle Won (+4 pts)</h3>
+              <div class="player-points"><span class="player-avatar"></span><span>Jovane Cabral</span><strong>+4 pts</strong></div>
+            </div>
+          </article>
+          <article class="commentary-item">
+            <div class="commentary-time">90+5</div>
+            <div class="commentary-body">
+              <h3>Arcanjo - Chance Created (+3 pts)</h3>
+              <div class="player-points"><span class="player-avatar"></span><span>Arcanjo</span><strong>+3 pts</strong></div>
+            </div>
+          </article>
+          <article class="commentary-item">
+            <div class="commentary-time">90+5</div>
+            <div class="commentary-body">
+              <h3>Spain draw Cape Verde 0-0.</h3>
+            </div>
+          </article>
+          <article class="commentary-item">
+            <div class="commentary-time">90+5</div>
+            <div class="commentary-body">
+              <h3>2nd half ended scores 0 - 0</h3>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="myMatchesPage" class="my-matches-page hidden">
         <div class="my-titlebar">My Matches</div>
         <div class="my-tabs" aria-label="My Matches 类型">
@@ -3725,6 +4040,41 @@
         </ul>
       </div>
 
+      <div class="hidden" data-doc-page="commentary">
+        <h2>赛中解说页面产品文档</h2>
+
+        <h3>交互说明</h3>
+        <p><strong>进入页面交互：</strong></p>
+        <ul>
+          <li>在已完成比赛详情页点击 Commentary 页签进入本页面。</li>
+        </ul>
+        <p><strong>本页面交互：</strong></p>
+        <ul>
+          <li>点击顶部返回按钮，返回赛事玩法房间页面。</li>
+          <li>点击 Scorecard 可展开比分详情；展开后的比分详情结构待确认。</li>
+          <li>可切换 My Contests、Teams、Commentary、Winners 页签；当前仅 Commentary 有页面结构。</li>
+          <li>Commentary 列表按比赛时间倒序展示事件节点。</li>
+        </ul>
+
+        <h3>字段说明</h3>
+        <ul>
+          <li>SPN v CPV：当前比赛双方简称。</li>
+          <li>COMPLETED：比赛状态，表示比赛已结束。</li>
+          <li>SPN、CPV：双方队伍简称。</li>
+          <li>0、0：双方比分。</li>
+          <li>SPN drew with CPV 0-0：比赛结果说明。</li>
+          <li>Scorecard：比分详情入口。</li>
+          <li>My Contests (1)：用户参与的 contest 数量入口。</li>
+          <li>Teams (1)：用户创建/参与的队伍数量入口。</li>
+          <li>Commentary：赛中事件解说列表页签。</li>
+          <li>Winners：获奖名单入口，页面结构待确认。</li>
+          <li>90+5：事件发生时间。</li>
+          <li>Fabian Ruiz - Tackle Won (+4 pts)：事件描述和本次事件获得积分。</li>
+          <li>Fabian Ruiz、Jovane Cabral、Arcanjo：事件关联球员名称。</li>
+          <li>+4 pts、+3 pts：该事件带来的梦幻积分变化。</li>
+        </ul>
+      </div>
+
       <div class="hidden" data-doc-page="awards">
         <h2>Awards 页面产品文档</h2>
 
@@ -3991,6 +4341,7 @@
       qs("#fantasyPage").classList.toggle("hidden", !isFantasyPage);
       qs("#contestPage").classList.add("hidden");
       qs("#contestDetailPage").classList.add("hidden");
+      qs("#commentaryPage").classList.add("hidden");
       qs("#myMatchesPage").classList.add("hidden");
       qs("#awardsPage").classList.add("hidden");
       qs("#historyPage").classList.add("hidden");
@@ -4016,10 +4367,10 @@
     function setQuickPageActive(view) {
       qsa("[data-quick-page]").forEach((button) => {
         const page = button.dataset.quickPage;
-        button.classList.toggle("active", page === view || ((view === "contest" || view === "contestDetail") && page === "home") || ((view === "points" || view === "history") && page === "awards"));
+        button.classList.toggle("active", page === view || ((view === "contest" || view === "contestDetail" || view === "commentary") && page === "home") || ((view === "points" || view === "history") && page === "awards"));
       });
       qsa("[data-quick-group]").forEach((group) => {
-        group.classList.toggle("open", group.dataset.quickGroup === view || ((view === "contest" || view === "contestDetail") && group.dataset.quickGroup === "home") || ((view === "points" || view === "history") && group.dataset.quickGroup === "awards"));
+        group.classList.toggle("open", group.dataset.quickGroup === view || ((view === "contest" || view === "contestDetail" || view === "commentary") && group.dataset.quickGroup === "home") || ((view === "points" || view === "history") && group.dataset.quickGroup === "awards"));
       });
     }
 
@@ -4066,6 +4417,7 @@
         qs("#fantasyPage").classList.remove("hidden");
         qs("#contestPage").classList.add("hidden");
         qs("#contestDetailPage").classList.add("hidden");
+        qs("#commentaryPage").classList.add("hidden");
         qs("#myMatchesPage").classList.add("hidden");
         qs("#awardsPage").classList.add("hidden");
         qs("#historyPage").classList.add("hidden");
@@ -4080,6 +4432,7 @@
         qs("#fantasyPage").classList.add("hidden");
         qs("#contestPage").classList.add("hidden");
         qs("#contestDetailPage").classList.add("hidden");
+        qs("#commentaryPage").classList.add("hidden");
         qs("#myMatchesPage").classList.remove("hidden");
         qs("#awardsPage").classList.add("hidden");
         qs("#historyPage").classList.add("hidden");
@@ -4096,6 +4449,7 @@
         qs("#fantasyPage").classList.add("hidden");
         qs("#contestPage").classList.add("hidden");
         qs("#contestDetailPage").classList.add("hidden");
+        qs("#commentaryPage").classList.add("hidden");
         qs("#myMatchesPage").classList.add("hidden");
         qs("#awardsPage").classList.remove("hidden");
         qs("#historyPage").classList.add("hidden");
@@ -4114,6 +4468,7 @@
       qs("#fantasyPage").classList.add("hidden");
       qs("#contestPage").classList.remove("hidden");
       qs("#contestDetailPage").classList.add("hidden");
+      qs("#commentaryPage").classList.add("hidden");
       qs("#myMatchesPage").classList.add("hidden");
       qs("#awardsPage").classList.add("hidden");
       qs("#historyPage").classList.add("hidden");
@@ -4132,6 +4487,7 @@
       qs("#fantasyPage").classList.add("hidden");
       qs("#contestPage").classList.add("hidden");
       qs("#contestDetailPage").classList.remove("hidden");
+      qs("#commentaryPage").classList.add("hidden");
       qs("#myMatchesPage").classList.add("hidden");
       qs("#awardsPage").classList.add("hidden");
       qs("#historyPage").classList.add("hidden");
@@ -4150,6 +4506,7 @@
       qs("#fantasyPage").classList.add("hidden");
       qs("#contestPage").classList.add("hidden");
       qs("#contestDetailPage").classList.add("hidden");
+      qs("#commentaryPage").classList.add("hidden");
       qs("#myMatchesPage").classList.add("hidden");
       qs("#awardsPage").classList.add("hidden");
       qs("#historyPage").classList.remove("hidden");
@@ -4175,6 +4532,7 @@
       qs("#fantasyPage").classList.add("hidden");
       qs("#contestPage").classList.add("hidden");
       qs("#contestDetailPage").classList.add("hidden");
+      qs("#commentaryPage").classList.add("hidden");
       qs("#myMatchesPage").classList.add("hidden");
       qs("#awardsPage").classList.add("hidden");
       qs("#historyPage").classList.add("hidden");
@@ -4182,6 +4540,31 @@
       qs("#fantasyBottomNav").classList.add("hidden");
       setDetailSport("points", state.pointsSport);
       selectPointsTab(tab);
+      qs(".screen").scrollTop = 0;
+    }
+
+    function openCommentaryPage() {
+      setFrameMode("main");
+      setQuickPageActive("commentary");
+      setDocPage("commentary");
+      qs("#contestFilterSheet").classList.remove("open");
+      qs("#couponDetailSheet").classList.remove("open");
+      qsa("[data-fantasy-bottom]").forEach((button) => {
+        button.classList.remove("active");
+      });
+      qs("#fantasyPage").classList.add("hidden");
+      qs("#contestPage").classList.add("hidden");
+      qs("#contestDetailPage").classList.add("hidden");
+      qs("#commentaryPage").classList.remove("hidden");
+      qs("#myMatchesPage").classList.add("hidden");
+      qs("#awardsPage").classList.add("hidden");
+      qs("#historyPage").classList.add("hidden");
+      qs("#pointsPage").classList.add("hidden");
+      qs("#helpBlock").classList.add("hidden");
+      qs(".telegram").classList.add("hidden");
+      qs("#floatingChat").classList.add("hidden");
+      qs("#mainBottomNav").classList.add("hidden");
+      qs("#fantasyBottomNav").classList.add("hidden");
       qs(".screen").scrollTop = 0;
     }
 
@@ -4392,6 +4775,10 @@
           openContestRoom();
           return;
         }
+        if (quickPageButton.dataset.quickPage === "commentary") {
+          openCommentaryPage();
+          return;
+        }
         if (quickPageButton.dataset.quickPage === "contestDetail") {
           openContestDetail();
           return;
@@ -4483,8 +4870,18 @@
       if (action === "contestBack") {
         setFantasyDock("home");
       }
+      if (action === "commentaryBack") {
+        openContestRoom();
+      }
       if (action === "contestDetailBack") {
         openContestRoom();
+      }
+      if (action === "commentaryTab") {
+        qsa("[data-action='commentaryTab']").forEach((button) => button.classList.toggle("active", button === actionButton));
+        if (actionButton.textContent.trim() !== "Commentary") showToast(`${actionButton.textContent.trim()} 内容待确认`);
+      }
+      if (action === "scorecardToggle") {
+        showToast("Scorecard 展开内容待确认");
       }
       if (action === "contestTab") {
         qsa("[data-action='contestTab']").forEach((button) => button.classList.toggle("active", button === actionButton));
