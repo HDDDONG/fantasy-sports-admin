@@ -1509,9 +1509,10 @@
             <ol>
               <li>首次进入默认选择第一个支付方式，并默认选中该支付方式的第一个可用金额。</li>
               <li>用户先选择支付方式，再请求 9UPI 查询该方式支持的金额范围和固定金额。</li>
+              <li>前端最终展示的充值金额默认为后台配置金额和 9UPI 返回金额的去重合集。</li>
               <li>用户切换支付方式时，下方 Recharge Amount 列表同步刷新，并默认选中切换后支付方式的第一个可用金额。</li>
-              <li>ApplePay 支持用户在下方金额输入框输入自定义金额；输入金额必须在当前方式的最小金额和最大金额范围内。</li>
-              <li>ApplePay 输入金额超出范围时，金额框标红并提示可输入范围，Go to Payment 不可提交。</li>
+              <li>ApplePay 是一个示例：当后台把当前支付方式配置为支持自定义金额时，用户可在下方金额输入框输入自定义金额；输入金额必须在当前方式的最小金额和最大金额范围内。</li>
+              <li>支持自定义金额的支付方式输入金额超出范围时，金额框标红并提示可输入范围，Go to Payment 不可提交。</li>
               <li>除支持自定义金额的支付方式外，其它方式只能选择固定金额；列表为空时 Deposit 不可提交并提示渠道暂无可用金额。</li>
               <li>金额列表超出样式及交互和 UI 沟通后确定。</li>
               <li>Deposit 按钮提交当前金额、币种 USD、用户信息和 accountType；9UPI 返回 repaymentUrl 后进入三方支付页，结果页待确认。</li>
@@ -1528,10 +1529,10 @@
           <div class="doc-body">
             <div class="field-grid">
               <div class="field"><strong>Payment Channel</strong><span>美国代收渠道：CashApp、ApplePay、GooglePay、BtcPay、Paypal、Card。</span></div>
-              <div class="field"><strong>Recharge Amount</strong><span>展示当前支付方式支持的固定金额；首次进入和切换方式后，默认选中当前支付方式的第一个可用金额。ApplePay 支持在下方输入框输入自定义金额。</span></div>
+              <div class="field"><strong>Recharge Amount</strong><span>展示当前支付方式支持的固定金额；首次进入和切换方式后，默认选中当前支付方式的第一个可用金额。ApplePay 只是示例，后台配置为支持自定义金额的方式才展示下方输入框。</span></div>
               <div class="field"><strong>交互顺序</strong><span>先选择支付方式，再展示该方式支持的固定金额或自定义金额输入框；切换支付方式后，下方金额区域同步刷新。</span></div>
-              <div class="field"><strong>金额范围校验</strong><span>ApplePay 自定义输入金额必须在该方式最小金额和最大金额之间；超出范围时展示错误提示并禁止提交。</span></div>
-              <div class="field"><strong>9UPI 查询</strong><span>选择支付类型后查询可用渠道和金额，再展示给用户选择。</span></div>
+              <div class="field"><strong>金额范围校验</strong><span>支持自定义金额时，输入金额必须在该方式最小金额和最大金额之间；超出范围时展示错误提示并禁止提交。</span></div>
+              <div class="field"><strong>9UPI 查询</strong><span>选择支付类型后查询可用渠道和金额；最终金额列表默认取后台配置金额和 9UPI 返回金额的去重合集。</span></div>
               <div class="field"><strong>Deposit</strong><span>提交 amount、currency=USD、accountType；后续使用 repaymentUrl。</span></div>
               <div class="field"><strong>History Currency</strong><span>充提历史页需跟随当前国家/币种替换货币 ICON、货币单位和货币符号，例如美国站展示 USD 和 $。</span></div>
             </div>
@@ -1545,7 +1546,6 @@
           </header>
           <div class="doc-body">
             <ul>
-              <li>后台金额和 9UPI 金额冲突时，目前按去重合集处理；如需取交集或以 9UPI 为准需再确认。</li>
               <li>9UPI 查询失败时，是隐藏渠道、保留后台金额，还是整条渠道不可用待确认。</li>
               <li>Join Activity 卡片和浮动 S 按钮点击后的页面或弹层待确认。</li>
             </ul>
@@ -1587,22 +1587,6 @@
           </header>
           <div class="doc-body">
             <div class="list" id="methodControls"></div>
-          </div>
-        </div>
-
-        <div class="doc-card">
-          <header>
-            <h2>Field Notes</h2>
-            <span class="badge ok" id="selectedMethodCount">0 已选</span>
-          </header>
-          <div class="doc-body">
-            <div class="field-grid" style="margin-bottom: 12px;">
-              <div class="field"><strong>Payout Amount</strong><span>用户本次付款或提现金额；左侧 $ 常显，点击 Max 填入当前可提余额。</span></div>
-              <div class="field"><strong>Payment Methods</strong><span>CashApp、PayPal、ACH、Card、Chime、Zelle 单选列表。</span></div>
-              <div class="field"><strong>收款人账号</strong><span>不同 accountType 使用不同账号格式；输入框提示词统一为英文，CashApp/Chime 默认带上 $。</span></div>
-              <div class="field"><strong>Withdraw</strong><span>提交付款方式、金额和必填字段；结果流程待确认。</span></div>
-            </div>
-            <div class="list" id="accountControls"></div>
           </div>
         </div>
 
@@ -1800,7 +1784,7 @@
                 <h4>后台层级</h4>
                 <p>后台支付配置一级展示国家列表；点击国家行后的“详情”，展开该国家的充值配置和提现配置。</p>
                 <h4>充值配置</h4>
-                <p>美国充值支付方式固定展示 CashApp、ApplePay、GooglePay、BtcPay、Paypal、Card；默认前端展示状态为未展示，后台可选金额为空。当前 ApplePay 支持自定义金额，其它方式默认不支持自定义。点击编辑后，可以维护该方式的可选金额、是否支持自定义和前端展示状态。</p>
+                <p>美国充值支付方式固定展示 CashApp、ApplePay、GooglePay、BtcPay、Paypal、Card；默认前端展示状态为未展示，后台可选金额为空。本原型以 ApplePay 作为支持自定义金额的示例，实际以后台“是否支持自定义”配置为准。点击编辑后，可以维护该方式的可选金额、是否支持自定义和前端展示状态。</p>
                 <h4>前台充值联动</h4>
                 <p>前台先选择支付方式，再展示该支付方式可用金额；切换支付方式后，金额列表跟随刷新。最终展示金额以后台配置和 9UPI 返回结果的业务规则为准。</p>
                 <h4>提现配置</h4>
@@ -2116,8 +2100,11 @@
 
     function renderAccountControls() {
       const selected = methods.find((method) => method.id === state.selectedMethod);
-      $("#selectedMethodCount").textContent = selected ? "1 已选" : "0 已选";
-      $("#accountControls").innerHTML = selected ? `
+      const selectedMethodCount = $("#selectedMethodCount");
+      const accountControls = $("#accountControls");
+      if (selectedMethodCount) selectedMethodCount.textContent = selected ? "1 已选" : "0 已选";
+      if (!accountControls) return;
+      accountControls.innerHTML = selected ? `
         <div class="list-item">
           <div class="item-head">
             <span>${selected.name} 必填字段</span>
