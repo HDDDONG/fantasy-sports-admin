@@ -1,0 +1,2300 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>US 收付款前台需求可视化</title>
+  <style>
+    :root {
+      --page: #1f2220;
+      --shell: #0b1110;
+      --top: #202821;
+      --panel: #272d2b;
+      --tile: #151b19;
+      --line: #333c38;
+      --text: #eef5ef;
+      --muted: #9ca9a2;
+      --green: #2df06e;
+      --green-2: #86f26d;
+      --green-soft: rgba(45, 240, 110, .13);
+      --amber: #ffca28;
+      --red: #f05252;
+      --blue: #45a2ff;
+      --card: #ffffff;
+      --ink: #17201d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #343434;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 76px minmax(360px, 440px) minmax(420px, 1fr);
+      gap: 22px;
+      min-height: 100vh;
+      padding: 22px;
+    }
+
+    .rail {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 18px;
+      background: #171c1a;
+    }
+
+    .rail-logo {
+      display: grid;
+      place-items: center;
+      height: 48px;
+      color: #fff;
+      font-size: 22px;
+      font-family: Georgia, serif;
+      font-weight: 700;
+      font-style: italic;
+    }
+
+    .rail button {
+      display: grid;
+      place-items: center;
+      gap: 5px;
+      min-height: 58px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      color: #94a39b;
+      font-size: 11px;
+      padding: 6px 4px;
+    }
+
+    .rail button strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .rail button.active {
+      border-color: rgba(45, 240, 110, .38);
+      background: var(--green-soft);
+      color: #fff;
+    }
+
+    .phone-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .phone {
+      width: min(100%, 393px);
+      min-height: 852px;
+      border: 8px solid #222;
+      background:
+        radial-gradient(circle at 22% 14%, rgba(49, 120, 102, .24), transparent 34%),
+        radial-gradient(circle at 78% 36%, rgba(57, 89, 76, .28), transparent 34%),
+        #12161c;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .42);
+      overflow: hidden;
+    }
+
+    .phone-top {
+      display: grid;
+      grid-template-columns: 30px 1fr 24px 28px 18px;
+      align-items: center;
+      gap: 12px;
+      height: 76px;
+      padding: 0 12px;
+      background: #15171e;
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .logo {
+      color: #fff;
+      font-family: Georgia, serif;
+      font-size: 26px;
+      font-style: italic;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .balance {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 27px;
+      border-radius: 999px;
+      background: #364037;
+      color: #fff4b5;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .browser-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      border-radius: 999px;
+      background: #4b4b54;
+      color: #fff;
+      padding: 0 14px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .browser-icon {
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .coin {
+      display: grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: linear-gradient(#ffd85e, #f29718);
+      color: #7a4300;
+      font-size: 11px;
+    }
+
+    .plus {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--green);
+      color: #052a12;
+      font-weight: 900;
+    }
+
+    .top-icons {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bubble {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #3b473f;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .bubble::after {
+      content: attr(data-count);
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      min-width: 17px;
+      height: 17px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      line-height: 17px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .screen-title {
+      display: grid;
+      grid-template-columns: 38px 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+      height: 68px;
+      padding: 0 12px;
+      background: #15171e;
+      border-top: 1px solid rgba(255, 255, 255, .04);
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .history-btn,
+    .support-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      border: 0;
+      border-radius: 999px;
+      background: #32333b;
+      color: #fff;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .support-btn {
+      width: 36px;
+      padding: 0;
+    }
+
+    .back {
+      width: 26px;
+      height: 26px;
+      border: 0;
+      border-radius: 3px;
+      background: #424946;
+      color: #cfd8d2;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .screen {
+      padding: 14px 12px 26px;
+    }
+
+    .wallet-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .wallet-tab {
+      display: grid;
+      place-items: center;
+      min-height: 66px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(84, 93, 94, .62), rgba(35, 43, 44, .56));
+      color: rgba(255, 255, 255, .55);
+      font-size: 18px;
+      font-weight: 850;
+    }
+
+    .wallet-tab.active {
+      border-color: rgba(255, 255, 255, .22);
+      color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22);
+    }
+
+    .wallet-panel {
+      display: flex;
+      flex-direction: column;
+      border-radius: 13px;
+      background: rgba(37, 38, 48, .82);
+      border: 1px solid rgba(255, 255, 255, .05);
+      padding: 14px 12px 16px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+    }
+
+    .flow-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .flow-switch button {
+      min-height: 38px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 8px;
+      background: rgba(30, 34, 42, .72);
+      color: rgba(255, 255, 255, .7);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .flow-switch button.active {
+      border-color: var(--green);
+      color: #fff;
+    }
+
+    .flow-note {
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 14px;
+      background: rgba(30, 34, 42, .76);
+      color: #f1b45d;
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 750;
+    }
+
+    .currency-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 52px;
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+
+    .currency-select {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 8px;
+      background: rgba(24, 27, 34, .78);
+      color: #fff;
+      padding: 0 12px;
+      font-weight: 850;
+    }
+
+    .wallet-amount {
+      color: #fff;
+      font-size: 28px;
+      font-weight: 950;
+    }
+
+    .mobile-card {
+      border-radius: 7px;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin-bottom: 16px;
+    }
+
+    .mobile-label {
+      color: rgba(255, 255, 255, .66);
+      font-size: 16px;
+      font-weight: 850;
+      margin-bottom: 10px;
+    }
+
+    .recharge-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px 7px;
+    }
+
+    .amount {
+      position: relative;
+      min-height: 58px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: rgba(43, 44, 54, .92);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .amount.active {
+      border-color: #02b96a;
+      color: #fff;
+    }
+
+    .amount.active::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      border-left: 13px solid transparent;
+      border-bottom: 13px solid var(--green);
+    }
+
+    .custom-field {
+      width: 100%;
+      height: 56px;
+      margin-top: 9px;
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 8px;
+      background: rgba(20, 23, 31, .72);
+      color: #f2faf4;
+      padding: 0 14px;
+      font-weight: 750;
+    }
+
+    .custom-field.invalid {
+      border-color: #d92d20 !important;
+    }
+
+    .amount-input {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) 64px;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      height: 56px;
+      margin-top: 9px;
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 8px;
+      background: rgba(20, 23, 31, .72);
+      color: #f2faf4;
+      padding: 0 10px 0 14px;
+    }
+
+    .amount-prefix {
+      color: #8c9691;
+      font-size: 18px;
+    }
+
+    .amount-input input {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      outline: 0;
+    }
+
+    .max-btn {
+      min-height: 38px;
+      border: 1px solid #d5ddd9;
+      border-radius: 6px;
+      background: #fff;
+      color: #26332e;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .activity-card {
+      min-height: 0;
+    }
+
+    .promo {
+      width: 100%;
+      min-height: 68px;
+      border: 1px solid rgba(71, 151, 255, .36);
+      border-radius: 6px;
+      background: linear-gradient(100deg, #354263, #1262c8);
+      padding: 12px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
+    }
+
+    .promo-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      color: #fff;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .info {
+      display: grid;
+      place-items: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #108c59;
+      color: #bdf8d1;
+      font-size: 10px;
+    }
+
+    .bonus {
+      color: #ffb15a;
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 950;
+      margin: 7px 0 0;
+    }
+
+    .multiplier {
+      color: #43f485;
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .received {
+      margin: 10px 0 8px;
+      color: #ffbd58;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .deposit-btn {
+      width: 100%;
+      height: 58px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #51ff82, #35d960);
+      color: #071d0e;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .deposit-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    #receivePhone .deposit-btn {
+      order: 9;
+      margin-top: 10px;
+    }
+
+    .channel-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 50px;
+      padding: 0 13px;
+      border-radius: 8px;
+      background: rgba(55, 56, 67, .9);
+      margin-top: 8px;
+      color: #dbe6df;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .channel-row.active {
+      border: 1px solid #0dba66;
+      background: #153425;
+      color: #fff;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 22px;
+      border-radius: 999px;
+      padding: 0 8px;
+      background: #203229;
+      color: #7ff2a8;
+      font-size: 10px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .phone-inner {
+      position: relative;
+      min-height: 774px;
+    }
+
+    .payout-methods {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .method {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      justify-items: center;
+      gap: 8px;
+      min-width: 118px;
+      min-height: 90px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: rgba(43, 44, 54, .92);
+      padding: 10px;
+      position: relative;
+    }
+
+    .method.selected {
+      border-color: #08b868;
+      background: #153425;
+    }
+
+    .check {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border: 1px solid #53615a;
+      border-radius: 50%;
+      color: transparent;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+    }
+
+    .method.selected .check {
+      border-color: var(--green);
+      background: var(--green);
+      color: #052b13;
+      font-weight: 950;
+    }
+
+    .method-name {
+      color: #f3faf5;
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .method-detail {
+      display: block;
+      margin-top: 2px;
+      color: #94a49c;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .account-box {
+      margin-top: 9px;
+      border-radius: 5px;
+      background: #111715;
+      padding: 9px;
+    }
+
+    .account-option {
+      display: grid;
+      grid-template-columns: 1fr 20px;
+      align-items: center;
+      min-height: 42px;
+      border-bottom: 1px solid #26302b;
+      color: #dce8e0;
+      font-size: 12px;
+    }
+
+    .account-option:last-child {
+      border-bottom: 0;
+    }
+
+    .radio-dot {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #56625d;
+      border-radius: 50%;
+    }
+
+    .account-option.active .radio-dot {
+      border: 5px solid var(--green);
+    }
+
+    .input-note {
+      margin-top: 7px;
+      color: #93a49c;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .input-note.error {
+      color: #d92d20 !important;
+    }
+
+    .config {
+      min-width: 0;
+      color: var(--ink);
+    }
+
+    .config-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin-top: 7px;
+      color: #c6d0ca;
+      font-size: 13px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      border: 1px solid #49514d;
+      border-radius: 8px;
+      color: #dce8e0;
+      padding: 0 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid #d9e0dc;
+      border-radius: 8px;
+      background: var(--card);
+      overflow: hidden;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, .18);
+    }
+
+    .panel.full {
+      grid-column: 1 / -1;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      min-height: 52px;
+      padding: 13px 15px;
+      border-bottom: 1px solid #e1e6e3;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
+    }
+
+    .panel-body {
+      padding: 15px;
+    }
+
+    .doc-layout {
+      display: grid;
+      gap: 14px;
+    }
+
+    .page-path {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      color: #dce8e0;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    .path-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      border: 1px solid #4a5550;
+      border-radius: 999px;
+      padding: 0 10px;
+      background: #242a27;
+      color: #f3faf5;
+      font-weight: 750;
+    }
+
+    .doc-card {
+      border: 1px solid #d9e0dc;
+      border-radius: 8px;
+      background: #fff;
+      color: #17201d;
+      overflow: hidden;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, .16);
+    }
+
+    .doc-card header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 48px;
+      padding: 12px 15px;
+      border-bottom: 1px solid #e1e6e3;
+    }
+
+    .doc-card h2 {
+      font-size: 15px;
+    }
+
+    .doc-body {
+      padding: 14px 15px 15px;
+    }
+
+    .doc-body ol,
+    .doc-body ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .doc-body li {
+      margin: 0 0 8px;
+      color: #2d3834;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .doc-body li:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .field {
+      min-height: 58px;
+      border: 1px solid #e1e7e4;
+      border-radius: 7px;
+      padding: 10px;
+      background: #fbfdfc;
+    }
+
+    .field strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #17201d;
+      font-size: 12px;
+    }
+
+    .field span {
+      display: block;
+      color: #63716b;
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .state-controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #63716b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid #d4ddd8;
+      border-radius: 6px;
+      background: #fff;
+      color: #17201d;
+      padding: 0 10px;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 46px;
+      margin-top: 12px;
+      border: 1px solid #d4ddd8;
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #17201d;
+    }
+
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      display: none;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #cbd5cf;
+      transition: .18s ease;
+    }
+
+    .slider::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, .25);
+      transition: .18s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: #0dba66;
+    }
+
+    .switch input:checked + .slider::after {
+      transform: translateX(18px);
+    }
+
+    .ghost {
+      min-height: 34px;
+      border: 1px solid #d5ddd9;
+      border-radius: 7px;
+      background: #fff;
+      color: #26332e;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .ghost.active {
+      border-color: #0dba66;
+      background: #effdf5;
+      color: #137a3c;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .list-item {
+      display: grid;
+      gap: 6px;
+      border: 1px solid #dfe6e2;
+      border-radius: 7px;
+      padding: 10px;
+      background: #fff;
+      color: #17201d;
+    }
+
+    .item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-weight: 850;
+    }
+
+    .meta {
+      color: #63716b;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      border-radius: 999px;
+      padding: 0 8px;
+      font-size: 11px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .ok {
+      background: #dcfce7;
+      color: #137a3c;
+    }
+
+    .warn {
+      background: #fef3c7;
+      color: #9a5f00;
+    }
+
+    .off {
+      background: #fee2e2;
+      color: #b42318;
+    }
+
+    .method-control {
+      display: grid;
+      grid-template-columns: 21px 1fr auto;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid #dfe6e2;
+      border-radius: 7px;
+      padding: 10px;
+      color: #17201d;
+      cursor: pointer;
+    }
+
+    .method-control input {
+      width: 18px;
+      min-height: 18px;
+      accent-color: #0dba66;
+    }
+
+    .method-control.selected {
+      border-color: #0dba66;
+      background: #effdf5;
+    }
+
+    .method-fields {
+      display: grid;
+      gap: 8px;
+      margin-top: 9px;
+    }
+
+    .method-field {
+      display: grid;
+      gap: 4px;
+      border: 1px solid #e1e7e4;
+      border-radius: 6px;
+      padding: 8px;
+      background: #fbfdfc;
+    }
+
+    .method-field strong {
+      font-size: 12px;
+      color: #17201d;
+    }
+
+    .method-field span {
+      color: #63716b;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .workspace.admin-mode {
+      grid-template-columns: 76px minmax(820px, 1fr);
+    }
+
+    .workspace.admin-mode .phone-wrap {
+      display: none;
+    }
+
+    .admin-shell {
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .admin-menu {
+      display: grid;
+      gap: 8px;
+      border: 1px solid #d9e0dc;
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, .14);
+    }
+
+    .admin-menu-title {
+      padding: 8px 8px 10px;
+      border-bottom: 1px solid #e1e6e3;
+      color: #17201d;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .admin-menu button {
+      min-height: 38px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: #52605a;
+      text-align: left;
+      padding: 0 10px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .admin-menu button.active {
+      border-color: #0dba66;
+      background: #effdf5;
+      color: #137a3c;
+    }
+
+    .admin-main {
+      display: grid;
+      gap: 14px;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .admin-table th,
+    .admin-table td {
+      border-bottom: 1px solid #e1e7e4;
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .admin-table th {
+      color: #63716b;
+      font-size: 12px;
+      font-weight: 900;
+      background: #fbfdfc;
+    }
+
+    .edit-row {
+      background: #fbfdfc;
+    }
+
+    .edit-row .form-grid {
+      grid-template-columns: 180px minmax(120px, 1fr) minmax(120px, 1fr) 120px;
+    }
+
+    .requirements {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid #f4f4f4;
+      color: #333;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .requirements h4 {
+      margin: 6px 0 0;
+      font-size: 14px;
+    }
+
+    .requirements p {
+      margin: 0;
+      color: #777;
+    }
+
+    body {
+      --wire-bg: #f7f7f7;
+      --wire-card: #ffffff;
+      --wire-line: #202020;
+      --wire-muted: #777;
+    }
+
+    .phone {
+      border-color: #111;
+      background: var(--wire-bg);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .24);
+    }
+
+    .phone-top,
+    .screen-title {
+      background: #fff;
+      border-bottom: 1px solid var(--wire-line);
+      color: #111;
+    }
+
+    .browser-pill,
+    .history-btn,
+    .support-btn,
+    .back,
+    .wallet-tab,
+    .wallet-panel,
+    .currency-select,
+    .amount,
+    .custom-field,
+    .amount-input,
+    .max-btn,
+    .promo,
+    .method,
+    .channel-row,
+    .flow-switch button,
+    .flow-note {
+      background: #fff !important;
+      background-image: none !important;
+      border: 1px solid var(--wire-line) !important;
+      box-shadow: none !important;
+      color: #111 !important;
+    }
+
+    .browser-icon,
+    .mobile-label,
+    .wallet-amount,
+    .method-name,
+    .method-detail,
+    .input-note,
+    .received,
+    .bonus,
+    .promo-title,
+    .tag {
+      color: #111 !important;
+    }
+
+    .amount-input input,
+    .amount-prefix {
+      color: #111 !important;
+    }
+
+    .amount.active,
+    .method.selected,
+    .channel-row.active,
+    .wallet-tab.active,
+    .flow-switch button.active {
+      outline: 1px solid #111;
+      outline-offset: -5px;
+    }
+
+    .amount.active::after {
+      border-bottom-color: #111;
+    }
+
+    .deposit-btn {
+      background: #111 !important;
+      color: #fff !important;
+      border: 1px solid #111;
+    }
+
+    .check,
+    .method.selected .check {
+      border-color: #111 !important;
+      background: #fff !important;
+      color: #111 !important;
+    }
+
+    .phone,
+    .phone button,
+    .phone input,
+    .phone select {
+      font-weight: 500;
+    }
+
+    .screen-title,
+    .history-btn,
+    .support-btn,
+    .wallet-tab,
+    .flow-switch button,
+    .currency-select,
+    .mobile-label,
+    .amount,
+    .promo-title,
+    .deposit-btn,
+    .method-name,
+    .method.selected .check {
+      font-weight: 650;
+    }
+
+    .flow-note,
+    .custom-field,
+    .channel-row,
+    .tag,
+    .method-detail,
+    .input-note {
+      font-weight: 500;
+    }
+
+    .doc-card h2,
+    .field strong,
+    label,
+    .ghost,
+    .item-head,
+    .badge,
+    .method-field strong,
+    .admin-menu-title,
+    .admin-menu button,
+    .admin-table th {
+      font-weight: 650;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: 70px minmax(320px, 393px);
+      }
+
+      .config {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .workspace {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+
+      .rail {
+        grid-template-columns: 60px repeat(2, minmax(0, 1fr));
+        align-items: center;
+      }
+
+      .rail-logo {
+        height: 40px;
+      }
+
+      .rail button {
+        min-height: 42px;
+        grid-auto-flow: column;
+      }
+
+      .phone {
+        min-height: 740px;
+      }
+
+      .phone-inner {
+        min-height: 662px;
+      }
+
+      .phone-top {
+        grid-template-columns: 52px 1fr 128px;
+      }
+
+      .top-icons {
+        gap: 5px;
+      }
+
+      .bubble {
+        width: 25px;
+        height: 25px;
+      }
+
+      .config-head,
+      .screen-title {
+        align-items: stretch;
+      }
+
+      .config-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel.full {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="workspace">
+    <nav class="rail" aria-label="US 收付款">
+      <div class="rail-logo">Six</div>
+      <button class="active" data-view="receive" type="button"><strong>↓</strong>收款</button>
+      <button data-view="payout" type="button"><strong>↑</strong>付款</button>
+      <button data-view="admin" type="button"><strong>⚙</strong>后台</button>
+    </nav>
+
+    <div class="phone-wrap">
+      <div class="phone" aria-label="移动端页面预览">
+        <div class="phone-inner">
+          <div class="screen-title">
+            <button class="back" type="button">‹</button>
+            <span id="mobileTitle">Wallet</span>
+            <button class="history-btn" type="button">History</button>
+            <button class="support-btn" type="button" aria-label="Customer Service">☎</button>
+          </div>
+
+          <section id="receivePhone" class="screen">
+            <div class="wallet-tabs">
+              <button class="wallet-tab active" data-view="receive" type="button">Deposit</button>
+              <button class="wallet-tab" data-view="payout" type="button">Withdrawal</button>
+            </div>
+
+            <div class="wallet-panel">
+              <div class="currency-row">
+                <div class="currency-select">🇺🇸 USD ▾</div>
+              </div>
+
+              <div class="mobile-card activity-card">
+                <div class="mobile-label">Deposit Bonus</div>
+                <div class="promo" aria-label="Deposit Bonus 占位"></div>
+              </div>
+
+              <div class="mobile-card" id="methodCard">
+                <div class="mobile-label">Deposit Method</div>
+                <div class="payout-methods" id="mobileChannels"></div>
+              </div>
+
+              <div class="mobile-card" id="amountCard">
+                <div class="mobile-label">Deposit Amount</div>
+                <div class="recharge-grid" id="amountGrid"></div>
+                <input class="custom-field" id="customAmount" type="number" min="1" step="0.01" value="4.99" disabled>
+                <div class="input-note error hidden" id="depositAmountError"></div>
+              </div>
+
+              <button class="deposit-btn" type="button">Go to Payment</button>
+            </div>
+          </section>
+
+          <section id="payoutPhone" class="screen hidden">
+            <div class="wallet-tabs">
+              <button class="wallet-tab" data-view="receive" type="button">Deposit</button>
+              <button class="wallet-tab active" data-view="payout" type="button">Withdrawal</button>
+            </div>
+
+            <div class="wallet-panel">
+              <div class="currency-row">
+                <div class="currency-select">🇺🇸 USD ▾</div>
+              </div>
+
+              <div class="mobile-card">
+                <div class="mobile-label">Withdrawal To</div>
+                <div class="payout-methods" id="phoneMethods"></div>
+              </div>
+
+              <div class="mobile-card">
+                <div class="mobile-label">Withdrawal Amount <span style="float:right;font-size:13px;color:#89919a;">Available: <span id="payoutAvailable">$0.00</span></span></div>
+                <div class="amount-input">
+                  <span class="amount-prefix">$</span>
+                  <input id="payoutAmount" type="text" inputmode="decimal">
+                  <button class="max-btn" id="payoutMax" type="button">Max</button>
+                </div>
+              </div>
+
+              <div class="mobile-card">
+                <div class="mobile-label">Withdrawal info</div>
+                <div id="phonePayoutFields"></div>
+              </div>
+
+              <div class="received" id="payoutLine">Selected: CashApp, PayPal</div>
+              <div class="channel-row" style="color:#ff5d83;background:#30313a;">The current available cash balance is less than the minimum withdrawal amount.</div>
+              <button class="deposit-btn" type="button" style="margin-top: 12px;">Submit Withdrawal</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <main class="config">
+      <div class="config-head">
+        <div>
+          <h1 id="pageTitle">US 收款前台需求</h1>
+          <div class="subtitle" id="pageSubtitle">按 front-office skill 输出：页面入口、当前页交互、字段含义和待确认项。</div>
+        </div>
+        <div class="status" id="statusText">United States · USD</div>
+      </div>
+
+      <section id="receiveConfig" class="doc-layout">
+        <div class="page-path">
+          <span class="path-pill">Wallet</span>
+          <span>›</span>
+          <span class="path-pill">Deposit</span>
+          <span class="badge ok">Current Page</span>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Interaction Notes</h2>
+            <span class="badge ok">Deposit</span>
+          </header>
+          <div class="doc-body">
+            <ol>
+              <li>首次进入默认选择第一个支付方式，并默认选中该支付方式的第一个可用金额。</li>
+              <li>用户先选择支付方式，再请求 9UPI 查询该方式支持的金额范围和固定金额。</li>
+              <li>用户切换支付方式时，下方 Recharge Amount 列表同步刷新，并默认选中切换后支付方式的第一个可用金额。</li>
+              <li>ApplePay 支持用户在下方金额输入框输入自定义金额；输入金额必须在当前方式的最小金额和最大金额范围内。</li>
+              <li>ApplePay 输入金额超出范围时，金额框标红并提示可输入范围，Go to Payment 不可提交。</li>
+              <li>除支持自定义金额的支付方式外，其它方式只能选择固定金额；列表为空时 Deposit 不可提交并提示渠道暂无可用金额。</li>
+              <li>金额列表超出样式及交互和 UI 沟通后确定。</li>
+              <li>Deposit 按钮提交当前金额、币种 USD、用户信息和 accountType；9UPI 返回 repaymentUrl 后进入三方支付页，结果页待确认。</li>
+              <li>点击 History 进入充提历史时，历史页中的货币 ICON、货币单位和货币符号需要按当前国家/币种替换。</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Field Notes</h2>
+            <span class="badge ok" id="channelCount">0 可用渠道</span>
+          </header>
+          <div class="doc-body">
+            <div class="field-grid">
+              <div class="field"><strong>Payment Channel</strong><span>美国代收渠道：CashApp、ApplePay、GooglePay、BtcPay、Paypal、Card。</span></div>
+              <div class="field"><strong>Recharge Amount</strong><span>展示当前支付方式支持的固定金额；首次进入和切换方式后，默认选中当前支付方式的第一个可用金额。ApplePay 支持在下方输入框输入自定义金额。</span></div>
+              <div class="field"><strong>交互顺序</strong><span>先选择支付方式，再展示该方式支持的固定金额或自定义金额输入框；切换支付方式后，下方金额区域同步刷新。</span></div>
+              <div class="field"><strong>金额范围校验</strong><span>ApplePay 自定义输入金额必须在该方式最小金额和最大金额之间；超出范围时展示错误提示并禁止提交。</span></div>
+              <div class="field"><strong>9UPI 查询</strong><span>选择支付类型后查询可用渠道和金额，再展示给用户选择。</span></div>
+              <div class="field"><strong>Deposit</strong><span>提交 amount、currency=USD、accountType；后续使用 repaymentUrl。</span></div>
+              <div class="field"><strong>History Currency</strong><span>充提历史页需跟随当前国家/币种替换货币 ICON、货币单位和货币符号，例如美国站展示 USD 和 $。</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Open Questions</h2>
+            <span class="badge warn">Pending</span>
+          </header>
+          <div class="doc-body">
+            <ul>
+              <li>后台金额和 9UPI 金额冲突时，目前按去重合集处理；如需取交集或以 9UPI 为准需再确认。</li>
+              <li>9UPI 查询失败时，是隐藏渠道、保留后台金额，还是整条渠道不可用待确认。</li>
+              <li>Join Activity 卡片和浮动 S 按钮点击后的页面或弹层待确认。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="payoutConfig" class="doc-layout hidden">
+        <div class="page-path">
+          <span class="path-pill">Wallet</span>
+          <span>›</span>
+          <span class="path-pill">Withdraw</span>
+          <span class="badge ok">Current Page</span>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Interaction Notes</h2>
+            <span class="badge ok">Withdraw</span>
+          </header>
+          <div class="doc-body">
+            <ol>
+              <li>Entry Interaction: 用户从钱包、余额提现入口或付款 CTA 进入 Withdraw 页面；返回按钮回到上一页，来源不明确时返回结果待确认。</li>
+              <li>This Page Interactions: 用户输入 Payout Amount 后，单选一种美国出款方式。</li>
+              <li>Withdrawal Amount 输入框左侧货币符号 $ 常显常驻，不作为 placeholder；右侧展示 Max 按钮。</li>
+              <li>点击 Max 后，将当前可提余额全部写入 Withdrawal Amount 输入框。</li>
+              <li>CashApp、PayPal、ACH、Card、Chime、Zelle 均可被选择；提现卡片只展示方式名称和金额范围。</li>
+              <li>收款人账号字段随 accountType 变化，前端输入框提示词统一使用英文；CashApp/Chime 默认带上 $，PayPal 使用 Recipient Email。</li>
+              <li>Card 额外必填卡过期时间，格式 MM/YYYY；ACH 额外必填 9 位美国 ACH 路由号码。</li>
+              <li>Withdraw 按钮提交付款金额、accountType、cardNo/收款账号和对应附加字段；确认页、风控页或结果页待确认。</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Payment Methods State</h2>
+            <span class="badge ok">单选</span>
+          </header>
+          <div class="doc-body">
+            <div class="list" id="methodControls"></div>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Field Notes</h2>
+            <span class="badge ok" id="selectedMethodCount">0 已选</span>
+          </header>
+          <div class="doc-body">
+            <div class="field-grid" style="margin-bottom: 12px;">
+              <div class="field"><strong>Payout Amount</strong><span>用户本次付款或提现金额；左侧 $ 常显，点击 Max 填入当前可提余额。</span></div>
+              <div class="field"><strong>Payment Methods</strong><span>CashApp、PayPal、ACH、Card、Chime、Zelle 单选列表。</span></div>
+              <div class="field"><strong>收款人账号</strong><span>不同 accountType 使用不同账号格式；输入框提示词统一为英文，CashApp/Chime 默认带上 $。</span></div>
+              <div class="field"><strong>Withdraw</strong><span>提交付款方式、金额和必填字段；结果流程待确认。</span></div>
+            </div>
+            <div class="list" id="accountControls"></div>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Open Questions</h2>
+            <span class="badge warn">Pending</span>
+          </header>
+          <div class="doc-body">
+            <ul>
+              <li>CashApp/Chime 标签、Zelle 手机号格式是否需要前端强校验待确认。</li>
+              <li>Withdraw 点击后的确认、风控、结果页流程待确认。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="adminConfig" class="doc-layout hidden">
+        <div class="page-path">
+          <span class="path-pill">后台</span>
+          <span>›</span>
+          <span class="path-pill">支付配置</span>
+          <span class="badge ok">US</span>
+        </div>
+
+        <div class="admin-shell">
+          <aside class="admin-menu" aria-label="后台配置菜单">
+            <div class="admin-menu-title">支付配置</div>
+            <button class="active" type="button">国家支付配置</button>
+          </aside>
+
+          <div class="admin-main">
+            <div class="doc-card">
+              <header>
+                <h2>国家列表</h2>
+                <span class="badge ok">一级列表</span>
+              </header>
+              <div class="doc-body">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>国家</th>
+                      <th>币种</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>印度 India</td>
+                      <td>INR</td>
+                      <td><button class="ghost" data-country-detail="india" type="button">详情</button></td>
+                    </tr>
+                    <tr>
+                      <td>美国 United States</td>
+                      <td>USD</td>
+                      <td><button class="ghost" data-country-detail="us" type="button">详情</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="doc-card country-detail hidden" data-country-panel="india">
+              <header>
+                <h2>印度支付配置详情</h2>
+                <span class="badge warn">参考现有配置</span>
+              </header>
+              <div class="doc-body">
+                <div class="field-grid">
+                  <div class="field"><strong>国家</strong><span>India / INR</span></div>
+                  <div class="field"><strong>说明</strong><span>已有印度站配置作为美国新增配置参考；此页只做层级占位。</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="doc-card country-detail hidden" data-country-panel="us">
+              <header>
+                <h2>美国充值配置</h2>
+                <div class="actions">
+                  <span class="badge ok">Pay In</span>
+                </div>
+              </header>
+              <div class="doc-body">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>accountType</th>
+                      <th>前端展示状态</th>
+                      <th>后台可选金额</th>
+                      <th>是否支持自定义</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>CashApp</td><td><span class="badge warn">未展示</span></td><td class="meta">空</td><td><span class="badge off">不支持</span></td><td><button class="ghost" data-edit-payin="CashApp" type="button">编辑</button></td></tr>
+                    <tr><td>ApplePay</td><td><span class="badge warn">未展示</span></td><td class="meta">空</td><td><span class="badge ok">支持</span></td><td><button class="ghost" data-edit-payin="ApplePay" type="button">编辑</button></td></tr>
+                    <tr><td>GooglePay</td><td><span class="badge warn">未展示</span></td><td class="meta">空</td><td><span class="badge off">不支持</span></td><td><button class="ghost" data-edit-payin="GooglePay" type="button">编辑</button></td></tr>
+                    <tr><td>BtcPay</td><td><span class="badge warn">未展示</span></td><td class="meta">空</td><td><span class="badge off">不支持</span></td><td><button class="ghost" data-edit-payin="BtcPay" type="button">编辑</button></td></tr>
+                    <tr><td>Paypal</td><td><span class="badge warn">未展示</span></td><td class="meta">空</td><td><span class="badge off">不支持</span></td><td><button class="ghost" data-edit-payin="Paypal" type="button">编辑</button></td></tr>
+                    <tr><td>Card</td><td><span class="badge warn">未展示</span></td><td class="meta">空</td><td><span class="badge off">不支持</span></td><td><button class="ghost" data-edit-payin="Card" type="button">编辑</button></td></tr>
+                    <tr class="edit-row hidden" id="payinEditRow">
+                      <td colspan="5">
+                        <div class="form-grid">
+                          <label>
+                            当前方式
+                            <input id="payinEditType" value="CashApp" readonly>
+                          </label>
+                          <label>
+                            可选金额
+                            <input id="payinEditAmounts" placeholder="例如：8.99, 9.99, 14.99">
+                          </label>
+                          <label>
+                            是否支持自定义
+                            <select id="payinEditCustom">
+                              <option>不支持</option>
+                              <option>支持</option>
+                            </select>
+                          </label>
+                          <label>
+                            前端展示状态
+                            <select id="payinEditStatus">
+                              <option>展示</option>
+                              <option>不展示</option>
+                              <option>需审核</option>
+                            </select>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="doc-card country-detail hidden" data-country-panel="us">
+              <header>
+                <h2>美国提现配置</h2>
+                <span class="badge ok">Pay Out</span>
+              </header>
+              <div class="doc-body">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>accountType</th>
+                      <th>前端展示状态</th>
+                      <th>最小金额</th>
+                      <th>最大金额</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>CashApp</td><td><span class="badge warn">未展示</span></td><td>10</td><td>10000</td><td><button class="ghost" data-edit-payout="CashApp" data-min="10" data-max="10000" type="button">编辑</button></td></tr>
+                    <tr><td>Paypal</td><td><span class="badge warn">未展示</span></td><td>10</td><td>2000</td><td><button class="ghost" data-edit-payout="Paypal" data-min="10" data-max="2000" type="button">编辑</button></td></tr>
+                    <tr><td>ACH</td><td><span class="badge warn">未展示</span></td><td>10</td><td>1000</td><td><button class="ghost" data-edit-payout="ACH" data-min="10" data-max="1000" type="button">编辑</button></td></tr>
+                    <tr><td>Card</td><td><span class="badge warn">未展示</span></td><td>10</td><td>1000</td><td><button class="ghost" data-edit-payout="Card" data-min="10" data-max="1000" type="button">编辑</button></td></tr>
+                    <tr><td>Chime</td><td><span class="badge warn">未展示</span></td><td>30</td><td>10000</td><td><button class="ghost" data-edit-payout="Chime" data-min="30" data-max="10000" type="button">编辑</button></td></tr>
+                    <tr><td>Zelle</td><td><span class="badge warn">未展示</span></td><td>50</td><td>2000</td><td><button class="ghost" data-edit-payout="Zelle" data-min="50" data-max="2000" type="button">编辑</button></td></tr>
+                    <tr class="edit-row hidden" id="payoutEditRow">
+                      <td colspan="5">
+                        <div class="form-grid">
+                          <label>
+                            当前方式
+                            <input id="payoutEditType" value="CashApp" readonly>
+                          </label>
+                          <label>
+                            最小金额
+                            <input id="payoutEditMin" placeholder="例如：10">
+                          </label>
+                          <label>
+                            最大金额
+                            <input id="payoutEditMax" placeholder="例如：10000">
+                          </label>
+                          <label>
+                            前端展示状态
+                            <select id="payoutEditStatus">
+                              <option>展示</option>
+                              <option>不展示</option>
+                              <option>需审核</option>
+                            </select>
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="doc-card country-detail hidden" data-country-panel="us">
+              <header>
+                <h2>需求说明</h2>
+                <span class="badge ok">Requirement</span>
+              </header>
+              <div class="requirements">
+                <h4>后台层级</h4>
+                <p>后台支付配置一级展示国家列表；点击国家行后的“详情”，展开该国家的充值配置和提现配置。</p>
+                <h4>充值配置</h4>
+                <p>美国充值支付方式固定展示 CashApp、ApplePay、GooglePay、BtcPay、Paypal、Card；默认前端展示状态为未展示，后台可选金额为空。当前 ApplePay 支持自定义金额，其它方式默认不支持自定义。点击编辑后，可以维护该方式的可选金额、是否支持自定义和前端展示状态。</p>
+                <h4>前台充值联动</h4>
+                <p>前台先选择支付方式，再展示该支付方式可用金额；切换支付方式后，金额列表跟随刷新。最终展示金额以后台配置和 9UPI 返回结果的业务规则为准。</p>
+                <h4>提现配置</h4>
+                <p>美国提现方式固定展示 CashApp、Paypal、ACH、Card、Chime、Zelle；后台配置只维护金额范围和前端展示状态。前台 Withdrawal Amount 左侧货币符号常驻，Max 按钮用于一键填入当前可提余额。收款人账号格式、Card 过期时间、ACH 路由号码等字段说明保留在前台提现说明中。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      view: "receive",
+      backendAmounts: [4.99, 5.99, 6.99, 7.99, 8.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 17.99],
+      nineUpiAmounts: [],
+      amounts: [],
+      expandedAmounts: false,
+      decimals: 2,
+      defaultAmount: 4.99,
+      overflowMode: "collapse",
+      customVisible: true,
+      depositFlow: "methodFirst",
+      selectedChannel: "CashApp",
+      selectedMethod: "CashApp",
+      payoutAvailable: 0,
+    };
+
+    const channels = [
+      { name: "CashApp", type: "CashApp", source: "后台配置 + 9UPI", eta: "固定金额", status: "ok" },
+      { name: "ApplePay", type: "ApplePay", source: "后台配置 + 9UPI", eta: "固定金额 + 自定义", status: "ok" },
+      { name: "GooglePay", type: "GooglePay", source: "后台配置 + 9UPI", eta: "固定金额", status: "ok" },
+      { name: "BtcPay", type: "BtcPay", source: "后台配置 + 9UPI", eta: "固定金额", status: "warn" },
+      { name: "Paypal", type: "Paypal", source: "后台配置 + 9UPI", eta: "固定金额", status: "ok" },
+      { name: "Card", type: "Card", source: "后台配置 + 9UPI", eta: "固定金额", status: "ok" }
+    ];
+
+    const nineUpiByChannel = {
+      CashApp: [8.99, 9.99, 14.99, 19.99, 24.99, 29.99, 49.99],
+      ApplePay: [4.99, 5.99, 12.99, 17.99, 39.99, 59.99],
+      GooglePay: [6.99, 10.99, 13.99, 19.99, 29.99, 99.99],
+      BtcPay: [24.99, 49.99, 99.99, 124.99, 199.99],
+      Paypal: [7.99, 11.99, 14.99, 29.99, 49.99, 99.99],
+      Card: [9.99, 19.99, 29.99, 59.99, 129.99, 249.99]
+    };
+
+    const methods = [
+      { id: "CashApp", name: "CashApp", detail: "收款标签必须以 $ 开头，例如 $test123。", min: 10, max: 10000 },
+      { id: "Paypal", name: "PayPal", detail: "收款账号为 PayPal 邮箱，需填写正确 email。", min: 10, max: 2000 },
+      { id: "ACH", name: "ACH", detail: "收款账号为 4-17 位银行账户号码，并填写 9 位路由号码。", min: 10, max: 1000 },
+      { id: "Card", name: "Card", detail: "收款账号为银行卡号，一般 16 位数字，并填写卡过期时间。", min: 10, max: 1000 },
+      { id: "Chime", name: "Chime", detail: "收款账号为 $ 开头的 Chime 账号。", min: 30, max: 10000 },
+      { id: "Zelle", name: "Zelle", detail: "收款账号为 Zelle email 或 phone。", min: 50, max: 2000 }
+    ];
+
+    const methodFields = {
+      CashApp: [
+        { label: "CashTag", rule: "cashtag，必须以 $ 开头，例如 $test123。" }
+      ],
+      Paypal: [
+        { label: "Recipient Email", rule: "收款人邮箱，需符合 email 格式。" }
+      ],
+      ACH: [
+        { label: "Bank Account Number", rule: "银行账户号码，4-17 位数字，不同银行长度不同。" },
+        { label: "ACH Routing Number", rule: "9 位数字，示例 026009593。" }
+      ],
+      Card: [
+        { label: "Card Number", rule: "银行卡号，一般 16 位数字。" },
+        { label: "Expiration Date", rule: "必填，格式 MM/YYYY，示例 01/2028。" }
+      ],
+      Chime: [
+        { label: "Chime Account", rule: "$ 开头的 Chime 账号。" }
+      ],
+      Zelle: [
+        { label: "Zelle Email / Phone", rule: "Zelle 账号 email 或 phone。" }
+      ]
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+
+    function formatAmount(value) {
+      return Number(value).toFixed(state.decimals);
+    }
+
+    function formatCurrency(value, decimals = 0) {
+      return `$${Number(value).toLocaleString("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      })}`;
+    }
+
+    function methodRange(method) {
+      return `${formatCurrency(method.min)}-${formatCurrency(method.max)}`;
+    }
+
+    function channelAmounts(channelName) {
+      return [...(nineUpiByChannel[channelName] || [])].map(Number).sort((a, b) => a - b);
+    }
+
+    function supportsCustomDepositAmount() {
+      return state.selectedChannel === "ApplePay";
+    }
+
+    function selectedDepositRange() {
+      const amounts = state.amounts.length ? state.amounts : channelAmounts(state.selectedChannel);
+      return {
+        min: amounts[0] || 0,
+        max: amounts[amounts.length - 1] || 0
+      };
+    }
+
+    function validateDepositAmount() {
+      const input = $("#customAmount");
+      const error = $("#depositAmountError");
+      const button = document.querySelector("#receivePhone .deposit-btn");
+      if (!input || !error || !button) return true;
+
+      if (!supportsCustomDepositAmount()) {
+        input.classList.remove("invalid");
+        error.classList.add("hidden");
+        button.disabled = false;
+        return true;
+      }
+
+      const value = Number(input.value);
+      const { min, max } = selectedDepositRange();
+      const invalid = !input.value || Number.isNaN(value) || value < min || value > max;
+      input.classList.toggle("invalid", invalid);
+      error.classList.toggle("hidden", !invalid);
+      error.textContent = `Amount must be between ${formatCurrency(min, 2)} and ${formatCurrency(max, 2)}.`;
+      button.disabled = invalid;
+      return !invalid;
+    }
+
+    function selectDepositChannel(channelName) {
+      const available = channels.filter((channel) => channel.status !== "off");
+      const selected = available.find((channel) => channel.name === channelName) || available[0];
+      state.selectedChannel = selected ? selected.name : "";
+      state.nineUpiAmounts = selected ? channelAmounts(selected.name) : [];
+      state.defaultAmount = state.nineUpiAmounts[0] || 0;
+      state.expandedAmounts = false;
+    }
+
+    function refreshAmounts() {
+      const merged = [...state.nineUpiAmounts]
+        .map((amount) => Number(amount).toFixed(2));
+      state.amounts = [...new Set(merged)].map(Number).sort((a, b) => a - b);
+      if (!state.amounts.some((amount) => Number(amount) === Number(state.defaultAmount))) {
+        if (!supportsCustomDepositAmount()) state.defaultAmount = state.amounts[0] || 0;
+      }
+      const defaultAmountInput = $("#defaultAmount");
+      if (defaultAmountInput) defaultAmountInput.value = state.defaultAmount;
+      const customAmount = $("#customAmount");
+      customAmount.value = state.defaultAmount ? formatAmount(state.defaultAmount) : "";
+      customAmount.disabled = !supportsCustomDepositAmount();
+      const { min, max } = selectedDepositRange();
+      customAmount.min = min || 1;
+      customAmount.max = max || "";
+      customAmount.placeholder = supportsCustomDepositAmount()
+        ? `${formatCurrency(min, 2)} - ${formatCurrency(max, 2)}`
+        : "$";
+    }
+
+    function currentVisibleAmounts() {
+      if (state.overflowMode === "collapse" && !state.expandedAmounts) return state.amounts.slice(0, 9);
+      return state.amounts;
+    }
+
+    function renderAmounts() {
+      refreshAmounts();
+      const grid = $("#amountGrid");
+      const visibleAmounts = currentVisibleAmounts();
+      grid.innerHTML = visibleAmounts.map((amount) => `
+        <button class="amount ${Number(amount) === Number(state.defaultAmount) ? "active" : ""}" data-amount="${amount}" type="button">
+          ${formatAmount(amount)}
+        </button>
+      `).join("");
+
+      grid.style.overflowX = state.overflowMode === "scroll" ? "auto" : "visible";
+      grid.style.gridAutoFlow = state.overflowMode === "scroll" ? "column" : "row";
+      grid.style.gridAutoColumns = state.overflowMode === "scroll" ? "108px" : "auto";
+
+      grid.querySelectorAll(".amount").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.defaultAmount = Number(button.dataset.amount);
+          const defaultAmountInput = $("#defaultAmount");
+          if (defaultAmountInput) defaultAmountInput.value = state.defaultAmount;
+          $("#customAmount").value = formatAmount(state.defaultAmount);
+          renderAmounts();
+          renderReceived();
+        });
+      });
+      validateDepositAmount();
+      renderReceived();
+    }
+
+    function renderReceived() {
+      const selected = state.selectedChannel || "None";
+      const line = $("#receivedLine");
+      if (line) line.textContent = `Channel:${selected} · Amount:$${formatAmount(state.defaultAmount)}`;
+    }
+
+    function renderDepositFlow() {
+      $("#methodCard").style.order = "3";
+      $("#amountCard").style.order = "4";
+    }
+
+    function renderChannels() {
+      const available = channels.filter((channel) => channel.status !== "off");
+      $("#channelCount").textContent = `${available.length} 可用`;
+      $("#mobileChannels").innerHTML = available.map((channel) => `
+        <div class="method ${state.selectedChannel === channel.name ? "selected" : ""}" data-channel="${channel.name}">
+          <span class="check">${state.selectedChannel === channel.name ? "✓" : ""}</span>
+          <span>
+            <span class="method-name">${channel.name}</span>
+            <span class="method-detail">$${formatAmount(Math.min(...(nineUpiByChannel[channel.name] || state.backendAmounts)))}-$${formatAmount(Math.max(...(nineUpiByChannel[channel.name] || state.backendAmounts)))}</span>
+          </span>
+        </div>
+      `).join("");
+      $("#mobileChannels").querySelectorAll(".method").forEach((row) => {
+        row.addEventListener("click", () => {
+          selectDepositChannel(row.dataset.channel);
+          renderChannels();
+          renderAmounts();
+        });
+      });
+      const channelList = $("#channelList");
+      if (channelList) {
+        channelList.innerHTML = channels.map((channel) => {
+          const badge = channel.status === "ok"
+            ? '<span class="badge ok">可用</span>'
+            : channel.status === "warn"
+              ? '<span class="badge warn">需审核</span>'
+              : '<span class="badge off">不可用</span>';
+          return `
+            <article class="list-item">
+              <div class="item-head">
+                <span>${channel.type}</span>
+                ${badge}
+              </div>
+              <div class="meta">${channel.source} · ${channel.eta} · 9UPI 返回 ${nineUpiByChannel[channel.name]?.length || 0} 个金额</div>
+            </article>
+          `;
+        }).join("");
+      }
+    }
+
+    function renderPhoneMethods() {
+      $("#phoneMethods").innerHTML = methods.map((method) => {
+        const selected = state.selectedMethod === method.id;
+        return `
+          <div class="method ${selected ? "selected" : ""}" data-method="${method.id}">
+            <span class="check">${selected ? "✓" : ""}</span>
+            <span>
+              <span class="method-name">${method.name}</span>
+              <span class="method-detail">${methodRange(method)}</span>
+            </span>
+          </div>
+        `;
+      }).join("");
+
+      $("#phoneMethods").querySelectorAll(".method").forEach((card) => {
+        card.addEventListener("click", () => {
+          state.selectedMethod = card.dataset.method;
+          renderPayout();
+        });
+      });
+
+      const selected = methods.find((method) => method.id === state.selectedMethod);
+      $("#payoutLine").textContent = `Selected: ${selected ? selected.name : "None"}`;
+      renderPhonePayoutFields();
+    }
+
+    function renderPhonePayoutFields() {
+      const selected = methods.find((method) => method.id === state.selectedMethod) || methods[0];
+      $("#phonePayoutFields").innerHTML = methodFields[selected.id].map((field, index) => {
+        const defaultValue = index === 0 && (selected.id === "CashApp" || selected.id === "Chime") ? "$" : "";
+        return `
+        <input class="custom-field" type="text" placeholder="${field.label}" value="${defaultValue}" style="margin-top: 8px;">
+      `;
+      }).join("");
+      const amountInput = $("#payoutAmount");
+      if (amountInput) {
+        amountInput.min = selected.min;
+        amountInput.removeAttribute("placeholder");
+      }
+      const available = $("#payoutAvailable");
+      if (available) available.textContent = formatCurrency(state.payoutAvailable, 2);
+      const alert = document.querySelector("#payoutPhone .channel-row");
+      if (alert) alert.innerHTML = `The current available cash balance is less than the minimum withdrawal amount: <strong>${formatCurrency(selected.min, 2)}</strong>`;
+    }
+
+    function renderMethodControls() {
+      $("#methodControls").innerHTML = methods.map((method) => `
+        <label class="method-control ${state.selectedMethod === method.id ? "selected" : ""}">
+          <input type="radio" name="withdrawMethod" data-method="${method.id}" ${state.selectedMethod === method.id ? "checked" : ""}>
+          <span>
+            <strong>${method.name}</strong>
+            <span class="meta" style="display:block;">${method.detail}</span>
+          </span>
+          <span class="badge ${state.selectedMethod === method.id ? "ok" : "warn"}">${state.selectedMethod === method.id ? "已选择" : "未选择"}</span>
+        </label>
+      `).join("");
+
+      $("#methodControls").querySelectorAll("input").forEach((input) => {
+        input.addEventListener("change", () => {
+          state.selectedMethod = input.dataset.method;
+          renderPayout();
+        });
+      });
+    }
+
+    function renderAccountControls() {
+      const selected = methods.find((method) => method.id === state.selectedMethod);
+      $("#selectedMethodCount").textContent = selected ? "1 已选" : "0 已选";
+      $("#accountControls").innerHTML = selected ? `
+        <div class="list-item">
+          <div class="item-head">
+            <span>${selected.name} 必填字段</span>
+            <span class="badge ok">${methodRange(selected)}</span>
+          </div>
+          <div class="meta">${selected.detail}</div>
+          <div class="method-fields">
+            ${methodFields[selected.id].map((field) => `
+              <div class="method-field">
+                <strong>${field.label}</strong>
+                <span>${field.rule}</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      ` : '<div class="list-item"><div class="meta">请选择一种付款方式。</div></div>';
+    }
+
+    function renderPayout() {
+      renderPhoneMethods();
+      renderMethodControls();
+      renderAccountControls();
+    }
+
+    function switchView(view) {
+      state.view = view;
+      const isAdmin = view === "admin";
+      document.querySelector(".workspace").classList.toggle("admin-mode", isAdmin);
+      $("#receivePhone").classList.toggle("hidden", view !== "receive");
+      $("#payoutPhone").classList.toggle("hidden", view !== "payout");
+      $("#receiveConfig").classList.toggle("hidden", view !== "receive");
+      $("#payoutConfig").classList.toggle("hidden", view !== "payout");
+      $("#adminConfig").classList.toggle("hidden", !isAdmin);
+      if (!isAdmin) $("#mobileTitle").textContent = view === "receive" ? "Deposit" : "Withdraw";
+      $("#pageTitle").textContent = view === "receive"
+        ? "US 收款前台需求"
+        : view === "payout"
+          ? "US 付款前台需求"
+          : "US 后台支付配置";
+      $("#pageSubtitle").textContent = view === "receive"
+        ? "前台充值：先选择支付方式，再展示该方式支持的固定金额。"
+        : view === "payout"
+          ? "前台提现：多支付方式账户字段和必填校验。"
+          : "后台配置：按国家维护充值支付方式、可选金额、展示状态和提现字段。";
+      $("#statusText").textContent = view === "receive"
+        ? "United States · USD"
+        : view === "payout"
+          ? "US Payout · Multi-method"
+          : "Admin · Payment Config";
+      document.querySelectorAll(".rail button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === view);
+      });
+    }
+
+    function showCountryDetail(country) {
+      document.querySelectorAll(".country-detail").forEach((panel) => {
+        panel.classList.toggle("hidden", panel.dataset.countryPanel !== country);
+      });
+      document.querySelectorAll("[data-country-detail]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.countryDetail === country);
+      });
+    }
+
+    function editPayinMethod(type) {
+      $("#payinEditRow").classList.remove("hidden");
+      $("#payinEditType").value = type;
+      $("#payinEditAmounts").value = "";
+      $("#payinEditCustom").value = type === "ApplePay" ? "支持" : "不支持";
+      $("#payinEditStatus").value = "展示";
+      document.querySelectorAll("[data-edit-payin]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.editPayin === type);
+      });
+    }
+
+    function editPayoutMethod(type, min, max) {
+      $("#payoutEditRow").classList.remove("hidden");
+      $("#payoutEditType").value = type;
+      $("#payoutEditMin").value = min || "";
+      $("#payoutEditMax").value = max || "";
+      $("#payoutEditStatus").value = "展示";
+      document.querySelectorAll("[data-edit-payout]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.editPayout === type);
+      });
+    }
+
+    document.querySelectorAll(".rail button").forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.view));
+    });
+
+    document.querySelectorAll(".wallet-tab").forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.view));
+    });
+
+    document.querySelectorAll("[data-country-detail]").forEach((button) => {
+      button.addEventListener("click", () => showCountryDetail(button.dataset.countryDetail));
+    });
+
+    document.querySelectorAll("[data-edit-payin]").forEach((button) => {
+      button.addEventListener("click", () => editPayinMethod(button.dataset.editPayin));
+    });
+
+    document.querySelectorAll("[data-edit-payout]").forEach((button) => {
+      button.addEventListener("click", () => editPayoutMethod(button.dataset.editPayout, button.dataset.min, button.dataset.max));
+    });
+
+    const decimalPlaces = $("#decimalPlaces");
+    if (decimalPlaces) {
+      decimalPlaces.addEventListener("change", (event) => {
+        state.decimals = Number(event.target.value);
+        $("#customAmount").step = state.decimals === 0 ? "1" : `0.${"0".repeat(state.decimals - 1)}1`;
+        renderAmounts();
+      });
+    }
+
+    const defaultAmountControl = $("#defaultAmount");
+    if (defaultAmountControl) {
+      defaultAmountControl.addEventListener("input", (event) => {
+        state.defaultAmount = Number(event.target.value || 0);
+        $("#customAmount").value = event.target.value;
+        renderAmounts();
+      });
+    }
+
+    $("#customAmount").addEventListener("input", (event) => {
+      state.defaultAmount = Number(event.target.value || 0);
+      const defaultAmountInput = $("#defaultAmount");
+      if (defaultAmountInput) defaultAmountInput.value = state.defaultAmount;
+      renderAmounts();
+    });
+
+    const payoutMax = $("#payoutMax");
+    if (payoutMax) {
+      payoutMax.addEventListener("click", () => {
+        $("#payoutAmount").value = formatAmount(state.payoutAvailable);
+      });
+    }
+
+    const overflowMode = $("#overflowMode");
+    if (overflowMode) {
+      overflowMode.addEventListener("change", (event) => {
+        state.overflowMode = event.target.value;
+        state.expandedAmounts = event.target.value === "all";
+        renderAmounts();
+      });
+    }
+
+    const customVisible = $("#customVisible");
+    if (customVisible) {
+      customVisible.addEventListener("change", (event) => {
+        state.customVisible = event.target.checked;
+        $("#customAmount").classList.toggle("hidden", !state.customVisible);
+      });
+    }
+
+    const preset9 = $("#preset9");
+    if (preset9) {
+      preset9.addEventListener("click", () => {
+        state.nineUpiAmounts = state.backendAmounts;
+        state.defaultAmount = state.nineUpiAmounts[0] || 0;
+        state.expandedAmounts = false;
+        renderAmounts();
+      });
+    }
+
+    const preset12 = $("#preset12");
+    if (preset12) {
+      preset12.addEventListener("click", () => {
+        selectDepositChannel(state.selectedChannel);
+        renderAmounts();
+      });
+    }
+
+    selectDepositChannel(state.selectedChannel);
+    renderChannels();
+    renderAmounts();
+    renderDepositFlow();
+    renderPayout();
+  </script>
+</body>
+</html>
