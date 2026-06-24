@@ -551,6 +551,24 @@
       cursor: not-allowed;
     }
 
+    .toast {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 22px;
+      min-height: 44px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #111;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      padding: 10px 12px;
+      font-size: 12px;
+      text-align: center;
+      z-index: 6;
+    }
+
     #receivePhone .deposit-btn {
       order: 9;
       margin-top: 10px;
@@ -621,6 +639,17 @@
     .method.selected {
       border-color: #08b868;
       background: #153425;
+    }
+
+    .method.disabled {
+      opacity: .38;
+      filter: grayscale(1);
+      cursor: not-allowed;
+    }
+
+    .method.disabled .check {
+      background: #f1f1f1;
+      color: transparent;
     }
 
     .check {
@@ -1170,6 +1199,142 @@
       grid-template-columns: 180px minmax(120px, 1fr) minmax(120px, 1fr) 120px;
     }
 
+    .site-config-grid {
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(320px, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .site-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .site-title {
+      color: #2f7cf4;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .optimization-pill {
+      border-radius: 999px;
+      background: #eef5ff;
+      color: #2f7cf4;
+      padding: 5px 12px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .amount-setting-table {
+      border: 1px solid #dce4ef;
+      border-collapse: collapse;
+    }
+
+    .amount-setting-table th,
+    .amount-setting-table td {
+      border: 1px solid #dce4ef;
+      text-align: center;
+      padding: 12px 10px;
+    }
+
+    .amount-editor {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #1f2937;
+    }
+
+    .amount-editor .mock-input {
+      display: inline-flex;
+      justify-content: flex-end;
+      min-width: 118px;
+      border: 1px solid #ff8585;
+      border-radius: 5px;
+      padding: 6px 10px;
+      color: #50627c;
+      background: #fff;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .mock-radio {
+      display: inline-flex;
+      width: 20px;
+      height: 20px;
+      border: 1px solid #8a8f95;
+      border-radius: 50%;
+      background: #fff;
+      box-sizing: border-box;
+    }
+
+    .mock-radio.selected {
+      border: 5px solid #2f7cf4;
+    }
+
+    .mock-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #ff8585;
+      border-radius: 50%;
+      color: #ff8585;
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .site-toggle-card {
+      border: 1px solid #dce4ef;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .site-toggle-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #dce4ef;
+      padding: 16px 20px;
+      color: #1f2937;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .mock-toggle {
+      position: relative;
+      width: 54px;
+      height: 30px;
+      border-radius: 999px;
+      background: #2f7cf4;
+    }
+
+    .mock-toggle::after {
+      content: "";
+      position: absolute;
+      right: 3px;
+      top: 3px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .site-toggle-body {
+      padding: 22px 20px;
+      background: #f8fafc;
+      color: #627089;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.65;
+    }
+
     .requirements {
       display: grid;
       gap: 8px;
@@ -1275,6 +1440,46 @@
       border-color: #111 !important;
       background: #fff !important;
       color: #111 !important;
+    }
+
+    .method.disabled {
+      background: #ededed !important;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(0, 0, 0, .08) 0,
+        rgba(0, 0, 0, .08) 6px,
+        transparent 6px,
+        transparent 14px
+      ) !important;
+      border: 1px dashed #999 !important;
+      color: #888 !important;
+      opacity: 1;
+      filter: none;
+    }
+
+    .method.disabled::after {
+      content: "Unavailable";
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      border: 1px solid #999;
+      border-radius: 999px;
+      background: #fff;
+      color: #666;
+      padding: 1px 6px;
+      font-size: 9px;
+      line-height: 1.4;
+    }
+
+    .method.disabled .method-name,
+    .method.disabled .method-detail {
+      color: #777 !important;
+    }
+
+    .method.disabled .check {
+      border-color: #999 !important;
+      background: #e5e5e5 !important;
+      color: transparent !important;
     }
 
     .phone,
@@ -1397,6 +1602,7 @@
     <nav class="rail" aria-label="US 收付款">
       <div class="rail-logo">Six</div>
       <button class="active" data-view="receive" type="button"><strong>↓</strong>收款</button>
+      <button data-view="receiveV2" type="button"><strong>↓</strong>收款版本二</button>
       <button data-view="payout" type="button"><strong>↑</strong>付款</button>
       <button data-view="admin" type="button"><strong>⚙</strong>后台</button>
     </nav>
@@ -1418,10 +1624,6 @@
             </div>
 
             <div class="wallet-panel">
-              <div class="currency-row">
-                <div class="currency-select">🇺🇸 USD ▾</div>
-              </div>
-
               <div class="mobile-card activity-card">
                 <div class="mobile-label">Deposit Bonus</div>
                 <div class="promo" aria-label="Deposit Bonus 占位"></div>
@@ -1439,6 +1641,32 @@
                 <div class="input-note error hidden" id="depositAmountError"></div>
               </div>
 
+              <button class="deposit-btn" id="depositSubmit" type="button">Go to Payment</button>
+            </div>
+          </section>
+
+          <section id="receivePhoneV2" class="screen hidden">
+            <div class="wallet-tabs">
+              <button class="wallet-tab active" data-view="receiveV2" type="button">Deposit</button>
+              <button class="wallet-tab" data-view="payout" type="button">Withdrawal</button>
+            </div>
+
+            <div class="wallet-panel">
+              <div class="mobile-card activity-card">
+                <div class="mobile-label">Deposit Bonus</div>
+                <div class="promo" aria-label="Deposit Bonus 占位"></div>
+              </div>
+
+              <div class="mobile-card">
+                <div class="mobile-label">Deposit Amount</div>
+                <div class="recharge-grid" id="amountGridV2"></div>
+              </div>
+
+              <div class="mobile-card">
+                <div class="mobile-label">Deposit Method</div>
+                <div class="payout-methods" id="mobileChannelsV2"></div>
+              </div>
+
               <button class="deposit-btn" type="button">Go to Payment</button>
             </div>
           </section>
@@ -1450,10 +1678,6 @@
             </div>
 
             <div class="wallet-panel">
-              <div class="currency-row">
-                <div class="currency-select">🇺🇸 USD ▾</div>
-              </div>
-
               <div class="mobile-card">
                 <div class="mobile-label">Withdrawal To</div>
                 <div class="payout-methods" id="phoneMethods"></div>
@@ -1479,6 +1703,7 @@
             </div>
           </section>
 
+          <div class="toast hidden" id="toast"></div>
         </div>
       </div>
     </div>
@@ -1508,15 +1733,18 @@
           <div class="doc-body">
             <ol>
               <li>首次进入默认选择第一个支付方式，并默认选中该支付方式的第一个可用金额。</li>
+              <li>ApplePay 排序按设备判断：苹果设备访问时 ApplePay 前移到首位；非苹果设备访问时 ApplePay 后移到最后。</li>
               <li>用户先选择支付方式，再请求 9UPI 查询该方式支持的金额范围和固定金额。</li>
-              <li>前端最终展示的充值金额默认为后台配置金额和 9UPI 返回金额的去重合集。</li>
+              <li>前端最终展示的充值金额为后台配置金额和 9UPI 返回全量金额的交集。</li>
+              <li>当 9UPI 可选金额未请求到时，前端默认保留并展示后台配置金额；点击 Go to Payment 时重新校验 9UPI 当前金额是否可选。</li>
+              <li>提交时若 9UPI 校验当前金额不可选，toast 提示英文：“The current amount is unavailable. Please choose again.”；原型以 GooglePay 的 10.99 作为示例。</li>
               <li>用户切换支付方式时，下方 Recharge Amount 列表同步刷新，并默认选中切换后支付方式的第一个可用金额。</li>
               <li>ApplePay 是一个示例：当后台把当前支付方式配置为支持自定义金额时，用户可在下方金额输入框输入自定义金额；输入金额必须在当前方式的最小金额和最大金额范围内。</li>
               <li>支持自定义金额的支付方式输入金额超出范围时，金额框标红并提示可输入范围，Go to Payment 不可提交。</li>
               <li>除支持自定义金额的支付方式外，其它方式只能选择固定金额；列表为空时 Deposit 不可提交并提示渠道暂无可用金额。</li>
               <li>金额列表超出样式及交互和 UI 沟通后确定。</li>
               <li>Deposit 按钮提交当前金额、币种 USD、用户信息和 accountType；9UPI 返回 repaymentUrl 后进入三方支付页，结果页待确认。</li>
-              <li>点击 History 进入充提历史时，历史页中的货币 ICON、货币单位和货币符号需要按当前国家/币种替换。</li>
+              <li>点击 History 进入充提历史时，历史页中的货币 ICON、货币单位和货币符号需要按当前国家/币种替换；充值历史列表和详情需要展示充值方式。</li>
             </ol>
           </div>
         </div>
@@ -1528,13 +1756,14 @@
           </header>
           <div class="doc-body">
             <div class="field-grid">
-              <div class="field"><strong>Payment Channel</strong><span>美国代收渠道：CashApp、ApplePay、GooglePay、BtcPay、Paypal、Card。</span></div>
+              <div class="field"><strong>Payment Channel</strong><span>美国代收渠道：CashApp、ApplePay、GooglePay、BtcPay、Paypal、Card。ApplePay 在苹果设备前置，非苹果设备后置。</span></div>
               <div class="field"><strong>Recharge Amount</strong><span>展示当前支付方式支持的固定金额；首次进入和切换方式后，默认选中当前支付方式的第一个可用金额。ApplePay 只是示例，后台配置为支持自定义金额的方式才展示下方输入框。</span></div>
               <div class="field"><strong>交互顺序</strong><span>先选择支付方式，再展示该方式支持的固定金额或自定义金额输入框；切换支付方式后，下方金额区域同步刷新。</span></div>
               <div class="field"><strong>金额范围校验</strong><span>支持自定义金额时，输入金额必须在该方式最小金额和最大金额之间；超出范围时展示错误提示并禁止提交。</span></div>
-              <div class="field"><strong>9UPI 查询</strong><span>选择支付类型后查询可用渠道和金额；最终金额列表默认取后台配置金额和 9UPI 返回金额的去重合集。</span></div>
+              <div class="field"><strong>9UPI 查询</strong><span>选择支付类型后查询可用渠道和金额；最终金额列表取后台配置金额和 9UPI 返回全量金额的交集。若可选金额未请求到，先保留后台金额，提交时重新校验。</span></div>
+              <div class="field"><strong>提交校验</strong><span>提交时若 9UPI 判断当前金额不可选，toast 提示“The current amount is unavailable. Please choose again.”；GooglePay 10.99 为示例。</span></div>
               <div class="field"><strong>Deposit</strong><span>提交 amount、currency=USD、accountType；后续使用 repaymentUrl。</span></div>
-              <div class="field"><strong>History Currency</strong><span>充提历史页需跟随当前国家/币种替换货币 ICON、货币单位和货币符号，例如美国站展示 USD 和 $。</span></div>
+              <div class="field"><strong>History</strong><span>充提历史页需跟随当前国家/币种替换货币 ICON、货币单位和货币符号；充值历史列表和详情展示充值方式。</span></div>
             </div>
           </div>
         </div>
@@ -1546,9 +1775,50 @@
           </header>
           <div class="doc-body">
             <ul>
-              <li>9UPI 查询失败时，是隐藏渠道、保留后台金额，还是整条渠道不可用待确认。</li>
               <li>Join Activity 卡片和浮动 S 按钮点击后的页面或弹层待确认。</li>
             </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="receiveConfigV2" class="doc-layout hidden">
+        <div class="page-path">
+          <span class="path-pill">Wallet</span>
+          <span>›</span>
+          <span class="path-pill">Deposit Version 2</span>
+          <span class="badge ok">Amount First</span>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Interaction Notes</h2>
+            <span class="badge ok">Deposit V2</span>
+          </header>
+          <div class="doc-body">
+            <ol>
+              <li>收款版本二用于展示另一套充值流程：用户先选择充值金额，再展示该金额支持的支付方式。</li>
+              <li>首次进入默认选中第一个可用金额，并在下方展示支持该金额的支付方式。</li>
+              <li>进入充值页后，先获取 9UPI 所有支付方式下面的可选金额合集，再和后台配置金额做交集，交集结果展示在前端金额列表中。</li>
+              <li>用户切换金额时，支付方式列表同步刷新；所有支付方式仍展示，但不支持当前金额的支付方式置灰且不可选。</li>
+              <li>交互示例：选择 4.99 时，ApplePay 支持该金额可选；CashApp、Paypal、Card 等不包含 4.99 的方式置灰。GooglePay 若当前未请求到 9UPI 金额，先按后台金额保留展示，提交时再重新校验。</li>
+              <li>支付方式卡片展示该方式支持的金额范围；用户再选择支付方式后点击 Go to Payment，提交 amount、currency=USD、accountType；后续使用 repaymentUrl。</li>
+              <li>该版本仅用于对比金额优先交互，原收款页仍保留支付方式优先流程。</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <header>
+            <h2>Field Notes</h2>
+            <span class="badge ok">Version 2</span>
+          </header>
+          <div class="doc-body">
+            <div class="field-grid">
+              <div class="field"><strong>Deposit Amount</strong><span>金额列表先取 9UPI 所有支付方式的可选金额合集，再和后台配置金额做交集，最终交集有多少展示多少；当前原型金额数量仅作示例。</span></div>
+              <div class="field"><strong>Payment Method</strong><span>根据当前金额判断支付方式是否可用；切换金额后支付方式区域同步刷新，不支持当前金额的方式置灰不可选，卡片展示该方式支持的金额范围。</span></div>
+              <div class="field"><strong>默认选中</strong><span>首次进入默认选择第一个可用金额，并展示支持该金额的支付方式。</span></div>
+              <div class="field"><strong>交互示例</strong><span>选择 4.99 时，ApplePay 可选；不支持 4.99 的 CashApp、Paypal、Card 等支付方式置灰。GooglePay 未拿到 9UPI 金额时先展示后台金额，提交时再校验。</span></div>
+            </div>
           </div>
         </div>
       </section>
@@ -1576,6 +1846,7 @@
               <li>收款人账号字段随 accountType 变化，前端输入框提示词统一使用英文；CashApp/Chime 默认带上 $，PayPal 使用 Recipient Email。</li>
               <li>Card 额外必填卡过期时间，格式 MM/YYYY；ACH 额外必填 9 位美国 ACH 路由号码。</li>
               <li>Withdraw 按钮提交付款金额、accountType、cardNo/收款账号和对应附加字段；确认页、风控页或结果页待确认。</li>
+              <li>提现历史列表和详情需要展示提现方式。</li>
             </ol>
           </div>
         </div>
@@ -1615,11 +1886,13 @@
         <div class="admin-shell">
           <aside class="admin-menu" aria-label="后台配置菜单">
             <div class="admin-menu-title">支付配置</div>
-            <button class="active" type="button">国家支付配置</button>
+            <button class="active" data-admin-section="country" type="button">国家支付配置</button>
+            <button data-admin-section="records" type="button">充提记录</button>
+            <button data-admin-section="site" type="button">站点配置</button>
           </aside>
 
           <div class="admin-main">
-            <div class="doc-card">
+            <div class="doc-card admin-section" data-admin-panel="country">
               <header>
                 <h2>国家列表</h2>
                 <span class="badge ok">一级列表</span>
@@ -1775,6 +2048,124 @@
               </div>
             </div>
 
+            <div class="doc-card admin-section hidden" data-admin-panel="records">
+              <header>
+                <h2>充提记录</h2>
+                <span class="badge ok">Record</span>
+              </header>
+              <div class="doc-body">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>序号</th>
+                      <th>站点</th>
+                      <th>单据类型</th>
+                      <th>订单号</th>
+                      <th>会员ID</th>
+                      <th>会员名称</th>
+                      <th>渠道类型</th>
+                      <th>渠道ID</th>
+                      <th>充提方式</th>
+                      <th>活动ID</th>
+                      <th>交易金额</th>
+                      <th>交易手续费</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="meta">展示</td>
+                      <td class="meta">US</td>
+                      <td class="meta">Deposit / Withdrawal</td>
+                      <td class="meta">展示</td>
+                      <td class="meta">展示</td>
+                      <td class="meta">展示</td>
+                      <td class="meta">展示</td>
+                      <td class="meta">展示</td>
+                      <td class="meta">ApplePay / CashApp</td>
+                      <td class="meta">展示</td>
+                      <td class="meta">展示</td>
+                      <td class="meta">展示</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="doc-card admin-section hidden" data-admin-panel="site">
+              <header>
+                <h2>站点配置</h2>
+                <span class="badge ok">Site</span>
+              </header>
+              <div class="doc-body">
+                <div class="site-config-grid">
+                  <section>
+                    <div class="site-title-row">
+                      <div class="site-title">充值首页充值金额</div>
+                      <span class="optimization-pill">本次优化</span>
+                    </div>
+                    <table class="admin-table amount-setting-table">
+                      <thead>
+                        <tr>
+                          <th>档位</th>
+                          <th>金额</th>
+                          <th>默认选中</th>
+                          <th>+</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>1</td>
+                          <td><span class="amount-editor"><span class="mock-input">100</span><span>USD</span></span></td>
+                          <td><span class="mock-radio selected" aria-label="默认选中"></span></td>
+                          <td><span class="mock-action">-</span></td>
+                        </tr>
+                        <tr>
+                          <td>2</td>
+                          <td><span class="amount-editor"><span class="mock-input">300</span><span>USD</span></span></td>
+                          <td><span class="mock-radio"></span></td>
+                          <td><span class="mock-action">-</span></td>
+                        </tr>
+                        <tr>
+                          <td>3</td>
+                          <td><span class="amount-editor"><span class="mock-input">500</span><span>USD</span></span></td>
+                          <td><span class="mock-radio"></span></td>
+                          <td><span class="mock-action">-</span></td>
+                        </tr>
+                        <tr>
+                          <td>4</td>
+                          <td><span class="amount-editor"><span class="mock-input">1000</span><span>USD</span></span></td>
+                          <td><span class="mock-radio"></span></td>
+                          <td><span class="mock-action">-</span></td>
+                        </tr>
+                        <tr>
+                          <td>5</td>
+                          <td><span class="amount-editor"><span class="mock-input">2000</span><span>USD</span></span></td>
+                          <td><span class="mock-radio"></span></td>
+                          <td><span class="mock-action">-</span></td>
+                        </tr>
+                        <tr>
+                          <td>6</td>
+                          <td><span class="amount-editor"><span class="mock-input">5000</span><span>USD</span></span></td>
+                          <td><span class="mock-radio"></span></td>
+                          <td><span class="mock-action">-</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </section>
+
+                  <section class="site-toggle-card">
+                    <div class="site-toggle-head">
+                      <span>自定义金额输入</span>
+                      <span class="mock-toggle" aria-label="已开启"></span>
+                    </div>
+                    <div class="site-toggle-body">
+                      开启后，H5 充值界面展示「自定义金额」输入入口；关闭后，不展示自定义金额入口。
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+
             <div class="doc-card country-detail hidden" data-country-panel="us">
               <header>
                 <h2>需求说明</h2>
@@ -1782,13 +2173,15 @@
               </header>
               <div class="requirements">
                 <h4>后台层级</h4>
-                <p>后台支付配置一级展示国家列表；点击国家行后的“详情”，展开该国家的充值配置和提现配置。</p>
+                <p>后台支付配置一级菜单包含“国家支付配置”、“充提记录”和“站点配置”，三者为同级入口；点击国家支付配置中的国家详情，展开该国家的充值配置和提现配置。</p>
                 <h4>充值配置</h4>
                 <p>美国充值支付方式固定展示 CashApp、ApplePay、GooglePay、BtcPay、Paypal、Card；默认前端展示状态为未展示，后台可选金额为空。本原型以 ApplePay 作为支持自定义金额的示例，实际以后台“是否支持自定义”配置为准。点击编辑后，可以维护该方式的可选金额、是否支持自定义和前端展示状态。</p>
                 <h4>前台充值联动</h4>
-                <p>前台先选择支付方式，再展示该支付方式可用金额；切换支付方式后，金额列表跟随刷新。最终展示金额以后台配置和 9UPI 返回结果的业务规则为准。</p>
+                <p>前台先选择支付方式，再展示该支付方式可用金额；切换支付方式后，金额列表跟随刷新。ApplePay 排序按设备判断：苹果设备前移到首位，非苹果设备后移到最后。最终展示金额取后台配置金额和 9UPI 返回全量金额的交集，交集有多少展示多少；当前原型金额数量仅作示例。收款版本二进入充值页后，先获取 9UPI 所有支付方式下面的可选金额合集，再和后台配置金额做交集展示；用户选择金额后，不支持该金额的支付方式置灰且不可选，例如选择 4.99 时，ApplePay 可选，不支持 4.99 的 CashApp、Paypal、Card 等置灰。若 9UPI 可选金额未请求到，则先保留后台金额，提交时重新校验 9UPI 是否可选；不可选时 toast 提示“The current amount is unavailable. Please choose again.”。</p>
                 <h4>提现配置</h4>
                 <p>美国提现方式固定展示 CashApp、Paypal、ACH、Card、Chime、Zelle；后台配置只维护金额范围和前端展示状态。前台 Withdrawal Amount 左侧货币符号常驻，Max 按钮用于一键填入当前可提余额。收款人账号格式、Card 过期时间、ACH 路由号码等字段说明保留在前台提现说明中。</p>
+                <h4>充提记录</h4>
+                <p>“充提记录”和“国家支付配置”为后台同级菜单；列表仅做字段展示，无交互。字段在“渠道ID”后新增“充提方式”，展示 ApplePay、CashApp、Card 等具体充值/提现支付方式。前台充值历史列表和详情展示充值方式，提现历史列表和详情展示提现方式。</p>
               </div>
             </div>
           </div>
@@ -1810,6 +2203,8 @@
       customVisible: true,
       depositFlow: "methodFirst",
       selectedChannel: "CashApp",
+      selectedV2Amount: 0,
+      selectedV2Channel: "",
       selectedMethod: "CashApp",
       payoutAvailable: 0,
     };
@@ -1830,6 +2225,11 @@
       BtcPay: [24.99, 49.99, 99.99, 124.99, 199.99],
       Paypal: [7.99, 11.99, 14.99, 29.99, 49.99, 99.99],
       Card: [9.99, 19.99, 29.99, 59.99, 129.99, 249.99]
+    };
+
+    const failedAmountRequestChannels = new Set(["GooglePay"]);
+    const unavailableAmountOnSubmit = {
+      GooglePay: [10.99]
     };
 
     const methods = [
@@ -1882,7 +2282,56 @@
     }
 
     function channelAmounts(channelName) {
-      return [...(nineUpiByChannel[channelName] || [])].map(Number).sort((a, b) => a - b);
+      const source = failedAmountRequestChannels.has(channelName)
+        ? state.backendAmounts
+        : (nineUpiByChannel[channelName] || state.backendAmounts);
+      return [...source].map(Number).sort((a, b) => a - b);
+    }
+
+    function backendIntersection(amounts) {
+      const backendSet = new Set(state.backendAmounts.map((amount) => Number(amount).toFixed(2)));
+      return amounts
+        .filter((amount) => backendSet.has(Number(amount).toFixed(2)))
+        .sort((a, b) => a - b);
+    }
+
+    function channelAmountRange(channelName) {
+      const amounts = backendIntersection(channelAmounts(channelName));
+      const min = amounts[0] || 0;
+      const max = amounts[amounts.length - 1] || 0;
+      return `${formatCurrency(min, 2)}-${formatCurrency(max, 2)}`;
+    }
+
+    function showToast(message) {
+      const toast = $("#toast");
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.remove("hidden");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.add("hidden"), 2600);
+    }
+
+    function validateNineUpiBeforeSubmit() {
+      const unavailable = unavailableAmountOnSubmit[state.selectedChannel] || [];
+      return !unavailable.some((amount) => Number(amount).toFixed(2) === Number(state.defaultAmount).toFixed(2));
+    }
+
+    function handleDepositSubmit() {
+      if (!validateDepositAmount()) return;
+      if (!validateNineUpiBeforeSubmit()) {
+        showToast("The current amount is unavailable. Please choose again.");
+      }
+    }
+
+    function isAppleDevice() {
+      return /iPhone|iPad|iPod|Macintosh|Mac OS/i.test(navigator.userAgent || "");
+    }
+
+    function orderedDepositChannels() {
+      const available = channels.filter((channel) => channel.status !== "off");
+      const apple = available.filter((channel) => channel.name === "ApplePay");
+      const others = available.filter((channel) => channel.name !== "ApplePay");
+      return isAppleDevice() ? [...apple, ...others] : [...others, ...apple];
     }
 
     function supportsCustomDepositAmount() {
@@ -1921,7 +2370,7 @@
     }
 
     function selectDepositChannel(channelName) {
-      const available = channels.filter((channel) => channel.status !== "off");
+      const available = orderedDepositChannels();
       const selected = available.find((channel) => channel.name === channelName) || available[0];
       state.selectedChannel = selected ? selected.name : "";
       state.nineUpiAmounts = selected ? channelAmounts(selected.name) : [];
@@ -1930,7 +2379,7 @@
     }
 
     function refreshAmounts() {
-      const merged = [...state.nineUpiAmounts]
+      const merged = backendIntersection(state.nineUpiAmounts)
         .map((amount) => Number(amount).toFixed(2));
       state.amounts = [...new Set(merged)].map(Number).sort((a, b) => a - b);
       if (!state.amounts.some((amount) => Number(amount) === Number(state.defaultAmount))) {
@@ -1950,7 +2399,6 @@
     }
 
     function currentVisibleAmounts() {
-      if (state.overflowMode === "collapse" && !state.expandedAmounts) return state.amounts.slice(0, 9);
       return state.amounts;
     }
 
@@ -1994,14 +2442,14 @@
     }
 
     function renderChannels() {
-      const available = channels.filter((channel) => channel.status !== "off");
+      const available = orderedDepositChannels();
       $("#channelCount").textContent = `${available.length} 可用`;
       $("#mobileChannels").innerHTML = available.map((channel) => `
         <div class="method ${state.selectedChannel === channel.name ? "selected" : ""}" data-channel="${channel.name}">
           <span class="check">${state.selectedChannel === channel.name ? "✓" : ""}</span>
           <span>
             <span class="method-name">${channel.name}</span>
-            <span class="method-detail">$${formatAmount(Math.min(...(nineUpiByChannel[channel.name] || state.backendAmounts)))}-$${formatAmount(Math.max(...(nineUpiByChannel[channel.name] || state.backendAmounts)))}</span>
+            <span class="method-detail">${channelAmountRange(channel.name)}</span>
           </span>
         </div>
       `).join("");
@@ -2030,6 +2478,71 @@
             </article>
           `;
         }).join("");
+      }
+    }
+
+    function allDepositAmounts() {
+      const amounts = backendIntersection(Object.keys(nineUpiByChannel).flatMap((channelName) => channelAmounts(channelName)));
+      return [...new Set(amounts.map((amount) => Number(amount).toFixed(2)))]
+        .map(Number)
+        .sort((a, b) => a - b);
+    }
+
+    function channelSupportsAmount(channelName, amount) {
+      return channelAmounts(channelName).some((item) => Number(item).toFixed(2) === Number(amount).toFixed(2));
+    }
+
+    function channelsForAmount(amount) {
+      return orderedDepositChannels().filter((channel) => channelSupportsAmount(channel.name, amount));
+    }
+
+    function renderAmountFirstDeposit() {
+      const amounts = allDepositAmounts();
+      if (!state.selectedV2Amount || !amounts.some((amount) => Number(amount) === Number(state.selectedV2Amount))) {
+        state.selectedV2Amount = amounts[0] || 0;
+      }
+      const amountGrid = $("#amountGridV2");
+      if (amountGrid) {
+        amountGrid.innerHTML = amounts.map((amount) => `
+          <button class="amount ${Number(amount) === Number(state.selectedV2Amount) ? "active" : ""}" data-v2-amount="${amount}" type="button">
+            ${formatAmount(amount)}
+          </button>
+        `).join("");
+        amountGrid.querySelectorAll("[data-v2-amount]").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.selectedV2Amount = Number(button.dataset.v2Amount);
+            state.selectedV2Channel = "";
+            renderAmountFirstDeposit();
+          });
+        });
+      }
+
+      const supportedChannels = channelsForAmount(state.selectedV2Amount);
+      if (!state.selectedV2Channel || !supportedChannels.some((channel) => channel.name === state.selectedV2Channel)) {
+        state.selectedV2Channel = supportedChannels[0]?.name || "";
+      }
+      const channelWrap = $("#mobileChannelsV2");
+      if (channelWrap) {
+        const allChannels = orderedDepositChannels();
+        channelWrap.innerHTML = allChannels.map((channel) => {
+          const supported = channelSupportsAmount(channel.name, state.selectedV2Amount);
+          return `
+          <div class="method ${state.selectedV2Channel === channel.name ? "selected" : ""} ${supported ? "" : "disabled"}" data-v2-channel="${channel.name}" data-supported="${supported}">
+            <span class="check">${state.selectedV2Channel === channel.name ? "✓" : ""}</span>
+            <span>
+              <span class="method-name">${channel.name}</span>
+              <span class="method-detail">${channelAmountRange(channel.name)}</span>
+            </span>
+          </div>
+        `;
+        }).join("");
+        channelWrap.querySelectorAll("[data-v2-channel]").forEach((card) => {
+          card.addEventListener("click", () => {
+            if (card.dataset.supported !== "true") return;
+            state.selectedV2Channel = card.dataset.v2Channel;
+            renderAmountFirstDeposit();
+          });
+        });
       }
     }
 
@@ -2134,38 +2647,62 @@
       const isAdmin = view === "admin";
       document.querySelector(".workspace").classList.toggle("admin-mode", isAdmin);
       $("#receivePhone").classList.toggle("hidden", view !== "receive");
+      $("#receivePhoneV2").classList.toggle("hidden", view !== "receiveV2");
       $("#payoutPhone").classList.toggle("hidden", view !== "payout");
       $("#receiveConfig").classList.toggle("hidden", view !== "receive");
+      $("#receiveConfigV2").classList.toggle("hidden", view !== "receiveV2");
       $("#payoutConfig").classList.toggle("hidden", view !== "payout");
       $("#adminConfig").classList.toggle("hidden", !isAdmin);
-      if (!isAdmin) $("#mobileTitle").textContent = view === "receive" ? "Deposit" : "Withdraw";
+      if (!isAdmin) $("#mobileTitle").textContent = view === "payout" ? "Withdraw" : "Deposit";
       $("#pageTitle").textContent = view === "receive"
         ? "US 收款前台需求"
-        : view === "payout"
-          ? "US 付款前台需求"
-          : "US 后台支付配置";
+        : view === "receiveV2"
+          ? "US 收款版本二需求"
+          : view === "payout"
+            ? "US 付款前台需求"
+            : "US 后台支付配置";
       $("#pageSubtitle").textContent = view === "receive"
         ? "前台充值：先选择支付方式，再展示该方式支持的固定金额。"
-        : view === "payout"
-          ? "前台提现：多支付方式账户字段和必填校验。"
-          : "后台配置：按国家维护充值支付方式、可选金额、展示状态和提现字段。";
+        : view === "receiveV2"
+          ? "前台充值版本二：先选择金额，再展示该金额支持的支付方式。"
+          : view === "payout"
+            ? "前台提现：多支付方式账户字段和必填校验。"
+            : "后台配置：按国家维护充值支付方式、可选金额、展示状态和提现字段。";
       $("#statusText").textContent = view === "receive"
         ? "United States · USD"
-        : view === "payout"
-          ? "US Payout · Multi-method"
-          : "Admin · Payment Config";
+        : view === "receiveV2"
+          ? "US Deposit · Amount First"
+          : view === "payout"
+            ? "US Payout · Multi-method"
+            : "Admin · Payment Config";
       document.querySelectorAll(".rail button").forEach((button) => {
         button.classList.toggle("active", button.dataset.view === view);
       });
     }
 
     function showCountryDetail(country) {
+      switchAdminSection("country");
       document.querySelectorAll(".country-detail").forEach((panel) => {
         panel.classList.toggle("hidden", panel.dataset.countryPanel !== country);
       });
       document.querySelectorAll("[data-country-detail]").forEach((button) => {
         button.classList.toggle("active", button.dataset.countryDetail === country);
       });
+    }
+
+    function switchAdminSection(section) {
+      document.querySelectorAll("[data-admin-section]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.adminSection === section);
+      });
+      document.querySelectorAll("[data-admin-panel]").forEach((panel) => {
+        panel.classList.toggle("hidden", panel.dataset.adminPanel !== section);
+      });
+      document.querySelectorAll(".country-detail").forEach((panel) => {
+        if (section !== "country") panel.classList.add("hidden");
+      });
+      if (section !== "country") {
+        document.querySelectorAll("[data-country-detail]").forEach((button) => button.classList.remove("active"));
+      }
     }
 
     function editPayinMethod(type) {
@@ -2202,6 +2739,10 @@
       button.addEventListener("click", () => showCountryDetail(button.dataset.countryDetail));
     });
 
+    document.querySelectorAll("[data-admin-section]").forEach((button) => {
+      button.addEventListener("click", () => switchAdminSection(button.dataset.adminSection));
+    });
+
     document.querySelectorAll("[data-edit-payin]").forEach((button) => {
       button.addEventListener("click", () => editPayinMethod(button.dataset.editPayin));
     });
@@ -2209,6 +2750,8 @@
     document.querySelectorAll("[data-edit-payout]").forEach((button) => {
       button.addEventListener("click", () => editPayoutMethod(button.dataset.editPayout, button.dataset.min, button.dataset.max));
     });
+
+    $("#depositSubmit").addEventListener("click", handleDepositSubmit);
 
     const decimalPlaces = $("#decimalPlaces");
     if (decimalPlaces) {
@@ -2280,6 +2823,7 @@
     selectDepositChannel(state.selectedChannel);
     renderChannels();
     renderAmounts();
+    renderAmountFirstDeposit();
     renderDepositFlow();
     renderPayout();
   </script>
