@@ -439,6 +439,27 @@
       border-color: #d92d20 !important;
     }
 
+    .editable-field {
+      position: relative;
+      margin-top: 8px;
+    }
+
+    .editable-field .custom-field {
+      margin-top: 0;
+      padding-right: 44px;
+    }
+
+    .edit-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777;
+      font-size: 18px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
     .amount-input {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) 64px;
@@ -1660,6 +1681,8 @@
               <div class="mobile-card">
                 <div class="mobile-label">Deposit Amount</div>
                 <div class="recharge-grid" id="amountGridV2"></div>
+                <input class="custom-field" id="customAmountV2" type="text" inputmode="decimal">
+                <div class="input-note error hidden" id="customAmountV2Note"></div>
               </div>
 
               <div class="mobile-card">
@@ -1667,7 +1690,7 @@
                 <div class="payout-methods" id="mobileChannelsV2"></div>
               </div>
 
-              <button class="deposit-btn" type="button">Go to Payment</button>
+              <button class="deposit-btn" id="depositSubmitV2" type="button">Go to Payment</button>
             </div>
           </section>
 
@@ -1799,9 +1822,15 @@
               <li>收款版本二用于展示另一套充值流程：用户先选择充值金额，再展示该金额支持的支付方式。</li>
               <li>首次进入默认选中第一个可用金额，并在下方展示支持该金额的支付方式。</li>
               <li>进入充值页后，先获取 9UPI 所有支付方式下面的可选金额合集，再和后台配置金额做交集，交集结果展示在前端金额列表中。</li>
+              <li>当 9UPI 可选金额未请求到时，前端默认保留并展示后台配置金额；点击 Go to Payment 时重新校验 9UPI 当前金额是否可选。</li>
+              <li>提交时若 9UPI 校验当前金额不可选，toast 提示英文：“The current amount is unavailable. Please choose again.”；原型以 GooglePay 的 10.99 作为示例。</li>
+              <li>充值方式排序：Card 首位，其次 Paypal，其次 CashApp；之后根据设备判断 ApplePay 和 GooglePay 的顺序，苹果设备 ApplePay 在前，非苹果设备 GooglePay 在前；其它方式排在最后。</li>
               <li>用户切换金额时，支付方式列表同步刷新；所有支付方式仍展示，但不支持当前金额的支付方式置灰且不可选。</li>
-              <li>交互示例：选择 4.99 时，ApplePay 支持该金额可选；CashApp、Paypal、Card 等不包含 4.99 的方式置灰。GooglePay 若当前未请求到 9UPI 金额，先按后台金额保留展示，提交时再重新校验。</li>
-              <li>支付方式卡片展示该方式支持的金额范围；用户再选择支付方式后点击 Go to Payment，提交 amount、currency=USD、accountType；后续使用 repaymentUrl。</li>
+              <li>如果当前金额下仅有一个可用充值方式，则隐藏整个充值方式模块，并默认选中该唯一支付方式。</li>
+              <li>金额区域增加自定义金额输入样式；当后台把某个支付方式配置为支持自定义金额时，用户输入金额后，下方支付方式按该金额重新判断可用状态。</li>
+              <li>支持自定义金额的支付方式输入金额超出范围时，金额框标红并提示可输入范围，Go to Payment 不可提交。</li>
+              <li>交互示例：输入自定义金额 15.00 时，ApplePay 作为支持自定义金额的示例可选；未支持自定义或不在金额范围内的支付方式置灰。选择固定金额 4.99 时，ApplePay 支持该金额可选；CashApp、Paypal、Card 等不包含 4.99 的方式置灰。GooglePay 若当前未请求到 9UPI 金额，先按后台金额保留展示，提交时再重新校验。</li>
+              <li>支付方式卡片仅展示方式名称和可用/不可用状态；用户再选择支付方式后点击 Go to Payment，提交 amount、currency=USD、accountType；后续使用 repaymentUrl。</li>
               <li>该版本仅用于对比金额优先交互，原收款页仍保留支付方式优先流程。</li>
             </ol>
           </div>
@@ -1814,10 +1843,10 @@
           </header>
           <div class="doc-body">
             <div class="field-grid">
-              <div class="field"><strong>Deposit Amount</strong><span>金额列表先取 9UPI 所有支付方式的可选金额合集，再和后台配置金额做交集，最终交集有多少展示多少；当前原型金额数量仅作示例。</span></div>
-              <div class="field"><strong>Payment Method</strong><span>根据当前金额判断支付方式是否可用；切换金额后支付方式区域同步刷新，不支持当前金额的方式置灰不可选，卡片展示该方式支持的金额范围。</span></div>
-              <div class="field"><strong>默认选中</strong><span>首次进入默认选择第一个可用金额，并展示支持该金额的支付方式。</span></div>
-              <div class="field"><strong>交互示例</strong><span>选择 4.99 时，ApplePay 可选；不支持 4.99 的 CashApp、Paypal、Card 等支付方式置灰。GooglePay 未拿到 9UPI 金额时先展示后台金额，提交时再校验。</span></div>
+              <div class="field"><strong>Deposit Amount</strong><span>金额列表先取 9UPI 所有支付方式的可选金额合集，再和后台配置金额做交集，最终交集有多少展示多少；若 9UPI 可选金额未请求到，先保留后台配置金额并展示，提交时重新校验当前金额是否可选。</span></div>
+              <div class="field"><strong>Payment Method</strong><span>版本二排序为 Card、Paypal、CashApp 优先；再按设备排序 ApplePay / GooglePay，苹果设备 ApplePay 在前，非苹果设备 GooglePay 在前；其它方式最后。根据当前金额判断可用性，不支持当前金额的方式置灰不可选，卡片不展示金额范围。若仅剩一个可用充值方式，则隐藏充值方式模块并默认选中该方式。</span></div>
+              <div class="field"><strong>Custom Amount</strong><span>版本二同样展示自定义金额输入样式；输入后按后台“是否支持自定义”和当前方式金额范围判断支付方式可用性。支持自定义金额的支付方式输入金额超出范围时，金额框标红并提示可输入范围，Go to Payment 不可提交。</span></div>
+              <div class="field"><strong>交互示例</strong><span>输入自定义金额 15.00 时，ApplePay 作为支持自定义金额的示例可选，其它未支持自定义的方式置灰；选择固定金额 4.99 时，不支持 4.99 的方式置灰。选择 10.99 时，GooglePay 作为提交校验失败示例，点击 Go to Payment 后 toast 提示“The current amount is unavailable. Please choose again.”。</span></div>
             </div>
           </div>
         </div>
@@ -1846,6 +1875,7 @@
               <li>收款人账号字段随 accountType 变化，前端输入框提示词统一使用英文；CashApp/Chime 默认带上 $，PayPal 使用 Recipient Email。</li>
               <li>Card 额外必填卡过期时间，格式 MM/YYYY；ACH 额外必填 9 位美国 ACH 路由号码。</li>
               <li>Withdraw 按钮提交付款金额、accountType、cardNo/收款账号和对应附加字段；确认页、风控页或结果页待确认。</li>
+              <li>用户完成提现后保存该提现方式的账户信息；再次进入 Withdraw 页面或再次选择同一提现方式时，默认带入已保存信息，并在每个输入框右侧展示编辑按钮用于修改。</li>
               <li>提现历史列表和详情需要展示提现方式。</li>
             </ol>
           </div>
@@ -1861,18 +1891,6 @@
           </div>
         </div>
 
-        <div class="doc-card">
-          <header>
-            <h2>Open Questions</h2>
-            <span class="badge warn">Pending</span>
-          </header>
-          <div class="doc-body">
-            <ul>
-              <li>CashApp/Chime 标签、Zelle 手机号格式是否需要前端强校验待确认。</li>
-              <li>Withdraw 点击后的确认、风控、结果页流程待确认。</li>
-            </ul>
-          </div>
-        </div>
       </section>
 
       <section id="adminConfig" class="doc-layout hidden">
@@ -2204,6 +2222,7 @@
       depositFlow: "methodFirst",
       selectedChannel: "CashApp",
       selectedV2Amount: 0,
+      selectedV2CustomAmount: "",
       selectedV2Channel: "",
       selectedMethod: "CashApp",
       payoutAvailable: 0,
@@ -2236,7 +2255,7 @@
       { id: "CashApp", name: "CashApp", detail: "收款标签必须以 $ 开头，例如 $test123。", min: 10, max: 10000 },
       { id: "Paypal", name: "PayPal", detail: "收款账号为 PayPal 邮箱，需填写正确 email。", min: 10, max: 2000 },
       { id: "ACH", name: "ACH", detail: "收款账号为 4-17 位银行账户号码，并填写 9 位路由号码。", min: 10, max: 1000 },
-      { id: "Card", name: "Card", detail: "收款账号为银行卡号，一般 16 位数字，并填写卡过期时间。", min: 10, max: 1000 },
+      { id: "Card", name: "Card", detail: "收款账号为银行卡号，前端校验 14-18 位数字，并填写卡过期时间。", min: 10, max: 1000 },
       { id: "Chime", name: "Chime", detail: "收款账号为 $ 开头的 Chime 账号。", min: 30, max: 10000 },
       { id: "Zelle", name: "Zelle", detail: "收款账号为 Zelle email 或 phone。", min: 50, max: 2000 }
     ];
@@ -2253,7 +2272,7 @@
         { label: "ACH Routing Number", rule: "9 位数字，示例 026009593。" }
       ],
       Card: [
-        { label: "Card Number", rule: "银行卡号，一般 16 位数字。" },
+        { label: "Card Number", rule: "银行卡号，前端校验 14-18 位数字。" },
         { label: "Expiration Date", rule: "必填，格式 MM/YYYY，示例 01/2028。" }
       ],
       Chime: [
@@ -2268,6 +2287,10 @@
 
     function formatAmount(value) {
       return Number(value).toFixed(state.decimals);
+    }
+
+    function depositAmountLabel(value) {
+      return Number(value).toFixed(2) === "17.99" ? "↓" : formatAmount(value);
     }
 
     function formatCurrency(value, decimals = 0) {
@@ -2311,14 +2334,22 @@
       showToast.timer = setTimeout(() => toast.classList.add("hidden"), 2600);
     }
 
-    function validateNineUpiBeforeSubmit() {
-      const unavailable = unavailableAmountOnSubmit[state.selectedChannel] || [];
-      return !unavailable.some((amount) => Number(amount).toFixed(2) === Number(state.defaultAmount).toFixed(2));
+    function validateNineUpiBeforeSubmit(channelName = state.selectedChannel, amountValue = state.defaultAmount) {
+      const unavailable = unavailableAmountOnSubmit[channelName] || [];
+      return !unavailable.some((amount) => Number(amount).toFixed(2) === Number(amountValue).toFixed(2));
     }
 
     function handleDepositSubmit() {
       if (!validateDepositAmount()) return;
       if (!validateNineUpiBeforeSubmit()) {
+        showToast("The current amount is unavailable. Please choose again.");
+      }
+    }
+
+    function handleDepositSubmitV2() {
+      const amountContext = v2AmountContext();
+      if (!state.selectedV2Channel) return;
+      if (!validateNineUpiBeforeSubmit(state.selectedV2Channel, amountContext.amount)) {
         showToast("The current amount is unavailable. Please choose again.");
       }
     }
@@ -2332,6 +2363,18 @@
       const apple = available.filter((channel) => channel.name === "ApplePay");
       const others = available.filter((channel) => channel.name !== "ApplePay");
       return isAppleDevice() ? [...apple, ...others] : [...others, ...apple];
+    }
+
+    function orderedDepositChannelsV2() {
+      const available = channels.filter((channel) => channel.status !== "off");
+      const fixedOrder = ["Card", "Paypal", "CashApp"];
+      const deviceOrder = isAppleDevice() ? ["ApplePay", "GooglePay"] : ["GooglePay", "ApplePay"];
+      const orderedNames = [...fixedOrder, ...deviceOrder];
+      const ordered = orderedNames
+        .map((name) => available.find((channel) => channel.name === name))
+        .filter(Boolean);
+      const rest = available.filter((channel) => !orderedNames.includes(channel.name));
+      return [...ordered, ...rest];
     }
 
     function supportsCustomDepositAmount() {
@@ -2408,7 +2451,7 @@
       const visibleAmounts = currentVisibleAmounts();
       grid.innerHTML = visibleAmounts.map((amount) => `
         <button class="amount ${Number(amount) === Number(state.defaultAmount) ? "active" : ""}" data-amount="${amount}" type="button">
-          ${formatAmount(amount)}
+          ${depositAmountLabel(amount)}
         </button>
       `).join("");
 
@@ -2449,7 +2492,6 @@
           <span class="check">${state.selectedChannel === channel.name ? "✓" : ""}</span>
           <span>
             <span class="method-name">${channel.name}</span>
-            <span class="method-detail">${channelAmountRange(channel.name)}</span>
           </span>
         </div>
       `).join("");
@@ -2492,8 +2534,39 @@
       return channelAmounts(channelName).some((item) => Number(item).toFixed(2) === Number(amount).toFixed(2));
     }
 
-    function channelsForAmount(amount) {
-      return orderedDepositChannels().filter((channel) => channelSupportsAmount(channel.name, amount));
+    function supportsCustomAmountForChannel(channelName, amount) {
+      if (channelName !== "ApplePay") return false;
+      const amounts = channelAmounts(channelName);
+      const min = Math.min(...amounts);
+      const max = Math.max(...amounts);
+      return Number(amount) >= min && Number(amount) <= max;
+    }
+
+    function customAmountRangeForChannel(channelName) {
+      const amounts = channelAmounts(channelName);
+      return {
+        min: Math.min(...amounts),
+        max: Math.max(...amounts)
+      };
+    }
+
+    function v2AmountContext() {
+      const customValue = Number(state.selectedV2CustomAmount);
+      const isCustom = state.selectedV2CustomAmount !== "" && !Number.isNaN(customValue);
+      return {
+        amount: isCustom ? customValue : state.selectedV2Amount,
+        isCustom
+      };
+    }
+
+    function channelSupportsV2Amount(channelName, amount, isCustom) {
+      return isCustom
+        ? supportsCustomAmountForChannel(channelName, amount)
+        : channelSupportsAmount(channelName, amount);
+    }
+
+    function channelsForAmount(amount, isCustom = false) {
+      return orderedDepositChannelsV2().filter((channel) => channelSupportsV2Amount(channel.name, amount, isCustom));
     }
 
     function renderAmountFirstDeposit() {
@@ -2501,37 +2574,65 @@
       if (!state.selectedV2Amount || !amounts.some((amount) => Number(amount) === Number(state.selectedV2Amount))) {
         state.selectedV2Amount = amounts[0] || 0;
       }
+      const amountContext = v2AmountContext();
       const amountGrid = $("#amountGridV2");
       if (amountGrid) {
         amountGrid.innerHTML = amounts.map((amount) => `
-          <button class="amount ${Number(amount) === Number(state.selectedV2Amount) ? "active" : ""}" data-v2-amount="${amount}" type="button">
-            ${formatAmount(amount)}
+          <button class="amount ${!amountContext.isCustom && Number(amount) === Number(state.selectedV2Amount) ? "active" : ""}" data-v2-amount="${amount}" type="button">
+            ${depositAmountLabel(amount)}
           </button>
         `).join("");
         amountGrid.querySelectorAll("[data-v2-amount]").forEach((button) => {
           button.addEventListener("click", () => {
             state.selectedV2Amount = Number(button.dataset.v2Amount);
+            state.selectedV2CustomAmount = "";
             state.selectedV2Channel = "";
             renderAmountFirstDeposit();
           });
         });
       }
 
-      const supportedChannels = channelsForAmount(state.selectedV2Amount);
+      const customAmountV2 = $("#customAmountV2");
+      if (customAmountV2) {
+        customAmountV2.value = state.selectedV2CustomAmount;
+        customAmountV2.oninput = (event) => {
+          state.selectedV2CustomAmount = event.target.value;
+          state.selectedV2Channel = "";
+          renderAmountFirstDeposit();
+        };
+      }
+
+      const note = $("#customAmountV2Note");
+      const supportedChannels = channelsForAmount(amountContext.amount, amountContext.isCustom);
+      const applePayRange = customAmountRangeForChannel("ApplePay");
+      const customOutOfRange = amountContext.isCustom && !supportsCustomAmountForChannel("ApplePay", amountContext.amount);
+      if (note) {
+        note.textContent = customOutOfRange
+          ? `Amount must be between ${formatCurrency(applePayRange.min, 2)} and ${formatCurrency(applePayRange.max, 2)}.`
+          : "";
+        note.classList.toggle("error", customOutOfRange);
+        note.classList.toggle("hidden", !customOutOfRange);
+      }
+      if (customAmountV2) {
+        customAmountV2.classList.toggle("invalid", customOutOfRange);
+      }
+      const submitV2 = $("#depositSubmitV2");
+      if (submitV2) {
+        submitV2.disabled = customOutOfRange;
+      }
       if (!state.selectedV2Channel || !supportedChannels.some((channel) => channel.name === state.selectedV2Channel)) {
         state.selectedV2Channel = supportedChannels[0]?.name || "";
       }
       const channelWrap = $("#mobileChannelsV2");
       if (channelWrap) {
-        const allChannels = orderedDepositChannels();
+        const allChannels = orderedDepositChannelsV2();
         channelWrap.innerHTML = allChannels.map((channel) => {
-          const supported = channelSupportsAmount(channel.name, state.selectedV2Amount);
+          const supported = channelSupportsV2Amount(channel.name, amountContext.amount, amountContext.isCustom);
           return `
           <div class="method ${state.selectedV2Channel === channel.name ? "selected" : ""} ${supported ? "" : "disabled"}" data-v2-channel="${channel.name}" data-supported="${supported}">
             <span class="check">${state.selectedV2Channel === channel.name ? "✓" : ""}</span>
             <span>
               <span class="method-name">${channel.name}</span>
-              <span class="method-detail">${channelAmountRange(channel.name)}</span>
             </span>
           </div>
         `;
@@ -2577,7 +2678,10 @@
       $("#phonePayoutFields").innerHTML = methodFields[selected.id].map((field, index) => {
         const defaultValue = index === 0 && (selected.id === "CashApp" || selected.id === "Chime") ? "$" : "";
         return `
-        <input class="custom-field" type="text" placeholder="${field.label}" value="${defaultValue}" style="margin-top: 8px;">
+        <div class="editable-field">
+          <input class="custom-field" type="text" placeholder="${field.label}" value="${defaultValue}">
+          <span class="edit-icon" aria-hidden="true">✎</span>
+        </div>
       `;
       }).join("");
       const amountInput = $("#payoutAmount");
@@ -2752,6 +2856,7 @@
     });
 
     $("#depositSubmit").addEventListener("click", handleDepositSubmit);
+    $("#depositSubmitV2").addEventListener("click", handleDepositSubmitV2);
 
     const decimalPlaces = $("#decimalPlaces");
     if (decimalPlaces) {
