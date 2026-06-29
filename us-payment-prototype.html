@@ -460,6 +460,135 @@
       pointer-events: none;
     }
 
+    .bind-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bind-account {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) 34px;
+      align-items: center;
+      gap: 8px;
+      min-height: 58px;
+      border: 1px solid #111;
+      border-radius: 8px;
+      background: #fff;
+      color: #111;
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .bind-account.selected {
+      outline: 1px solid #111;
+      outline-offset: -5px;
+    }
+
+    .bind-radio {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #111;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .bind-account.selected .bind-radio {
+      border: 5px solid #111;
+    }
+
+    .bind-title {
+      display: block;
+      color: #111;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .bind-meta {
+      display: block;
+      margin-top: 2px;
+      color: #666;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .bind-edit {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid #111;
+      border-radius: 6px;
+      background: #fff;
+      color: #111;
+      font-size: 15px;
+    }
+
+    .bind-add {
+      width: 100%;
+      min-height: 48px;
+      border: 1px dashed #111;
+      border-radius: 8px;
+      background: #fff;
+      color: #111;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .bind-empty {
+      margin: 0 0 8px;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      align-items: end;
+      background: rgba(0, 0, 0, .38);
+      z-index: 8;
+    }
+
+    .bind-sheet {
+      border: 1px solid #111;
+      border-radius: 12px 12px 0 0;
+      background: #fff;
+      color: #111;
+      padding: 14px 14px 18px;
+      box-shadow: 0 -12px 30px rgba(0, 0, 0, .22);
+    }
+
+    .bind-sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 16px;
+      font-weight: 650;
+    }
+
+    .sheet-close {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #111;
+      border-radius: 6px;
+      background: #fff;
+      color: #111;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .bind-sheet-fields {
+      display: grid;
+      gap: 9px;
+    }
+
+    .bind-save {
+      margin-top: 14px;
+    }
+
     .amount-input {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) 64px;
@@ -1727,6 +1856,16 @@
           </section>
 
           <div class="toast hidden" id="toast"></div>
+          <div class="sheet-backdrop hidden" id="bindSheet">
+            <div class="bind-sheet" role="dialog" aria-modal="true" aria-labelledby="bindSheetTitle">
+              <div class="bind-sheet-head">
+                <span id="bindSheetTitle">Bind Account</span>
+                <button class="sheet-close" id="bindSheetClose" type="button">×</button>
+              </div>
+              <div class="bind-sheet-fields" id="bindSheetFields"></div>
+              <button class="deposit-btn bind-save" id="bindSheetSave" type="button">Save</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1868,10 +2007,14 @@
           <div class="doc-body">
             <ol>
               <li>Entry Interaction: 用户从钱包、余额提现入口或付款 CTA 进入 Withdraw 页面；返回按钮回到上一页，来源不明确时返回结果待确认。</li>
-              <li>This Page Interactions: 用户输入 Payout Amount 后，单选一种美国出款方式。</li>
+              <li>This Page Interactions: 用户输入 Payout Amount 后，单选一种美国出款方式，并从该方式已绑定账户中选择一个用于提现。</li>
               <li>Withdrawal Amount 输入框左侧货币符号 $ 常显常驻，不作为 placeholder；右侧展示 Max 按钮。</li>
               <li>点击 Max 后，将当前可提余额全部写入 Withdrawal Amount 输入框。</li>
               <li>CashApp、PayPal、ACH、Card、Chime、Zelle 均可被选择；提现卡片只展示方式名称和金额范围。</li>
+              <li>每一种提现方式都支持先绑定账户再选择账户提现；未绑定时展示 “+ Bind ...” 入口，点击后底部弹出绑定弹窗录入该方式必填字段。</li>
+              <li>以 Card 为例：点击 “+ Bind Bank Card” 后，底部弹窗输入 Card Number 和 Expiration Date，点击 Save 后保存为可选卡片；用户可以选择该卡提现，也可以继续添加另一张卡。</li>
+              <li>绑定成功后，账户卡片外部信息统一展示弹窗内输入的内容：第一行展示第一个字段值，第二行展示第二个字段值；例如 Card 第一行展示卡号，第二行展示有效期。</li>
+              <li>绑定账户支持编辑：已绑定账户卡片右侧展示编辑按钮，点击后再次打开底部弹窗并带入已保存信息，修改后保存。</li>
               <li>收款人账号字段随 accountType 变化，前端输入框提示词统一使用英文；CashApp/Chime 默认带上 $，PayPal 使用 Recipient Email。</li>
               <li>Card 额外必填卡过期时间，格式 MM/YYYY；ACH 额外必填 9 位美国 ACH 路由号码。</li>
               <li>Withdraw 按钮提交付款金额、accountType、cardNo/收款账号和对应附加字段；确认页、风控页或结果页待确认。</li>
@@ -2225,6 +2368,16 @@
       selectedV2CustomAmount: "",
       selectedV2Channel: "",
       selectedMethod: "CashApp",
+      payoutAccounts: {
+        CashApp: [],
+        Paypal: [],
+        ACH: [],
+        Card: [],
+        Chime: [],
+        Zelle: []
+      },
+      selectedPayoutAccounts: {},
+      editingPayoutAccountId: "",
       payoutAvailable: 0,
     };
 
@@ -2673,17 +2826,59 @@
       renderPhonePayoutFields();
     }
 
+    function bindMethodLabel(methodId) {
+      const method = methods.find((item) => item.id === methodId);
+      if (methodId === "Card") return "Bank Card";
+      return method ? method.name : "Account";
+    }
+
+    function accountSummary(methodId, account) {
+      const values = account.values || [];
+      const fields = methodFields[methodId] || [];
+      const title = values[0] || fields[0]?.label || "Account";
+      const secondary = values[1] || fields[1]?.label || "";
+      return { title, secondary };
+    }
+
     function renderPhonePayoutFields() {
       const selected = methods.find((method) => method.id === state.selectedMethod) || methods[0];
-      $("#phonePayoutFields").innerHTML = methodFields[selected.id].map((field, index) => {
-        const defaultValue = index === 0 && (selected.id === "CashApp" || selected.id === "Chime") ? "$" : "";
-        return `
-        <div class="editable-field">
-          <input class="custom-field" type="text" placeholder="${field.label}" value="${defaultValue}">
-          <span class="edit-icon" aria-hidden="true">✎</span>
+      const accounts = state.payoutAccounts[selected.id] || [];
+      const selectedAccountId = state.selectedPayoutAccounts[selected.id] || "";
+      const accountList = accounts.length
+        ? accounts.map((account) => {
+          const summary = accountSummary(selected.id, account);
+          const isSelected = selectedAccountId === account.id;
+          return `
+            <button class="bind-account ${isSelected ? "selected" : ""}" data-bind-select="${account.id}" type="button">
+              <span class="bind-radio" aria-hidden="true"></span>
+              <span>
+                <span class="bind-title">${summary.title}</span>
+                <span class="bind-meta">${summary.secondary}</span>
+              </span>
+              <span class="bind-edit" data-bind-edit="${account.id}" aria-label="Edit ${summary.title}">✎</span>
+            </button>
+          `;
+        }).join("")
+        : "";
+      $("#phonePayoutFields").innerHTML = `
+        <div class="bind-list">
+          ${accountList}
+          <button class="bind-add" data-bind-add="${selected.id}" type="button">+ Bind ${bindMethodLabel(selected.id)}</button>
         </div>
       `;
-      }).join("");
+      $("#phonePayoutFields").querySelectorAll("[data-bind-select]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedPayoutAccounts[selected.id] = button.dataset.bindSelect;
+          renderPayout();
+        });
+      });
+      $("#phonePayoutFields").querySelectorAll("[data-bind-edit]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          openBindSheet(selected.id, button.dataset.bindEdit);
+        });
+      });
+      $("#phonePayoutFields").querySelector("[data-bind-add]")?.addEventListener("click", () => openBindSheet(selected.id));
       const amountInput = $("#payoutAmount");
       if (amountInput) {
         amountInput.min = selected.min;
@@ -2693,6 +2888,45 @@
       if (available) available.textContent = formatCurrency(state.payoutAvailable, 2);
       const alert = document.querySelector("#payoutPhone .channel-row");
       if (alert) alert.innerHTML = `The current available cash balance is less than the minimum withdrawal amount: <strong>${formatCurrency(selected.min, 2)}</strong>`;
+    }
+
+    function openBindSheet(methodId, accountId = "") {
+      state.selectedMethod = methodId;
+      state.editingPayoutAccountId = accountId;
+      const fields = methodFields[methodId] || [];
+      const account = (state.payoutAccounts[methodId] || []).find((item) => item.id === accountId);
+      $("#bindSheetTitle").textContent = `${accountId ? "Edit" : "Bind"} ${bindMethodLabel(methodId)}`;
+      $("#bindSheetFields").innerHTML = fields.map((field, index) => `
+        <label>
+          ${field.label}
+          <input class="custom-field" data-bind-field="${index}" type="text" value="${account?.values?.[index] || ""}">
+        </label>
+      `).join("");
+      $("#bindSheetSave").textContent = accountId ? "Save Changes" : "Save";
+      $("#bindSheet").classList.remove("hidden");
+    }
+
+    function closeBindSheet() {
+      $("#bindSheet").classList.add("hidden");
+      state.editingPayoutAccountId = "";
+    }
+
+    function saveBindSheet() {
+      const methodId = state.selectedMethod;
+      const values = Array.from(document.querySelectorAll("[data-bind-field]")).map((input) => input.value);
+      const accounts = state.payoutAccounts[methodId] || [];
+      if (state.editingPayoutAccountId) {
+        const account = accounts.find((item) => item.id === state.editingPayoutAccountId);
+        if (account) account.values = values;
+        state.selectedPayoutAccounts[methodId] = state.editingPayoutAccountId;
+      } else {
+        const id = `${methodId}-${Date.now()}`;
+        accounts.push({ id, values });
+        state.payoutAccounts[methodId] = accounts;
+        state.selectedPayoutAccounts[methodId] = id;
+      }
+      closeBindSheet();
+      renderPayout();
     }
 
     function renderMethodControls() {
@@ -2854,6 +3088,9 @@
     document.querySelectorAll("[data-edit-payout]").forEach((button) => {
       button.addEventListener("click", () => editPayoutMethod(button.dataset.editPayout, button.dataset.min, button.dataset.max));
     });
+
+    $("#bindSheetClose").addEventListener("click", closeBindSheet);
+    $("#bindSheetSave").addEventListener("click", saveBindSheet);
 
     $("#depositSubmit").addEventListener("click", handleDepositSubmit);
     $("#depositSubmitV2").addEventListener("click", handleDepositSubmitV2);
